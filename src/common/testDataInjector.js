@@ -13,6 +13,7 @@ const assert = require('assert').strict;
 // const crypto = require('crypto');
 
 const { faker } = require('@faker-js/faker');
+// const adminTypedefs = require('../api/typedefs/adminTypedefs');
 // const { v4: isUUID } = require('is-uuid');
 // const { DateTime } = require('luxon');
 
@@ -21,14 +22,28 @@ const { faker } = require('@faker-js/faker');
 module.exports = async ({ now, config, eventDB, stateDB }) => { // , tools })
   const {
     suId,
+    subs,
     staffIds,
+    adminIds,
+    installerIds,
+    salesAgentIds,
   } = config.testData;
 
   assert(!!now);
   assert(!!config);
   assert(!!config.testData);
+  assert(!!adminIds.length);
   assert(!!staffIds.length);
+  assert(!!installerIds.length);
+  assert(!!salesAgentIds.length);
   assert(!!suId);
+  assert(!!subs);
+  assert(subs.length >= (
+    staffIds.length
+    + adminIds.length
+    + installerIds.length
+    + salesAgentIds.length
+  ));
 
   // TODO NOTE this doesn't really support the idea of an agnostic unerlying
   // database layer does it? consider further.
@@ -98,7 +113,7 @@ module.exports = async ({ now, config, eventDB, stateDB }) => { // , tools })
     {
       firstName: 'Staffy',
       lastName: 'mcStaffface',
-      emailAddress: 'staffy@mcStaffface.com',
+      emailAddress: '0@test.com',
       phoneNumber: '+16045550000',
     },
   ];
@@ -133,9 +148,127 @@ module.exports = async ({ now, config, eventDB, stateDB }) => { // , tools })
     },
   ]));
 
-  staticEvents.push(...staffEvents);
+  const adminDescriptors = [
+    {
+      firstName: 'Adminny',
+      lastName: 'mcAdminface',
+      emailAddress: '1@test.com',
+      phoneNumber: '+16045551111',
+    },
+  ];
 
-  const subs = Object.values(config.testData.phoneNumberSubs);
+  const adminEvents = adminDescriptors.map((ad, idx) => ({
+    ...ad,
+    id: adminIds[idx],
+    token: {
+      sub: adminIds[idx],
+      aud: config.sstAudience,
+      iss: config.sstIssuer,
+    },
+  })).flatMap(ad => ([ // events
+    {
+      key: `admin:${ad.id}`,
+      type: 'wasCreated',
+      metadata: { actor: { type: 'superuser', id: suId } },
+      data: {
+        id: ad.id,
+        firstName: ad.firstName,
+        lastName: ad.lastName,
+        emailAddress: ad.emailAddress,
+        phoneNumber: ad.phoneNumber,
+      },
+    },
+    {
+      key: `admin:${ad.id}`,
+      type: 'hadTokenAssociated',
+      metadata: { actor: { type: 'superuser', id: suId } },
+      data: { token: ad.token },
+    },
+  ]));
+
+  const installerDescriptors = [
+    {
+      firstName: 'Install',
+      lastName: 'McInstallface',
+      emailAddress: '2@test.com',
+      phoneNumber: '+16045552222',
+    },
+  ];
+
+  const installerEvents = installerDescriptors.map((instid, idx) => ({
+    ...instid,
+    id: installerIds[idx],
+    token: {
+      sub: installerIds[idx],
+      aud: config.sstAudience,
+      iss: config.sstIssuer,
+    },
+  })).flatMap(instid => ([ // event
+    {
+      key: `installer:${instid.id}`,
+      type: 'wasCreated',
+      metadata: { actor: { type: 'superuser', id: suId } },
+      data: {
+        id: instid.id,
+        firstName: instid.firstName,
+        lastName: instid.lastName,
+        emailAddress: instid.emailAddress,
+        phoneNumber: instid.phoneNumber,
+      },
+    },
+    {
+      key: `installer:${instid.id}`,
+      type: 'hadTokenAssociated',
+      metadata: { actor: { type: 'superuser', id: suId } },
+      data: { token: instid.token },
+    },
+  ]));
+
+  const salesAgentDescriptors = [
+    {
+      firstName: 'Sales',
+      lastName: 'McSalesface',
+      emailAddress: '3@test.com',
+      phoneNumber: '+16045553333',
+    },
+  ];
+
+  const salesAgentEvents = salesAgentDescriptors.map((sad, idx) => ({
+    ...sad,
+    id: salesAgentIds[idx],
+    token: {
+      sub: salesAgentIds[idx],
+      aud: config.sstAudience,
+      iss: config.sstIssuer,
+    },
+  })).flatMap(sad => ([ // event
+    {
+      key: `salesAgent:${sad.id}`,
+      type: 'wasCreated',
+      metadata: { actor: { type: 'superuser', id: suId } },
+      data: {
+        id: sad.id,
+        firstName: sad.firstName,
+        lastName: sad.lastName,
+        emailAddress: sad.emailAddress,
+        phoneNumber: sad.phoneNumber,
+      },
+    },
+    {
+      key: `salesAgent:${sad.id}`,
+      type: 'hadTokenAssociated',
+      metadata: { actor: { type: 'superuser', id: suId } },
+      data: { token: sad.token },
+    },
+  ]));
+
+  staticEvents.push(
+    ...staffEvents,
+    ...adminEvents,
+    ...installerEvents,
+    ...salesAgentEvents,
+  );
+
   const firebaseAud = config.fbtAudience;
   const firebaseIss = config.fbtIssuer;
 
@@ -174,7 +307,7 @@ module.exports = async ({ now, config, eventDB, stateDB }) => { // , tools })
       await stateDB.set(`id:${iss}:${aud}:${sub}:${actorType}`, id);
     }));
 
-    // Manually connect token subs of firebase test phone numbers to ids
+    // Manually connect firebase token subs to aggregates
 
     const staffPromises = staffDescriptors
       .map((_, idx) => {
@@ -185,8 +318,42 @@ module.exports = async ({ now, config, eventDB, stateDB }) => { // , tools })
         );
       });
 
+    const adminPromises = adminDescriptors
+      .map((_, idx) => {
+        assert(!!subs[idx + staffDescriptors.length]);
+        return stateDB.set(
+          `id:${firebaseIss}:${firebaseAud}:${subs[idx]}:admin`,
+          adminIds[idx],
+        );
+      });
+
+    const installerPromises = installerDescriptors
+      .map((_, idx) => {
+        assert(!!subs[idx + staffDescriptors.length + adminDescriptors.length]);
+        return stateDB.set(
+          `id:${firebaseIss}:${firebaseAud}:${subs[idx]}:installer`,
+          installerIds[idx],
+        );
+      });
+
+    const salesAgentPromises = salesAgentDescriptors
+      .map((_, idx) => {
+        const offset = staffDescriptors.length
+          + adminDescriptors.length
+          + installerDescriptors.length;
+
+        assert(!!subs[idx + offset]);
+        return stateDB.set(
+          `id:${firebaseIss}:${firebaseAud}:${subs[idx]}:salesAgent`,
+          salesAgentIds[idx],
+        );
+      });
+
     await Promise.all([
       staffPromises,
+      adminPromises,
+      installerPromises,
+      salesAgentPromises,
     ]);
   }
 

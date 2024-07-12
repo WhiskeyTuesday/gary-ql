@@ -100,6 +100,7 @@ module.exports = {
       allLeads: [],
     }),
 
+    hadTokenAssociated: () => ({}),
     wasDeactivated: () => ({ status: 'inactive' }),
     wasReactivated: () => ({ status: 'active' }),
 
@@ -142,6 +143,7 @@ module.exports = {
       assignments: [],
     }),
 
+    hadTokenAssociated: () => ({}),
     wasDeactivated: () => ({ status: 'inactive' }),
     wasReactivated: () => ({ status: 'active' }),
 

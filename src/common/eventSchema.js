@@ -140,6 +140,7 @@ module.exports = {
       emailAddress: Joi.string().email().required(),
       phoneNumber: phoneNumberNorthAmerica,
     }),
+    hadTokenAssociated: eventData({ token }),
   },
 
   staff: {
@@ -180,6 +181,7 @@ module.exports = {
       memo: memo.optional(),
     }),
 
+    hadTokenAssociated: eventData({ token }),
     wasDeactivated: eventData({ memo }),
     wasReactivated: eventData({ memo }),
 
@@ -199,6 +201,7 @@ module.exports = {
       memo: memo.optional(),
     }),
 
+    hadTokenAssociated: eventData({ token }),
     wasDeactivated: eventData({ memo }),
     wasReactivated: eventData({ memo }),
 
