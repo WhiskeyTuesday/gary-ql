@@ -244,7 +244,7 @@ module.exports = {
       lastName: Joi.string().optional(),
       businessName: Joi.string().optional(),
       contactName: Joi.string().optional(),
-      emailAddress: Joi.string().emailAddress().required(),
+      emailAddress: Joi.string().email().required(),
       phoneNumber: phoneNumberNorthAmerica,
       addresses: Joi.array().items(addressObjectWithId).required(),
 
@@ -257,7 +257,7 @@ module.exports = {
       lastName: Joi.string().optional(),
       businessName: Joi.string().optional(),
       contactName: Joi.string().optional(),
-      emailAddress: Joi.string().emailAddress().required(),
+      emailAddress: Joi.string().email().required(),
       phoneNumber: phoneNumberNorthAmerica,
 
       memo: memo.optional(),
