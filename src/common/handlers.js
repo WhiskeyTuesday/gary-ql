@@ -193,10 +193,34 @@ module.exports = {
       status: 'active',
       firstName: event.data.firstName,
       lastName: event.data.lastName,
-      email: event.data.email,
+      bussinessName: event.data.bussinessName,
+      contactName: event.data.contactName,
+      emailAddress: event.data.emailAddress,
       phoneNumber: event.data.phoneNumber,
       addresses: event.data.addresses,
       isTaxExempt: event.data.isTaxExempt,
+    }),
+
+    wasModified: event => ({
+      firstName: event.data.firstName,
+      lastName: event.data.lastName,
+      bussinessName: event.data.bussinessName,
+      contactName: event.data.contactName,
+      emailAddress: event.data.emailAddress,
+      phoneNumber: event.data.phoneNumber,
+      isTaxExempt: event.data.isTaxExempt,
+    }),
+
+    wasDeactivated: () => ({ status: 'inactive' }),
+    wasReactivated: () => ({ status: 'active' }),
+
+    hadAddressAdded: (event, state) => ({
+      addresses: state.addresses.concat(event.data),
+    }),
+
+    hadAddressDeprecated: (event, state) => ({
+      addresses: state.addresses
+        .filter(address => address.id !== event.data.id),
     }),
   },
 

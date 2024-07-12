@@ -22,10 +22,44 @@ module.exports = gql`
     installer(id: ID!): Installer
   }
 
+  input CustomerEditInput {
+    memo: String
+    firstName: String
+    lastName: String
+    businessName: String
+    contactName: String
+
+    phoneNumber: String!
+    emailAddress: String!
+    taxExempt: Boolean!
+  }
+
+  input WindowInput {
+    location: String!
+    type: WindowType!
+    glassType: GlassType!
+    width: Int!
+    height: Int!
+  }
+
+  input StageInput {
+    windows: [WindowInput!]!
+
+    notes: String
+  }
+
+  input JobInput {
+    materials: [ID!]!
+    stages: [StageInput!]!
+
+    notes: String
+  }
+
+
   extend type Mutation {
     trackLead(details: LeadInput!): String
     createCustomer(details: CustomerInput!): String
-    editCustomer(id: ID!, details: CustomerInput!): String
+    editCustomer(id: ID!, details: CustomerEditInput!): String
     addAddress(customerId: ID!, address: AddressInput!): String
     deprecateAddress(customerId: ID!, addressId: ID!): String
     createJobDirect(details: JobInput!): String

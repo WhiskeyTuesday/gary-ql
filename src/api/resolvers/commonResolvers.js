@@ -2,9 +2,6 @@ const assert = require('assert').strict;
 
 module.exports = {
   Query: {
-    roles: (_, __, { actor: { roles } }) => Object.entries(roles)
-      .map(([k, v]) => ({ name: k, id: v })),
-
     self: async (_, __, { actor, tools }) => {
       const { read: { cache: { impl } } } = tools;
       const self = await tools.read.self(actor);
@@ -56,6 +53,26 @@ module.exports = {
         })),
       });
     },
+
+    roles: (_, __, { actor: { roles } }) => Object.entries(roles)
+      .map(([k, v]) => ({ name: k, id: v })),
+
+    materials: (_, __, { tools }) => tools.read.cache.list('material'),
+    material: (_, { id }, { tools }) => tools.read.standard('material', id),
+    customers: (_, __, { tools }) => tools.read.cache.list('customer'),
+    customer: (_, { id }, { tools }) => tools.read.standard('customer', id),
+    leads: (_, __, { tools }) => tools.read.cache.list('lead'),
+    lead: (_, { id }, { tools }) => tools.read.standard('lead', id),
+    jobs: (_, __, { tools }) => tools.read.cache.list('job'),
+    job: (_, { id }, { tools }) => tools.read.standard('job', id),
+    proposals: (_, __, { tools }) => tools.read.cache.list('proposal'),
+    proposal: (_, { id }, { tools }) => tools.read.standard('proposal', id),
+    salesAgents: (_, __, { tools }) => tools.read.cache.list('salesAgent'),
+    salesAgent: (_, { id }, { tools }) => tools.read.standard('salesAgent', id),
+    allStaff: (_, __, { tools }) => tools.read.cache.list('staff'),
+    staff: (_, { id }, { tools }) => tools.read.standard('staff', id),
+    installers: (_, __, { tools }) => tools.read.cache.list('installer'),
+    installer: (_, { id }, { tools }) => tools.read.standard('installer', id),
   },
 
   Mutation: {
@@ -77,12 +94,30 @@ module.exports = {
     createCustomer: async (_, { details }, { tools }) => {
       const customerId = tools.uuidv4();
 
+      const { firstName, lastName, businessName, contactName } = details;
+
+      assert(!firstName && lastName, 'first name required');
+      assert(firstName && !lastName, 'last name required');
+
+      assert(firstName || businessName, 'name required');
+
+      assert(
+        (firstName || lastName) && (businessName || contactName),
+        'name conflict',
+      );
+
+      assert(contactName && !businessName, 'business name required');
+      assert(businessName && !contactName, 'contact name required');
+
+      const { addresses, ...rest } = details;
+
       const event = {
         key: `customer:${customerId}`,
         type: 'wasCreated',
         data: {
           id: customerId,
-          ...details,
+          addresses: addresses.map(a => ({ id: tools.uuidv4(), ...a })),
+          ...rest,
         },
       };
 
@@ -92,6 +127,21 @@ module.exports = {
     editCustomer: async (_, { id, details }, { tools }) => {
       const { isUUID } = tools;
       assert(isUUID(id), 'target id is invalid.');
+
+      const { firstName, lastName, businessName, contactName } = details;
+
+      assert(!firstName && lastName, 'first name required');
+      assert(firstName && !lastName, 'last name required');
+
+      assert(firstName || businessName, 'name required');
+
+      assert(
+        (firstName || lastName) && (businessName || contactName),
+        'name conflict',
+      );
+
+      assert(contactName && !businessName, 'business name required');
+      assert(businessName && !contactName, 'contact name required');
 
       const event = {
         key: `customer:${id}`,
@@ -105,16 +155,15 @@ module.exports = {
     addAddress: async (_, { customerId, address }, { tools }) => {
       const { isUUID } = tools;
       assert(isUUID(customerId), 'target customerId is invalid.');
+      const customer = await tools.read.standard('customer', customerId);
+      assert(customer, 'customer not found');
 
       const locationId = tools.uuidv4();
 
       const event = {
         key: `customer:${customerId}`,
-        type: 'hadLocationAdded',
-        data: {
-          id: locationId,
-          ...address,
-        },
+        type: 'hadAddressAdded',
+        data: { id: locationId, ...address },
       };
 
       return tools.write({ event });
@@ -125,9 +174,16 @@ module.exports = {
       assert(isUUID(customerId), 'target customerId is invalid.');
       assert(isUUID(addressId), 'target addressId is invalid.');
 
+      const customer = await tools.read.standard('customer', customerId);
+      assert(customer, 'customer not found');
+      assert(
+        customer.addresses.find(a => a.id === addressId),
+        'address not found',
+      );
+
       const event = {
         key: `customer:${customerId}`,
-        type: 'hadLocationRemoved',
+        type: 'hadAddressDeprecated',
         data: { id: addressId },
       };
 
@@ -137,13 +193,16 @@ module.exports = {
     createJobDirect: async (_, { details }, { tools }) => {
       const jobId = tools.uuidv4();
 
+      const { materials, stages } = details;
+      assert(materials.length > 0, 'must provide at least one material');
+      assert(materials.length < 4, 'too many materials');
+      assert(stages.length > 0, 'must provide at least one stage');
+      assert(stages.length < 6, 'too many stages');
+
       const event = {
         key: `job:${jobId}`,
         type: 'wasCreated',
-        data: {
-          id: jobId,
-          ...details,
-        },
+        data: { id: jobId, ...details },
       };
 
       return tools.write({ event });
@@ -152,6 +211,12 @@ module.exports = {
     convertLead: async (_, { leadId, details }, { tools }) => {
       const { isUUID } = tools;
       assert(isUUID(leadId), 'target leadId is invalid.');
+
+      const { materials, stages } = details;
+      assert(materials.length > 0, 'must provide at least one material');
+      assert(materials.length < 4, 'too many materials');
+      assert(stages.length > 0, 'must provide at least one stage');
+      assert(stages.length < 6, 'too many stages');
 
       const event = {
         key: `lead:${leadId}`,

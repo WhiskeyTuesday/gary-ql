@@ -240,11 +240,25 @@ module.exports = {
     wasCreated: eventData({
       id: uuid,
       isTaxExempt: Joi.boolean().required(),
-      firstName: Joi.string().required(),
-      lastName: Joi.string().required(),
-      emailAddress: Joi.string().email().required(),
+      firstName: Joi.string().optional(),
+      lastName: Joi.string().optional(),
+      businessName: Joi.string().optional(),
+      contactName: Joi.string().optional(),
+      emailAddress: Joi.string().emailAddress().required(),
       phoneNumber: phoneNumberNorthAmerica,
       addresses: Joi.array().items(addressObjectWithId).required(),
+
+      memo: memo.optional(),
+    }),
+
+    wasModified: eventData({
+      isTaxExempt: Joi.boolean().required(),
+      firstName: Joi.string().optional(),
+      lastName: Joi.string().optional(),
+      businessName: Joi.string().optional(),
+      contactName: Joi.string().optional(),
+      emailAddress: Joi.string().emailAddress().required(),
+      phoneNumber: phoneNumberNorthAmerica,
 
       memo: memo.optional(),
     }),

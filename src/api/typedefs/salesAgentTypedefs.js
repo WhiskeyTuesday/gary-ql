@@ -17,27 +17,6 @@ module.exports = gql`
     placeholder: Boolean!
   }
 
-  input WindowInput {
-    location: String!
-    type: WindowType!
-    glassType: GlassType!
-    width: Int!
-    height: Int!
-  }
-
-  input StageInput {
-    windows: [WindowInput!]!
-
-    notes: String
-  }
-
-  input JobInput {
-    materials: [ID!]!
-    stages: [StageInput!]!
-
-    notes: String
-  }
-
   extend type Mutation {
     sendProposal(jobId: ID! stageIds: [ID!]!): String
     cancelProposal(jobId: ID! proposalId: ID!): String

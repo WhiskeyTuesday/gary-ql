@@ -164,13 +164,23 @@ module.exports = gql`
   }
 
   input LeadInput {
-    customerId: ID!
     addressId: ID!
+    customerId: ID!
+    isTaxExempt: Boolean!
   }
 
   input CustomerInput {
-    name: String!
-    contacts: [ContactInput]!
+    firstName: String
+    lastName: String
+    contactName: String
+    businessName: String
+
+    phoneNumber: String!
+    emailAddress: String!
+    taxExempt: Boolean!
+    addresses: [AddressInput!]!
+
+    memo: String
   }
 
   input ContactInput {
