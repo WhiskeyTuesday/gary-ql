@@ -14,4 +14,8 @@ module.exports = {
       }
     })(),
   },
+
+  Mutation: {
+    time: (_, __, { clock }) => clock.now().toString(),
+  },
 };
