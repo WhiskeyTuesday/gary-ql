@@ -43,8 +43,8 @@ importers:
         specifier: ^8.3.1
         version: 8.3.1
       '@gather-social/lib':
-        specifier: ^0.0.21
-        version: 0.0.21
+        specifier: ^0.0.23
+        version: 0.0.23
       '@sendgrid/mail':
         specifier: ^7.7.0
         version: 7.7.0
@@ -291,8 +291,8 @@ packages:
   '@firebase/util@1.9.3':
     resolution: {integrity: sha512-DY02CRhOZwpzO36fHpuVysz6JZrscPiBXD0fXp6qSrL9oNOx5KWICKdR95C0lSITzxp0TZosVyHqzatE8JbcjA==}
 
-  '@gather-social/lib@0.0.21':
-    resolution: {integrity: sha512-p8qPP3wQ8d0LhmPstt+o4ayuYeMDE6DJlfkJvru4l1Zzt8fZfGb/LhbgrRy4gQ2qKhuLU64rTSOKdbg77s1pvw==}
+  '@gather-social/lib@0.0.23':
+    resolution: {integrity: sha512-IuyI6ar3gBrSIlHyn8c9ozqFCuIgUkIWtI71mvf14FNZ8UvLZ1XYd3ciy21bN4bkt8EXPEE4CGLHUqK440qJ4A==}
     engines: {node: ^18.12.1}
 
   '@google-cloud/firestore@6.8.0':
@@ -2345,7 +2345,7 @@ snapshots:
     dependencies:
       tslib: 2.6.2
 
-  '@gather-social/lib@0.0.21':
+  '@gather-social/lib@0.0.23':
     dependencies:
       '@apollo/server': 4.10.4(graphql@16.8.1)
       '@faker-js/faker': 8.4.1
