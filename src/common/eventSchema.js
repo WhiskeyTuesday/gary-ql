@@ -153,6 +153,15 @@ module.exports = {
       phoneNumber: phoneNumberNorthAmerica,
     }),
 
+    wasEdited: eventData({
+      memo: memo.optional(),
+
+      firstName: Joi.string().max(50).required(),
+      lastName: Joi.string().max(50).required(),
+      emailAddress: Joi.string().email().required(),
+      phoneNumber: phoneNumberNorthAmerica,
+    }),
+
     hadTokenAssociated: eventData({ token }),
     wasAssociatedToUser: eventData({ userId: uuid }),
 
@@ -181,6 +190,15 @@ module.exports = {
       memo: memo.optional(),
     }),
 
+    wasEdited: eventData({
+      memo: memo.optional(),
+
+      firstName: Joi.string().max(50).required(),
+      lastName: Joi.string().max(50).required(),
+      emailAddress: Joi.string().email().required(),
+      phoneNumber: phoneNumberNorthAmerica,
+    }),
+
     hadTokenAssociated: eventData({ token }),
     wasDeactivated: eventData({ memo }),
     wasReactivated: eventData({ memo }),
@@ -199,6 +217,15 @@ module.exports = {
       phoneNumber: phoneNumberNorthAmerica,
 
       memo: memo.optional(),
+    }),
+
+    wasEdited: eventData({
+      memo: memo.optional(),
+
+      firstName: Joi.string().max(50).required(),
+      lastName: Joi.string().max(50).required(),
+      emailAddress: Joi.string().email().required(),
+      phoneNumber: phoneNumberNorthAmerica,
     }),
 
     hadTokenAssociated: eventData({ token }),

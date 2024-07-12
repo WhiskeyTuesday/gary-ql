@@ -38,11 +38,20 @@ module.exports = gql`
     phoneNumber: String!
   }
 
+  enum MaterialUnit {
+    SQ_FT
+    SQ_M
+  }
+
+  enum CurrencyCode {
+    USD
+  }
+
   input MaterialInput {
     name: String!
-    supplierName: String!
-    priceSqFt: CurrencyInput!
-    costSqFt: CurrencyInput!
+    price: Int!
+    unit: MaterialUnit!
+    currencyCode: CurrencyCode!
   }
 
   extend type Mutation {

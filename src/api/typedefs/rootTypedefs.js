@@ -142,7 +142,6 @@ module.exports = gql`
 
   type Query {
     time: String!
-    minimumSupportedVersion(platform: String!): Int!
   }
 
   input AddressInput {

@@ -69,6 +69,8 @@ module.exports = {
         id: event.data.id,
         lastName: event.data.lastName,
         firstName: event.data.firstName,
+        emailAdress: event.data.emailAdress,
+        phoneNumber: event.data.phoneNumber
       },
 
       settings: {},
@@ -80,6 +82,15 @@ module.exports = {
 
     changedSettings: event => ({
       settings: event.data,
+    }),
+
+    wasEdited: event => ({
+      profile: {
+        firstName: event.data.firstName,
+        lastName: event.data.lastName,
+        emailAdress: event.data.emailAdress,
+        phoneNumber: event.data.phoneNumber,
+      },
     }),
 
     wasDeactivated: () => ({ status: 'inactive' }),
@@ -98,6 +109,13 @@ module.exports = {
       leads: [],
       allJobs: [],
       allLeads: [],
+    }),
+
+    wasEdited: event => ({
+      firstName: event.data.firstName,
+      lastName: event.data.lastName,
+      email: event.data.email,
+      phoneNumber: event.data.phoneNumber,
     }),
 
     hadTokenAssociated: () => ({}),
@@ -141,6 +159,13 @@ module.exports = {
       email: event.data.email,
       phoneNumber: event.data.phoneNumber,
       assignments: [],
+    }),
+
+    wasEdited: event => ({
+      firstName: event.data.firstName,
+      lastName: event.data.lastName,
+      email: event.data.email,
+      phoneNumber: event.data.phoneNumber,
     }),
 
     hadTokenAssociated: () => ({}),
@@ -367,7 +392,7 @@ module.exports = {
   material: {
     wasCreated: event => ({
       id: event.data.id,
-      status: 'initial',
+      status: 'active',
       name: event.data.name,
       price: event.data.price,
       unit: event.data.unit,
@@ -382,6 +407,10 @@ module.exports = {
 
     wasDeprecated: () => ({
       status: 'deprecated',
+    }),
+
+    reinstateMaterial: () => ({
+      status: 'active',
     }),
   },
 };
