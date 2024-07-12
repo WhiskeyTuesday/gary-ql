@@ -18,6 +18,6 @@ module.exports = gql`
   }
 
   extend type Mutation {
-    markWindowComplete(jobId: ID!, windowId: ID!): String
+    markWindowsComplete(jobId: ID!, windowIds: [ID!]!): String
   }
 `;
