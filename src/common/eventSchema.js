@@ -206,6 +206,8 @@ module.exports = {
     wasAssignedLead: eventData({ leadId: uuid }),
     createdJob: eventData({ jobId: uuid }),
     wasAssignedJob: eventData({ jobId: uuid }),
+    wasUnassignedJob: eventData({ jobId: uuid }),
+    hadJobCompleted: eventData({ jobId: uuid }),
   },
 
   installer: {
@@ -234,6 +236,7 @@ module.exports = {
 
     wasAssignedJob: eventData({ jobId: uuid }),
     wasUnassignedJob: eventData({ jobId: uuid }),
+    completedJob: eventData({ jobId: uuid }),
   },
 
   customer: {

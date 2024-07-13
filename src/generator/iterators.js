@@ -894,7 +894,7 @@ module.exports = [
       const jobs = await Promise.all(jobIds.map(id => cache.entry('job', id)));
       const relevant = jobs.filter(j => j.status === 'pending-installation');
 
-      return relevant.flatMap(j => j.stages.flatMap((s) => {
+      const windowEvents = relevant.flatMap(j => j.stages.flatMap((s) => {
         if (s.status === 'completed') return [];
         if (s.status === 'rejected') return [];
 
@@ -913,6 +913,79 @@ module.exports = [
           data: { stageId: s.id, windowIds: [wid] },
         };
       }));
+
+      const stages = relevant.flatMap(j => j.stages);
+
+      const stageEvents = stages.flatMap((s) => {
+        if (['completed', 'rejected'].includes(s.status)) return [];
+        const containsNew = s.windows.some(w => windowEvents
+          .some(we => we.data.windowIds.includes(w.id)));
+        if (!containsNew) return [];
+
+        const notNew = s.windows
+          .filter(w => !windowEvents
+            .some(we => we.data.windowIds.includes(w.id)));
+
+        if (!notNew.length) return [];
+
+        return notNew.every(w => w.status === 'completed')
+          ? {
+            key: `job:${s.jobId}`,
+            type: 'hadStageCompleted',
+            metadata: { actor: systemAgent },
+            data: { stageId: s.id },
+          } : [];
+      });
+
+      const jobEvents = relevant.flatMap((j) => {
+        const containsNew = j.stages.some(s => stageEvents
+          .some(se => se.data.stageId === s.id));
+
+        if (!containsNew) return [];
+
+        const notNew = j.stages.filter(s => !stageEvents
+          .some(se => se.data.stageId === s.id));
+
+        if (!notNew.length) return [];
+
+        return notNew.every(s => s.status === 'completed')
+          ? {
+            key: `job:${j.id}`,
+            type: 'wasCompleted',
+            metadata: { actor: systemAgent },
+            data: {},
+          } : [];
+      });
+
+      const installerEvents = relevant.flatMap((j) => {
+        const completed = jobEvents.some(je => je.data.jobId === j.id);
+        if (!completed) return [];
+        return j.installers.map(iid => ({
+          key: `installer:${iid}`,
+          type: 'completedJob',
+          metadata: { actor: systemAgent },
+          data: { jobId: j.id },
+        }));
+      });
+
+      const salesAgentEvents = relevant.flatMap((j) => {
+        const completed = jobEvents.some(je => je.data.jobId === j.id);
+        if (!completed) return [];
+        return {
+          key: `salesAgent:${j.salesAgentId}`,
+          type: 'hadJobCompleted',
+          metadata: { actor: systemAgent },
+          data: { jobId: j.id },
+        };
+      });
+
+      return [
+        ...windowEvents,
+        ...stageEvents,
+        ...jobEvents,
+        ...installerEvents,
+        ...salesAgentEvents,
+      ];
     },
   },
   {

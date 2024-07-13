@@ -42,8 +42,6 @@ module.exports = gql`
     postalCode: String!
   }
 
-  union WorkItem = Lead | Job
-
   type Customer {
     id: ID!
     name: String!

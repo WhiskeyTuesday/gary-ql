@@ -5,6 +5,7 @@ module.exports = gql`
     id: ID!
     profile: InstallerProfile!
     settings: InstallerSettings!
+    assignments: [Job]!
   }
 
   type InstallerProfile {

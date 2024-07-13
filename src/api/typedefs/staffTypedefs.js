@@ -12,7 +12,6 @@ module.exports = gql`
     userId: ID!
     token: Token!
     status: String!
-    workList: [WorkItem]
     profile: StaffProfile!
     settings: StaffSettings!
   }

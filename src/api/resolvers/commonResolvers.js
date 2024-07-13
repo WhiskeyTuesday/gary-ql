@@ -1,56 +1,78 @@
 const assert = require('assert').strict;
 
 module.exports = {
+
   Query: {
     self: async (_, __, { actor, tools }) => {
       const { read: { cache: { impl } } } = tools;
       const self = await tools.read.self(actor);
 
       return ({
-        __resolveType: () => (() => {
+        ...self,
+        ...(() => {
           switch (actor.type) {
-            case 'admin': return 'Admin';
-            case 'staff': return 'Staff';
-            case 'installer': return 'Installer';
-            case 'salesAgent': return 'SalesAgent';
-            default: throw new Error('unknown actor type');
+            case 'superuser': return {};
+            case 'admin': return {
+              activeLeads: impl('active_leads'),
+              droppedLeads: impl('dropped_leads'),
+
+              activeJobs: impl('active_jobs'),
+              droppedJobs: impl('dropped_jobs'),
+              completedJobs: impl('completed_jobs'),
+            };
+            case 'staff': return {};
+            case 'installer': return {};
+            case 'salesAgent': return {};
+            default: throw new Error(`unknown actor type ${actor.type}`);
           }
         })(),
+        /*
+          tasks: await Promise.all((() => {
+            switch (actor.type) {
+              // everything current
+              case 'admin':
+              case 'staff': return [
+                read.cache.list('lead'),
+                read.cache.list('job'),
+                read.cache.list('proposal'),
+                read.cache.list('invoice'),
 
-        ...self,
+                impl('active_leads'),
+                impl('active_jobs'),
+                impl('pending_invoices'),
+                impl('rejected_proposals'),
+              ];
 
-        tasks: await Promise.all((() => {
-          switch (actor.type) {
-            // everything current
-            case 'admin':
-            case 'staff': return [
-              impl('active_leads'),
-              impl('active_jobs'),
-              impl('pending_invoices'),
-              impl('rejected_proposals'),
-            ];
+              case 'installer': return [
+                impl('active_jobs'),
+              ];
 
-            case 'installer': return [impl('active_jobs')];
+              case 'salesAgent': return [
+                impl('active_leads'),
+                impl('active_jobs'),
+                impl('pending_invoices'),
+                impl('rejected_proposals'),
+              ];
 
-            case 'salesAgent': return [
-              impl('active_leads'),
-              impl('active_jobs'),
-              impl('pending_invoices'),
-              impl('rejected_proposals'),
-            ];
+              case 'superuser': return [];
 
-            default: throw new Error('unknown actor type');
-          }
-        })().map(async (key) => {
-          const [aggregateType, id] = key.split(':');
+              default: throw new Error(`unknown actor type ${actor.type}`);
+            }
+          })().map(async (key) => {
+            const [aggregateType, id] = key.split(':');
+            const isInstaller = aggregateType === 'installer';
+            const isSalesAgent = aggregateType === 'salesAgent';
+            const { assignments } = self;
 
-          // this is inelegant and hard to read, I know
-          return ((aggregateType === 'installer'
-            || aggregateType === 'salesAgent')
-          && self.assignments.includes(key))
-            ? tools.read.standard(aggregateType, id)
-            : false;
-        })),
+            if (isInstaller || isSalesAgent) {
+              return assignments.includes(key)
+                ? tools.read.standard(aggregateType, id)
+                : false;
+            } else {
+              return tools.read.standard(aggregateType, id);
+            }
+          })),
+        */
       });
     },
 

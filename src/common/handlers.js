@@ -148,6 +148,18 @@ module.exports = {
 
       allJobs: state.allJobs.concat(event.data.jobId),
     }),
+
+    wasUnassignedJob: (event, state) => ({
+      jobs: state.jobs
+        .filter(job => job.id !== event.data.jobId),
+
+      allJobs: state.allJobs.filter(jobId => jobId !== event.data.jobId),
+    }),
+
+    hadJobCompleted: (event, state) => ({
+      jobs: state.jobs
+        .filter(job => job.id !== event.data.jobId),
+    }),
   },
 
   installer: {

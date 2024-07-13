@@ -5,6 +5,10 @@ module.exports = gql`
     id: ID!
     profile: SalesAgentProfile!
     settings: SalesAgentSettings!
+    leads: [Lead]!
+    jobs: [Job]!
+    allLeads: [Lead]!
+    allJobs: [Job]!
   }
 
   type SalesAgentProfile {
