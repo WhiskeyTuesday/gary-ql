@@ -5,6 +5,8 @@ module.exports = gql`
     id: ID!
     profile: AdminProfile!
     settings: AdminSettings!
+    leads: [Lead]!
+    jobs: [Job]!
   }
 
   type AdminProfile {

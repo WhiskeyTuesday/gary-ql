@@ -1,80 +1,33 @@
 const assert = require('assert').strict;
 
+const validateJobDetails = (details) => {
+  const { materials, stages } = details;
+  assert(materials.length > 0, 'must provide at least one material');
+  assert(materials.length < 4, 'too many materials');
+  assert(stages.length > 0, 'must provide at least one stage');
+  assert(stages.length < 6, 'too many stages');
+};
+
+const validateCustomerDetails = (details) => {
+  const { firstName, lastName, businessName, contactName } = details;
+
+  assert(!firstName && lastName, 'first name required');
+  assert(firstName && !lastName, 'last name required');
+
+  assert(firstName || businessName, 'name required');
+
+  assert(
+    (firstName || lastName) && (businessName || contactName),
+    'name conflict',
+  );
+
+  assert(contactName && !businessName, 'business name required');
+  assert(businessName && !contactName, 'contact name required');
+};
+
 module.exports = {
-
   Query: {
-    self: async (_, __, { actor, tools }) => {
-      const { read: { cache: { impl } } } = tools;
-      const self = await tools.read.self(actor);
-
-      return ({
-        ...self,
-        ...(() => {
-          switch (actor.type) {
-            case 'superuser': return {};
-            case 'admin': return {
-              activeLeads: impl('active_leads'),
-              droppedLeads: impl('dropped_leads'),
-
-              activeJobs: impl('active_jobs'),
-              droppedJobs: impl('dropped_jobs'),
-              completedJobs: impl('completed_jobs'),
-            };
-            case 'staff': return {};
-            case 'installer': return {};
-            case 'salesAgent': return {};
-            default: throw new Error(`unknown actor type ${actor.type}`);
-          }
-        })(),
-        /*
-          tasks: await Promise.all((() => {
-            switch (actor.type) {
-              // everything current
-              case 'admin':
-              case 'staff': return [
-                read.cache.list('lead'),
-                read.cache.list('job'),
-                read.cache.list('proposal'),
-                read.cache.list('invoice'),
-
-                impl('active_leads'),
-                impl('active_jobs'),
-                impl('pending_invoices'),
-                impl('rejected_proposals'),
-              ];
-
-              case 'installer': return [
-                impl('active_jobs'),
-              ];
-
-              case 'salesAgent': return [
-                impl('active_leads'),
-                impl('active_jobs'),
-                impl('pending_invoices'),
-                impl('rejected_proposals'),
-              ];
-
-              case 'superuser': return [];
-
-              default: throw new Error(`unknown actor type ${actor.type}`);
-            }
-          })().map(async (key) => {
-            const [aggregateType, id] = key.split(':');
-            const isInstaller = aggregateType === 'installer';
-            const isSalesAgent = aggregateType === 'salesAgent';
-            const { assignments } = self;
-
-            if (isInstaller || isSalesAgent) {
-              return assignments.includes(key)
-                ? tools.read.standard(aggregateType, id)
-                : false;
-            } else {
-              return tools.read.standard(aggregateType, id);
-            }
-          })),
-        */
-      });
-    },
+    self: async (_, __, { actor, tools }) => tools.read.self(actor),
 
     roles: (_, __, { actor: { roles } }) => Object.entries(roles)
       .map(([k, v]) => ({ name: k, id: v })),
@@ -91,6 +44,7 @@ module.exports = {
     proposal: (_, { id }, { tools }) => tools.read.standard('proposal', id),
     salesAgents: (_, __, { tools }) => tools.read.cache.list('salesAgent'),
     salesAgent: (_, { id }, { tools }) => tools.read.standard('salesAgent', id),
+    // implicit plural is such a pain in the ass --ers
     allStaff: (_, __, { tools }) => tools.read.cache.list('staff'),
     staff: (_, { id }, { tools }) => tools.read.standard('staff', id),
     installers: (_, __, { tools }) => tools.read.cache.list('installer'),
@@ -114,23 +68,8 @@ module.exports = {
     },
 
     createCustomer: async (_, { details }, { tools }) => {
+      validateCustomerDetails(details);
       const customerId = tools.uuidv4();
-
-      const { firstName, lastName, businessName, contactName } = details;
-
-      assert(!firstName && lastName, 'first name required');
-      assert(firstName && !lastName, 'last name required');
-
-      assert(firstName || businessName, 'name required');
-
-      assert(
-        (firstName || lastName) && (businessName || contactName),
-        'name conflict',
-      );
-
-      assert(contactName && !businessName, 'business name required');
-      assert(businessName && !contactName, 'contact name required');
-
       const { addresses, ...rest } = details;
 
       const event = {
@@ -149,21 +88,7 @@ module.exports = {
     editCustomer: async (_, { id, details }, { tools }) => {
       const { isUUID } = tools;
       assert(isUUID(id), 'target id is invalid.');
-
-      const { firstName, lastName, businessName, contactName } = details;
-
-      assert(!firstName && lastName, 'first name required');
-      assert(firstName && !lastName, 'last name required');
-
-      assert(firstName || businessName, 'name required');
-
-      assert(
-        (firstName || lastName) && (businessName || contactName),
-        'name conflict',
-      );
-
-      assert(contactName && !businessName, 'business name required');
-      assert(businessName && !contactName, 'contact name required');
+      validateCustomerDetails(details);
 
       const event = {
         key: `customer:${id}`,
@@ -214,12 +139,7 @@ module.exports = {
 
     createJobDirect: async (_, { details }, { tools }) => {
       const jobId = tools.uuidv4();
-
-      const { materials, stages } = details;
-      assert(materials.length > 0, 'must provide at least one material');
-      assert(materials.length < 4, 'too many materials');
-      assert(stages.length > 0, 'must provide at least one stage');
-      assert(stages.length < 6, 'too many stages');
+      validateJobDetails(details);
 
       const event = {
         key: `job:${jobId}`,
@@ -233,12 +153,7 @@ module.exports = {
     convertLead: async (_, { leadId, details }, { tools }) => {
       const { isUUID } = tools;
       assert(isUUID(leadId), 'target leadId is invalid.');
-
-      const { materials, stages } = details;
-      assert(materials.length > 0, 'must provide at least one material');
-      assert(materials.length < 4, 'too many materials');
-      assert(stages.length > 0, 'must provide at least one stage');
-      assert(stages.length < 6, 'too many stages');
+      validateJobDetails(details);
 
       const event = {
         key: `lead:${leadId}`,
