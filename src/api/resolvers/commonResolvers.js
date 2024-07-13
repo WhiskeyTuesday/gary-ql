@@ -26,8 +26,30 @@ const validateCustomerDetails = (details) => {
 };
 
 module.exports = {
+  Self: {
+    __resolveType: x => x.type.charAt(0).toUpperCase() + x.type.slice(1),
+  },
+
   Query: {
-    self: async (_, __, { actor, tools }) => tools.read.self(actor),
+    self: async (_, __, { actor, tools }) => {
+      const self = await tools.read.self(actor);
+
+      const x = (async () => {
+        if (['staff', 'admin'].includes(actor.type)) {
+          const leads = await tools.read.cache.list('lead');
+          const jobs = await tools.read.cache.list('job');
+
+          return { ...self, leads, jobs };
+        } else {
+          return self;
+        }
+      })();
+
+      return {
+        ...x,
+        type: actor.type,
+      };
+    },
 
     roles: (_, __, { actor: { roles } }) => Object.entries(roles)
       .map(([k, v]) => ({ name: k, id: v })),

@@ -140,6 +140,7 @@ module.exports = {
       emailAddress: Joi.string().email().required(),
       phoneNumber: phoneNumberNorthAmerica,
     }),
+
     hadTokenAssociated: eventData({ token }),
   },
 

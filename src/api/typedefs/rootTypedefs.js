@@ -20,7 +20,6 @@ module.exports = gql`
 
   type Superuser {
     id: ID!
-    type: String
   }
 
   type Token {

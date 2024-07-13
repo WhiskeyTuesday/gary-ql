@@ -679,7 +679,7 @@ module.exports = [
         .filter(p => p.status === 'initial')
         .filter(p => p.id.startsWith('0')); // 6.25% chance of cancellation
 
-      return toCancel.map(p => ([
+      return toCancel.flatMap(p => ([
         {
           key: `proposal:${p.id}`,
           type: 'wasCancelled',
@@ -914,7 +914,8 @@ module.exports = [
         };
       }));
 
-      const stages = relevant.flatMap(j => j.stages);
+      const stages = relevant
+        .flatMap(j => j.stages.map(s => ({ ...s, jobId: j.id })));
 
       const stageEvents = stages.flatMap((s) => {
         if (['completed', 'rejected'].includes(s.status)) return [];
@@ -979,13 +980,11 @@ module.exports = [
         };
       });
 
-      return [
-        ...windowEvents,
-        ...stageEvents,
-        ...jobEvents,
-        ...installerEvents,
-        ...salesAgentEvents,
-      ];
+      // NOTE: job and stage events are intentionally not
+      // sent, they are only used to trigger the installer
+      // and sales agent events. I could refactor them out
+      // but this is how I arrived at the solution so ehh
+      return [...windowEvents, ...installerEvents, ...salesAgentEvents];
     },
   },
   {
