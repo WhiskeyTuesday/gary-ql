@@ -28,29 +28,24 @@ module.exports = {
           .every(({ status }) => ['complete', 'cancelled', 'rejected'] // TODO
             .includes(status)));
 
-      const stageEvents = completedStages.map(({ id }) => ({
-        key: `stage:${id}`,
-        type: 'wasCompleted',
-        data: {}, // TODO
-      }));
-
       const jobComplete = stages
         .filter(({ id }) => !completedStages.some(({ id: cid }) => cid === id))
         .every(({ status }) => ['complete', 'cancelled', 'rejected'] // TODO
           .includes(status));
 
-      const jobEvents = jobComplete ? [{
-        key: `job:${jobId}`,
-        type: 'wasCompleted',
-        data: {}, // TODO
-      }] : [];
+      const installerEvents = jobComplete.map(j => ({
+        key: `installer:${j.installerId}`,
+        type: 'completedJob',
+        data: { jobId: j.id },
+      }));
 
-      const events = [
-        ...windowEvents,
-        ...stageEvents,
-        ...jobEvents,
-      ];
+      const salesAgentEvents = jobComplete.map(j => ({
+        key: `salesAgent:${j.salesAgentId}`,
+        type: 'hadJobCompleted',
+        data: { jobId: j.id },
+      }));
 
+      const events = [...windowEvents, ...installerEvents, ...salesAgentEvents];
       return tools.write({ events });
     },
   },
