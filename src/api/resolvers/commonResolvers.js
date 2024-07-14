@@ -41,9 +41,11 @@ module.exports = {
 
           return {
             ...self,
+
             leads: (await Promise.all(
               leads.map(l => tools.read.standard('lead', l)),
             )).sort((a, b) => b.modifiedTime - a.modifiedTime),
+
             jobs: (await Promise.all(
               jobs.map(j => tools.read.standard('job', j)),
             )).sort((a, b) => b.modifiedTime - a.modifiedTime),
@@ -53,10 +55,7 @@ module.exports = {
         }
       })();
 
-      return {
-        ...x,
-        type: actor.type,
-      };
+      return { ...x, type: actor.type };
     },
 
     roles: (_, __, { actor: { roles } }) => Object.entries(roles)
@@ -197,6 +196,17 @@ module.exports = {
     modifyJob: async (_, { id, details }, { tools }) => {
       const { isUUID } = tools;
       assert(isUUID(id), 'target id is invalid.');
+
+      const job = await tools.read.standard('job', id);
+      assert(job, 'job not found');
+      assert(job.status !== 'draft', 'job is still a draft');
+
+      assert(
+        ['initial', 'rejected', 'expired'].includes(job.status),
+        'job is already in progress',
+      );
+
+      validateJobDetails(details);
 
       const event = {
         key: `job:${id}`,

@@ -16,36 +16,34 @@ module.exports = {
 
       assert(relevantStages.length, 'stages not found');
 
-      const windowEvents = windowIds.map(windowId => ({
-        key: `window:${windowId}`,
-        type: 'wasCompleted',
-        data: {}, // TODO
-      }));
+      const windowEvent = {
+        key: `job:${jobId}`,
+        type: 'hadWindowsCompleted',
+        data: { windowIds },
+      };
 
-      const completedStages = relevantStages
-        .filter(({ windows }) => windows
-          .filter(({ id }) => !windowIds.includes(id))
-          .every(({ status }) => ['complete', 'cancelled', 'rejected'] // TODO
-            .includes(status)));
+      const completedStages = relevantStages.filter(({ windows }) => windows
+        .filter(({ id }) => !windowIds.includes(id))
+        .every(({ status }) => ['complete', 'cancelled', 'rejected']
+          .includes(status)));
 
       const jobComplete = stages
         .filter(({ id }) => !completedStages.some(({ id: cid }) => cid === id))
-        .every(({ status }) => ['complete', 'cancelled', 'rejected'] // TODO
-          .includes(status));
+        .every(({ status }) => ['complete', 'rejected'].includes(status));
 
-      const installerEvents = jobComplete.map(j => ({
-        key: `installer:${j.installerId}`,
+      const installerEvent = jobComplete ? [{
+        key: `installer:${job.installerId}`,
         type: 'completedJob',
-        data: { jobId: j.id },
-      }));
+        data: { jobId: job.id },
+      }] : [];
 
-      const salesAgentEvents = jobComplete.map(j => ({
-        key: `salesAgent:${j.salesAgentId}`,
+      const salesAgentEvent = jobComplete ? [{
+        key: `salesAgent:${job.salesAgentId}`,
         type: 'hadJobCompleted',
-        data: { jobId: j.id },
-      }));
+        data: { jobId: job.id },
+      }] : [];
 
-      const events = [...windowEvents, ...installerEvents, ...salesAgentEvents];
+      const events = [windowEvent, ...installerEvent, ...salesAgentEvent];
       return tools.write({ events });
     },
   },

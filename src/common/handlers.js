@@ -280,17 +280,45 @@ module.exports = {
   },
 
   job: {
-    wasCreated: event => ({
+    wasDrafted: event => ({
       id: event.data.id,
-      status: 'initial',
-      isTaxExempt: event.data.isTaxExempt,
+      status: 'draft',
       createdTime: event.timestamp,
       modifiedTime: event.timestamp,
+
+      isTaxExempt: event.data.isTaxExempt,
       salesAgentId: event.data.salesAgentId,
       customerId: event.data.customerId,
       addressId: event.data.addressId,
       materials: event.data.materials,
       leadId: event.data.leadId,
+
+      stages: event.data.stages
+        .map(stage => ({
+          ...stage,
+          status: 'initial',
+          windows: stage.windows.map(window => ({
+            ...window,
+            status: 'initial',
+          })),
+        })),
+
+      proposals: [],
+      installers: [],
+    }),
+
+    wasCreated: (event, state) => ({
+      id: event.data.id,
+      status: 'initial',
+      createdTime: state.createdTime || event.timestamp,
+      modifiedTime: event.timestamp,
+      isTaxExempt: event.data.isTaxExempt,
+      salesAgentId: event.data.salesAgentId,
+      customerId: event.data.customerId,
+      addressId: event.data.addressId,
+      materials: event.data.materials,
+      leadId: event.data.leadId,
+
       stages: event.data.stages
         .map(stage => ({
           ...stage,

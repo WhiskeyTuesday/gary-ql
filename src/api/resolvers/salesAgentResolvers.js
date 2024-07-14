@@ -6,7 +6,7 @@ module.exports = {
       const id = tools.uuidv4();
       assert(stageIds.length > 0, 'must provide at least one stageId');
 
-      // TODO -- call sendgrid
+      // TODO call sendgrid
       // TODO if fail return error
       // otherwise:
       const emailDetails = false; // TODO some kind of identifier or something
