@@ -205,7 +205,7 @@ module.exports = {
       status: 'active',
       firstName: event.data.firstName,
       lastName: event.data.lastName,
-      bussinessName: event.data.bussinessName,
+      businessName: event.data.businessName,
       contactName: event.data.contactName,
       emailAddress: event.data.emailAddress,
       phoneNumber: event.data.phoneNumber,
@@ -216,7 +216,7 @@ module.exports = {
     wasModified: event => ({
       firstName: event.data.firstName,
       lastName: event.data.lastName,
-      bussinessName: event.data.bussinessName,
+      businessName: event.data.businessName,
       contactName: event.data.contactName,
       emailAddress: event.data.emailAddress,
       phoneNumber: event.data.phoneNumber,

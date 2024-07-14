@@ -61,22 +61,53 @@ module.exports = {
     roles: (_, __, { actor: { roles } }) => Object.entries(roles)
       .map(([k, v]) => ({ name: k, id: v })),
 
-    materials: (_, __, { tools }) => tools.read.cache.list('material'),
+    materials: (_, __, { tools }) => tools.read.cache.list('material')
+      .then(ids => Promise.all(ids
+        .map(id => tools.read.standard('material', id)))),
+
     material: (_, { id }, { tools }) => tools.read.standard('material', id),
-    customers: (_, __, { tools }) => tools.read.cache.list('customer'),
+
+    customers: (_, __, { tools }) => tools.read.cache.list('customer')
+      .then(ids => Promise.all(ids
+        .map(id => tools.read.standard('customer', id)))),
+
     customer: (_, { id }, { tools }) => tools.read.standard('customer', id),
-    leads: (_, __, { tools }) => tools.read.cache.list('lead'),
+
+    leads: (_, __, { tools }) => tools.read.cache.list('lead')
+      .then(ids => Promise.all(ids
+        .map(id => tools.read.standard('lead', id)))),
+
     lead: (_, { id }, { tools }) => tools.read.standard('lead', id),
-    jobs: (_, __, { tools }) => tools.read.cache.list('job'),
+
+    jobs: (_, __, { tools }) => tools.read.cache.list('job')
+      .then(ids => Promise.all(ids
+        .map(id => tools.read.standard('job', id)))),
+
     job: (_, { id }, { tools }) => tools.read.standard('job', id),
-    proposals: (_, __, { tools }) => tools.read.cache.list('proposal'),
+
+    proposals: (_, __, { tools }) => tools.read.cache.list('proposal')
+      .then(ids => Promise.all(ids
+        .map(id => tools.read.standard('proposal', id)))),
+
     proposal: (_, { id }, { tools }) => tools.read.standard('proposal', id),
-    salesAgents: (_, __, { tools }) => tools.read.cache.list('salesAgent'),
+
+    salesAgents: (_, __, { tools }) => tools.read.cache.list('salesAgent')
+      .then(ids => Promise.all(ids
+        .map(id => tools.read.standard('salesAgent', id)))),
+
     salesAgent: (_, { id }, { tools }) => tools.read.standard('salesAgent', id),
+
     // implicit plural is such a pain in the ass --ers
-    allStaff: (_, __, { tools }) => tools.read.cache.list('staff'),
+    allStaff: (_, __, { tools }) => tools.read.cache.list('staff')
+      .then(ids => Promise.all(ids
+        .map(id => tools.read.standard('staff', id)))),
+
     staff: (_, { id }, { tools }) => tools.read.standard('staff', id),
-    installers: (_, __, { tools }) => tools.read.cache.list('installer'),
+
+    installers: (_, __, { tools }) => tools.read.cache.list('installer')
+      .then(ids => Promise.all(ids
+        .map(id => tools.read.standard('installer', id)))),
+
     installer: (_, { id }, { tools }) => tools.read.standard('installer', id),
   },
 

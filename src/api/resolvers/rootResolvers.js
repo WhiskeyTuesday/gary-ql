@@ -17,6 +17,17 @@ module.exports = {
         ? `${firstName} ${lastName}`
         : businessName;
     },
+
+    contactName: (customer) => {
+      const { firstName, lastName, contactName } = customer;
+      return firstName
+        ? `${firstName} ${lastName}`
+        : contactName;
+    },
+
+    phoneNumber: ({ phoneNumber }) => phoneNumber
+      .slice(2) // remove +1 (US country code)
+      .replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3'),
   },
 
   Lead: {

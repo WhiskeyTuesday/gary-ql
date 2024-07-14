@@ -34,6 +34,7 @@ module.exports = gql`
   }
 
   type Address {
+    id: ID!
     lineOne: String!
     lineTwo: String
     city: String!
@@ -46,7 +47,8 @@ module.exports = gql`
     name: String!
     addresses: [Address]!
     contactName: String!
-    contactPhone: String!
+    phoneNumber: String!
+    emailAddress: String!
   }
 
   type Material {
