@@ -164,6 +164,7 @@ const config = {
     salesAgentIds: ['09721c87-2e6d-491d-b450-39e8d2506df6'],
 
     phoneNumberSubs: JSON.parse(process.env.PHONE_NUMBER_SUBS),
+
     subs: [
       'aSEc7htduMPtb3IieAkJN3QOSMA2',
       'Er587AJ69yVvXlcQeMZqIEaTZ2Y2',

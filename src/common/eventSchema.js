@@ -336,6 +336,8 @@ module.exports = {
 
     hadProposalRejected: eventData({}),
 
+    hadProposalCancelled: eventData({}),
+
     hadProposalExpired: eventData({}),
 
     hadInstallerAssigned: eventData({ installerId: uuid }),
