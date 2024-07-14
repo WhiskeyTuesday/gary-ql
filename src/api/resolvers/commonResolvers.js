@@ -34,12 +34,20 @@ module.exports = {
     self: async (_, __, { actor, tools }) => {
       const self = await tools.read.self(actor);
 
-      const x = (async () => {
+      const x = await (async () => {
         if (['staff', 'admin'].includes(actor.type)) {
           const leads = await tools.read.cache.list('lead');
           const jobs = await tools.read.cache.list('job');
 
-          return { ...self, leads, jobs };
+          return {
+            ...self,
+            leads: (await Promise.all(
+              leads.map(l => tools.read.standard('lead', l)),
+            )).sort((a, b) => b.modifiedTime - a.modifiedTime),
+            jobs: (await Promise.all(
+              jobs.map(j => tools.read.standard('job', j)),
+            )).sort((a, b) => b.modifiedTime - a.modifiedTime),
+          };
         } else {
           return self;
         }

@@ -52,25 +52,31 @@ module.exports = gql`
   type Material {
     id: ID!
     name: String!
-    priceSqFt: CurrencyAmount!
+    price: CurrencyAmount!
+    unit: String!
   }
 
   type Lead {
     id: ID!
+    status: String!
+    createdTime: Int!
+    modifiedTime: Int!
     customer: Customer!
     job: Job!
   }
 
   type JobStage {
     id: ID!
-    job: Job!
     status: String!
+    job: Job!
     windows: [Window]!
   }
 
   type Job {
     id: ID!
     status: String!
+    createdTime: Int!
+    modifiedTime: Int!
     customer: Customer!
     materials: [Material]!
     stages: [JobStage]!

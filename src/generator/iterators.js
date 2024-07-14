@@ -495,6 +495,7 @@ module.exports = [
               isTaxExempt,
               customerId,
               addressId,
+              materials: filmTypes,
               stages: (() => {
                 const howMany = ctx.faker.number.int({ min: 1, max: 5 });
                 return [...Array(howMany)].map((_, idx) => ({

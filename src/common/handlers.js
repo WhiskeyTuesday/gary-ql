@@ -289,6 +289,7 @@ module.exports = {
       salesAgentId: event.data.salesAgentId,
       customerId: event.data.customerId,
       addressId: event.data.addressId,
+      materials: event.data.materials,
       leadId: event.data.leadId,
       stages: event.data.stages
         .map(stage => ({

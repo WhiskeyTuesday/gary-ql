@@ -312,6 +312,7 @@ module.exports = {
       addressId: uuid,
       customerId: uuid,
       salesAgentId: uuid,
+      materials: Joi.array().items(uuid).min(1).max(3).required(),
       isTaxExempt: Joi.boolean().required(),
       stages: Joi.array().items(jobStage).required(),
 

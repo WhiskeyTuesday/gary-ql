@@ -320,18 +320,20 @@ module.exports = async ({ now, config, eventDB, stateDB }) => { // , tools })
 
     const adminPromises = adminDescriptors
       .map((_, idx) => {
-        assert(!!subs[idx + staffDescriptors.length]);
+        const offset = staffDescriptors.length;
+        assert(!!subs[idx + offset]);
         return stateDB.set(
-          `id:${firebaseIss}:${firebaseAud}:${subs[idx]}:admin`,
+          `id:${firebaseIss}:${firebaseAud}:${subs[idx + offset]}:admin`,
           adminIds[idx],
         );
       });
 
     const installerPromises = installerDescriptors
       .map((_, idx) => {
-        assert(!!subs[idx + staffDescriptors.length + adminDescriptors.length]);
+        const offset = staffDescriptors.length + adminDescriptors.length;
+        assert(!!subs[idx + offset]);
         return stateDB.set(
-          `id:${firebaseIss}:${firebaseAud}:${subs[idx]}:installer`,
+          `id:${firebaseIss}:${firebaseAud}:${subs[idx + offset]}:installer`,
           installerIds[idx],
         );
       });
@@ -344,7 +346,7 @@ module.exports = async ({ now, config, eventDB, stateDB }) => { // , tools })
 
         assert(!!subs[idx + offset]);
         return stateDB.set(
-          `id:${firebaseIss}:${firebaseAud}:${subs[idx]}:salesAgent`,
+          `id:${firebaseIss}:${firebaseAud}:${subs[idx + offset]}:salesAgent`,
           salesAgentIds[idx],
         );
       });

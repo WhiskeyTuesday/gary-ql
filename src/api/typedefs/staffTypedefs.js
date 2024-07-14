@@ -14,6 +14,8 @@ module.exports = gql`
     status: String!
     profile: StaffProfile!
     settings: StaffSettings!
+    leads: [Lead]!
+    jobs: [Job]!
   }
 
   type StaffProfile {
