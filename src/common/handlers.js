@@ -211,6 +211,8 @@ module.exports = {
       phoneNumber: event.data.phoneNumber,
       addresses: event.data.addresses,
       isTaxExempt: event.data.isTaxExempt,
+      referralType: event.data.referralType,
+      referralDetails: event.data.referralDetails,
     }),
 
     wasModified: event => ({

@@ -251,6 +251,9 @@ module.exports = {
       emailAddress: Joi.string().email().required(),
       phoneNumber: phoneNumberNorthAmerica,
       addresses: Joi.array().items(addressObjectWithId).required(),
+      referralType: Joi.string()
+        .valid('SERP', 'SOCIAL', 'FRIEND', 'OTHER').required(),
+      referralDetails: Joi.string().optional(),
 
       memo: memo.optional(),
     }),

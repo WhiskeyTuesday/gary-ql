@@ -42,6 +42,13 @@ module.exports = gql`
     postalCode: String!
   }
 
+  enum ReferralType {
+    SERP
+    SOCIAL
+    FRIEND
+    OTHER
+  }
+
   type Customer {
     id: ID!
     name: String!
@@ -49,6 +56,11 @@ module.exports = gql`
     contactName: String!
     phoneNumber: String!
     emailAddress: String!
+    jobs: [Job]!
+    leads: [Lead]!
+    isTaxExempt: Boolean!
+    referralType: ReferralType!
+    referralDetails: String
   }
 
   type Material {

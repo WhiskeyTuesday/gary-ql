@@ -252,6 +252,8 @@ module.exports = [
             id: customerId,
             firstName: person.firstName(),
             lastName: person.lastName(),
+            referralType: 'SERP',
+            referralDetails: 'generator',
             addresses: [{
               id: ctx.faker.string.uuid(),
               lineOne: location.streetAddress(),
@@ -265,6 +267,7 @@ module.exports = [
               provider: 'example.org',
             }),
 
+            // 6.25% of customers are tax exempt
             isTaxExempt: customerId.startsWith('0'),
           },
         };
