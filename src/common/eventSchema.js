@@ -277,7 +277,7 @@ module.exports = {
     wasDeactivated: eventData({ memo }),
     wasReactivated: eventData({ memo }),
 
-    hadAddressAdded: eventData({ address: addressObject }),
+    hadAddressAdded: eventData({ address: addressObjectWithId }),
     hadAddressDeprecated: eventData({ addressId: uuid }),
 
     hadLeadCreated: eventData({ leadId: uuid }),

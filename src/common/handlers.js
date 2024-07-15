@@ -235,7 +235,7 @@ module.exports = {
     wasReactivated: () => ({ status: 'active' }),
 
     hadAddressAdded: (event, state) => ({
-      addresses: state.addresses.concat(event.data),
+      addresses: state.addresses.concat(event.data.address),
       modifiedTime: event.timestamp,
     }),
 

@@ -272,62 +272,14 @@ module.exports = [
     },
   },
   {
-    name: 'track-new-lead',
-    firstInstance: [6, 'hour'],
-    type: 'simple',
-    period: [19, 'minutes'],
-    function: async ({ ctx, cache }) => {
-      const target = ctx.volume;
-      const current = await cache.count('lead');
-      const difference = target - current;
-      const howMany = difference > 0 ? difference : 0;
-      if (howMany <= 0) return [];
-
-      const admin = await cache.list('admin');
-      if (!admin.length) throw new Error('No admin found');
-      const aid = ctx.faker.helpers.arrayElement(admin);
-
-      const customers = await cache.list('customer');
-
-      return (await Promise.all([...Array(howMany)].flatMap(async () => {
-        const id = ctx.faker.string.uuid();
-
-        // if no customers just skip for now
-        if (!customers.length) return [];
-        const customerId = ctx.faker.helpers.arrayElement(customers);
-        const customer = await cache.entry('customer', customerId);
-
-        return [
-          {
-            key: `lead:${id}`,
-            type: 'wasCreated',
-            metadata: { actor: { type: 'admin', id: aid } },
-            data: {
-              id,
-              customerId,
-              isTaxExempt: customer.isTaxExempt,
-              addressId: ctx.faker.helpers.arrayElement(customer.addresses).id,
-            },
-          },
-          {
-            key: `customer:${customerId}`,
-            type: 'hadLeadCreated',
-            metadata: { actor: { type: 'admin', id: aid } },
-            data: { leadId: id },
-          },
-        ];
-      }))).flat();
-    },
-  },
-  {
     name: 'add-addresses',
     firstInstance: [6, 'hour'],
     type: 'simple', // TODO per-customer?
     period: [3, 'days'],
     function: async ({ ctx, cache }) => {
       const { location } = ctx.faker;
-      const customers = (await cache.list('customer'))
-        .map(id => cache.entry('customer', id));
+      const customers = await Promise.all((await cache.list('customer'))
+        .map(id => cache.entry('customer', id)));
 
       const noAddress = customers.filter(c => !c.addresses.length);
 
@@ -355,6 +307,55 @@ module.exports = [
       // already have addresses.
 
       return noAddressEvents;
+    },
+  },
+  {
+    name: 'track-new-lead',
+    firstInstance: [6, 'hour'],
+    type: 'simple',
+    period: [19, 'minutes'],
+    function: async ({ ctx, cache }) => {
+      const target = ctx.volume;
+      const current = await cache.count('lead');
+      const difference = target - current;
+      const howMany = difference > 0 ? difference : 0;
+      if (howMany <= 0) return [];
+
+      const admin = await cache.list('admin');
+      if (!admin.length) throw new Error('No admin found');
+      const aid = ctx.faker.helpers.arrayElement(admin);
+
+      const customers = await cache.list('customer');
+
+      return (await Promise.all([...Array(howMany)].flatMap(async () => {
+        const id = ctx.faker.string.uuid();
+
+        // if no customers just skip for now
+        if (!customers.length) return [];
+        const customerId = ctx.faker.helpers.arrayElement(customers);
+        const customer = await cache.entry('customer', customerId);
+        if (customer.addresses.length === 0) return [];
+
+        return [
+          {
+            key: `lead:${id}`,
+            type: 'wasCreated',
+            metadata: { actor: { type: 'admin', id: aid } },
+            data: {
+              id,
+              customerId,
+              isTaxExempt: customer.isTaxExempt,
+              addressId: ctx.faker.helpers.arrayElement(customer.addresses).id,
+            },
+          },
+          {
+            key: `customer:${customerId}`,
+            type: 'hadLeadCreated',
+            metadata: { actor: { type: 'admin', id: aid } },
+            data: { leadId: id },
+          },
+        ];
+      }))).flat();
     },
   },
   {
