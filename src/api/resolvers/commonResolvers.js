@@ -121,12 +121,33 @@ module.exports = {
     createCustomer: async (_, { details }, { tools }) => {
       const customerId = tools.uuidv4();
 
+      const { firstName, lastName, businessName } = details;
+      const contactName = businessName ? `${firstName} ${lastName}` : undefined;
+      const names = {
+        firstName: businessName ? undefined : firstName,
+        lastName: businessName ? undefined : lastName,
+        businessName,
+        contactName,
+      };
+
+      const { phoneNumber, emailAddress } = details;
+      const { isTaxExempt, taxDetails, memo } = details;
+      const { referralType, referralDetails } = details;
+
       const event = {
         key: `customer:${customerId}`,
         type: 'wasCreated',
         data: {
           id: customerId,
-          ...details,
+          ...names,
+          phoneNumber,
+          emailAddress,
+          isTaxExempt,
+          taxDetails,
+          referralType,
+          referralDetails,
+
+          memo,
         },
       };
 

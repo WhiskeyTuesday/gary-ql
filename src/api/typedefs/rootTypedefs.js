@@ -59,7 +59,8 @@ module.exports = gql`
     jobs: [Job]!
     leads: [Lead]!
     isTaxExempt: Boolean!
-    referralType: ReferralType!
+    taxDetails: String
+    referralType: ReferralType
     referralDetails: String
   }
 
