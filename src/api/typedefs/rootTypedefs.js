@@ -99,7 +99,7 @@ module.exports = gql`
     stages: [JobStage]!
     proposals: [Proposal]!
 
-    startTime: Int
+    startTimestamp: Int
     notes: String
   }
 
