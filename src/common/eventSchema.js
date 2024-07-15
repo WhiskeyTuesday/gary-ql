@@ -121,6 +121,20 @@ const jobStage = Joi.object().keys({
   memo: memo.optional(),
 }).required();
 
+const newJob = eventData({
+  id: uuid,
+  leadId: uuid,
+  addressId: uuid,
+  customerId: uuid,
+  salesAgentId: uuid,
+  materials: Joi.array().items(uuid).min(1).max(3).required(),
+  isTaxExempt: Joi.boolean().required(),
+  stages: Joi.array().items(jobStage).required(),
+
+  startTimestamp: Joi.date().timestamp('unix').optional(),
+  memo: memo.optional(),
+});
+
 module.exports = {
   referralCode: {
     wasCreated: eventData({ code: referralCode, userId: uuid }),
@@ -316,22 +330,17 @@ module.exports = {
   },
 
   job: {
-    wasCreated: eventData({
-      id: uuid,
-      leadId: uuid,
-      addressId: uuid,
-      customerId: uuid,
-      salesAgentId: uuid,
-      materials: Joi.array().items(uuid).min(1).max(3).required(),
-      isTaxExempt: Joi.boolean().required(),
-      stages: Joi.array().items(jobStage).required(),
+    wasDrafted: newJob,
 
-      memo: memo.optional(),
-    }),
+    wasPublished: eventData({}),
+
+    wasCreated: newJob,
 
     wasModified: eventData({
-      stages: Joi.array().items(jobStage).required(),
-      memo: memo.required(),
+      materials: Joi.array().items(uuid).min(1).max(3).optional(),
+      startTimestamp: Joi.date().timestamp('unix').optional(),
+      stages: Joi.array().items(jobStage).optional(),
+      memo: memo.optional(),
     }),
 
     wasProposed: eventData({

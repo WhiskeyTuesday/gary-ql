@@ -93,14 +93,13 @@ module.exports = gql`
     status: String!
     address: Address!
     salesAgent: SalesAgent!
-    createdTime: Int!
-    modifiedTime: Int!
     customer: Customer!
     installers: [Installer]!
     materials: [Material]!
     stages: [JobStage]!
     proposals: [Proposal]!
 
+    startTime: Int
     notes: String
   }
 

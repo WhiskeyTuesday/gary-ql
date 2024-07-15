@@ -7,6 +7,36 @@ const isOld = (item, event) => {
   return (item.timestamp + interval) <= event.timestamp;
 };
 
+const newJob = event => ({
+  id: event.data.id,
+  status: 'draft',
+  createdTime: event.timestamp,
+  modifiedTime: event.timestamp,
+
+  isTaxExempt: event.data.isTaxExempt,
+  salesAgentId: event.data.salesAgentId,
+  customerId: event.data.customerId,
+  addressId: event.data.addressId,
+  materials: event.data.materials,
+  leadId: event.data.leadId,
+
+  stages: event.data.stages
+    .map(stage => ({
+      ...stage,
+      status: 'initial',
+      windows: stage.windows.map(window => ({
+        ...window,
+        status: 'initial',
+      })),
+    })),
+
+  proposals: [],
+  installers: [],
+
+  startTimestamp: event.data.startTimestamp || false,
+  notes: event.data.memo || '',
+});
+
 module.exports = {
   referralCode: {
     wasCreated: event => ({ userId: event.data.userId }),
@@ -300,68 +330,25 @@ module.exports = {
   },
 
   job: {
-    wasDrafted: event => ({
-      id: event.data.id,
-      status: 'draft',
-      createdTime: event.timestamp,
-      modifiedTime: event.timestamp,
+    wasDrafted: event => newJob(event),
 
-      isTaxExempt: event.data.isTaxExempt,
-      salesAgentId: event.data.salesAgentId,
-      customerId: event.data.customerId,
-      addressId: event.data.addressId,
-      materials: event.data.materials,
-      leadId: event.data.leadId,
-
-      stages: event.data.stages
-        .map(stage => ({
-          ...stage,
-          status: 'initial',
-          windows: stage.windows.map(window => ({
-            ...window,
-            status: 'initial',
-          })),
-        })),
-
-      proposals: [],
-      installers: [],
-
-      notes: event.data.memo || '',
+    wasPublished: () => ({
+      status: 'initial',
     }),
 
-    wasCreated: (event, state) => ({
-      id: event.data.id,
+    wasCreated: event => ({
+      ...newJob(event),
       status: 'initial',
-      createdTime: state.createdTime || event.timestamp,
-      modifiedTime: event.timestamp,
-      isTaxExempt: event.data.isTaxExempt,
-      salesAgentId: event.data.salesAgentId,
-      customerId: event.data.customerId,
-      addressId: event.data.addressId,
-      materials: event.data.materials,
-      leadId: event.data.leadId,
-
-      stages: event.data.stages
-        .map(stage => ({
-          ...stage,
-          status: 'initial',
-          windows: stage.windows.map(window => ({
-            ...window,
-            status: 'initial',
-          })),
-        })),
-
-      proposals: [],
-      installers: [],
-
-      memo: event.data.memo || '',
-      modificationMemos: [],
     }),
 
     wasModified: (event, state) => ({
-      stages: event.data.stages,
+      stages: event.data.stages || state.stages,
+      materials: event.data.materials || state.materials,
+      startTimestamp: event.data.startTimestamp || state.startTimestamp,
       modifiedTime: event.timestamp,
-      modificationMemos: state.modificationMemos.concat(event.metadata.memo),
+      modificationMemos: event.data.memo
+        ? state.modificationMemos.concat(event.data.memo)
+        : state.modificationMemos,
     }),
 
     wasProposed: (event, state) => ({
