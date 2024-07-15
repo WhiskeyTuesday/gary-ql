@@ -326,7 +326,9 @@ module.exports = [
     period: [3, 'days'],
     function: async ({ ctx, cache }) => {
       const { location } = ctx.faker;
-      const customers = await cache.list('customer');
+      const customers = (await cache.list('customer'))
+        .map(id => cache.entry('customer', id));
+
       const noAddress = customers.filter(c => !c.addresses.length);
 
       const admins = await cache.list('admin');
