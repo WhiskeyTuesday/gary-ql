@@ -10,6 +10,13 @@ module.exports = {
     }),
   },
 
+  Window: {
+    film: async ({ filmId }, _, { tools }) => tools.read.standard(
+      'material',
+      filmId,
+    ),
+  },
+
   Customer: {
     name: (customer) => {
       const { firstName, lastName, businessName } = customer;
