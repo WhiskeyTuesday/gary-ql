@@ -275,6 +275,9 @@ module.exports = {
 
     hadAddressAdded: eventData({ address: addressObject }),
     hadAddressDeprecated: eventData({ addressId: uuid }),
+
+    hadLeadCreated: eventData({ leadId: uuid }),
+    hadJobCreated: eventData({ jobId: uuid }),
   },
 
   lead: {

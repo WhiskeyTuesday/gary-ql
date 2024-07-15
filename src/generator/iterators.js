@@ -292,7 +292,7 @@ module.exports = [
 
       const customers = await cache.list('customer');
 
-      return (await Promise.all([...Array(howMany)].map(async () => {
+      return (await Promise.all([...Array(howMany)].flatMap(async () => {
         const id = ctx.faker.string.uuid();
 
         // if no customers just skip for now
@@ -300,17 +300,25 @@ module.exports = [
         const customerId = ctx.faker.helpers.arrayElement(customers);
         const customer = await cache.entry('customer', customerId);
 
-        return {
-          key: `lead:${id}`,
-          type: 'wasCreated',
-          metadata: { actor: { type: 'admin', id: aid } },
-          data: {
-            id,
-            customerId,
-            isTaxExempt: customer.isTaxExempt,
-            addressId: ctx.faker.helpers.arrayElement(customer.addresses).id,
+        return [
+          {
+            key: `lead:${id}`,
+            type: 'wasCreated',
+            metadata: { actor: { type: 'admin', id: aid } },
+            data: {
+              id,
+              customerId,
+              isTaxExempt: customer.isTaxExempt,
+              addressId: ctx.faker.helpers.arrayElement(customer.addresses).id,
+            },
           },
-        };
+          {
+            key: `customer:${customerId}`,
+            type: 'hadLeadCreated',
+            metadata: { actor: { type: 'admin', id: aid } },
+            data: { leadId: id },
+          },
+        ];
       }))).flat();
     },
   },
@@ -526,6 +534,12 @@ module.exports = [
           {
             key: `lead:${l.id}`,
             type: 'wasConverted',
+            metadata: { actor: { type: 'salesAgent', id: salesAgentId } },
+            data: { jobId: id },
+          },
+          {
+            key: `customer:${customerId}`,
+            type: 'hadJobCreated',
             metadata: { actor: { type: 'salesAgent', id: salesAgentId } },
             data: { jobId: id },
           },

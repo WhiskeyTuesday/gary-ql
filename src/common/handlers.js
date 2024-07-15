@@ -213,6 +213,8 @@ module.exports = {
       isTaxExempt: event.data.isTaxExempt,
       referralType: event.data.referralType,
       referralDetails: event.data.referralDetails,
+      leads: [],
+      jobs: [],
     }),
 
     wasModified: event => ({
@@ -235,6 +237,14 @@ module.exports = {
     hadAddressDeprecated: (event, state) => ({
       addresses: state.addresses
         .filter(address => address.id !== event.data.id),
+    }),
+
+    hadLeadCreated: (event, state) => ({
+      leads: state.leads.concat(event.data.leadId),
+    }),
+
+    hadJobCreated: (event, state) => ({
+      jobs: state.jobs.concat(event.data.jobId),
     }),
   },
 

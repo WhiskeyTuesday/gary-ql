@@ -75,6 +75,7 @@ module.exports = gql`
     status: String!
     createdTime: Int!
     modifiedTime: Int!
+    visitTimestamp: Int!
     customer: Customer!
     job: Job!
   }
