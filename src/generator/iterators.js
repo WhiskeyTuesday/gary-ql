@@ -239,7 +239,7 @@ module.exports = [
       if (!admin.length) throw new Error('No admin found');
       const aid = ctx.faker.helpers.arrayElement(admin);
 
-      const { location, person } = ctx.faker;
+      const { person } = ctx.faker;
 
       return [...Array(howMany)].map(() => {
         const customerId = ctx.faker.string.uuid();
@@ -252,16 +252,13 @@ module.exports = [
             id: customerId,
             firstName: person.firstName(),
             lastName: person.lastName(),
-            referralType: 'SERP',
-            referralDetails: 'generator',
-            addresses: [{
-              id: ctx.faker.string.uuid(),
-              lineOne: location.streetAddress(),
-              city: location.city(),
-              state: location.state({ abbreviated: true }).toLowerCase(),
-              postalCode: location.zipCode(),
-              country: 'us',
-            }],
+            referralType: ctx.faker.helpers.arrayElement([
+              'SERP',
+              'SOCIAL',
+              'FRIEND',
+              'OTHER',
+            ]),
+            referralDetails: 'generated test data',
             phoneNumber: phoneNumber(ctx.faker),
             emailAddress: ctx.faker.internet.email({
               provider: 'example.org',
@@ -327,7 +324,37 @@ module.exports = [
     firstInstance: [6, 'hour'],
     type: 'simple', // TODO per-customer?
     period: [3, 'days'],
-    function: () => [], // TODO
+    function: async ({ ctx, cache }) => {
+      const { location } = ctx.faker;
+      const customers = await cache.list('customer');
+      if (!customers.length) throw new Error('No customers found');
+      const noAddress = customers.filter(c => !c.addresses.length);
+
+      const admins = await cache.list('admin');
+      if (!admins.length) throw new Error('No admin found');
+      const aid = ctx.faker.helpers.arrayElement(admins);
+
+      const noAddressEvents = noAddress.map(c => ({
+        key: `customer:${c.id}`,
+        type: 'hadAddressAdded',
+        metadata: { actor: { type: 'admin', id: aid } },
+        data: {
+          address: {
+            id: ctx.faker.string.uuid(),
+            lineOne: location.streetAddress(),
+            city: location.city(),
+            state: location.state({ abbreviated: true }).toLowerCase(),
+            postalCode: location.zipCode(),
+            country: 'us',
+          },
+        },
+      }));
+
+      // TODO add events probabalistically on customers that
+      // already have addresses.
+
+      return noAddressEvents;
+    },
   },
   {
     name: 'deprecate-addresses',
