@@ -91,11 +91,17 @@ module.exports = gql`
   type Job {
     id: ID!
     status: String!
+    address: Address!
+    salesAgent: SalesAgent!
     createdTime: Int!
     modifiedTime: Int!
     customer: Customer!
+    installers: [Installer]!
     materials: [Material]!
     stages: [JobStage]!
+    proposals: [Proposal]!
+
+    notes: String
   }
 
   enum WindowType {
@@ -136,28 +142,6 @@ module.exports = gql`
     windows: [Window!]!
     subtotal: CurrencyAmount!
     taxAmount: CurrencyAmount!
-    total: CurrencyAmount!
-  }
-
-  type Proposal {
-    id: ID!
-    job: Job!
-    status: String!
-    totalCost: CurrencyAmount!
-  }
-
-  type TaxAmount {
-    name: String!
-    amount: Int!
-  }
-
-  type Invoice {
-    id: ID!
-    job: Job!
-    jobStages: [JobStage]!
-    status: String!
-    subtotal: CurrencyAmount!
-    taxes: [TaxAmount]!
     total: CurrencyAmount!
   }
 

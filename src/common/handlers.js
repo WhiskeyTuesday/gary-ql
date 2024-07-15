@@ -325,6 +325,8 @@ module.exports = {
 
       proposals: [],
       installers: [],
+
+      notes: event.data.memo || '',
     }),
 
     wasCreated: (event, state) => ({

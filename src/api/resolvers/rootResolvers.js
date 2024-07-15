@@ -61,6 +61,24 @@ module.exports = {
     materials: async (job, _, { tools }) => Promise.all(
       job.materials.map(m => tools.read.standard('material', m)),
     ),
+
+    proposals: async (job, _, { tools }) => Promise.all(
+      job.proposals.map(pid => tools.read.standard('proposal', pid)),
+    ),
+
+    address: async (job, _, { tools }) => tools.read.standard(
+      'customer',
+      job.customerId,
+    ).then(c => c.addresses.find(a => a.id === job.addressId)),
+
+    salesAgent: async (job, _, { tools }) => tools.read.standard(
+      'salesAgent',
+      job.salesAgentId,
+    ),
+
+    installers: async (job, _, { tools }) => Promise.all(
+      job.installers.map(i => tools.read.standard('installer', i)),
+    ),
   },
 
   Query: {
