@@ -203,21 +203,25 @@ module.exports = {
     wasCreated: event => ({
       id: event.data.id,
       status: 'active',
+      createdTime: event.timestamp,
+      modifiedTime: event.timestamp,
       firstName: event.data.firstName,
       lastName: event.data.lastName,
       businessName: event.data.businessName,
       contactName: event.data.contactName,
       emailAddress: event.data.emailAddress,
       phoneNumber: event.data.phoneNumber,
-      addresses: event.data.addresses,
       isTaxExempt: event.data.isTaxExempt,
+      taxDetails: event.data.taxDetails,
       referralType: event.data.referralType,
       referralDetails: event.data.referralDetails,
+      addresses: [],
       leads: [],
       jobs: [],
     }),
 
     wasModified: event => ({
+      modifiedTime: event.timestamp,
       firstName: event.data.firstName,
       lastName: event.data.lastName,
       businessName: event.data.businessName,
@@ -232,18 +236,22 @@ module.exports = {
 
     hadAddressAdded: (event, state) => ({
       addresses: state.addresses.concat(event.data),
+      modifiedTime: event.timestamp,
     }),
 
     hadAddressDeprecated: (event, state) => ({
+      modifiedTime: event.timestamp,
       addresses: state.addresses
         .filter(address => address.id !== event.data.id),
     }),
 
     hadLeadCreated: (event, state) => ({
+      modifiedTime: event.timestamp,
       leads: state.leads.concat(event.data.leadId),
     }),
 
     hadJobCreated: (event, state) => ({
+      modifiedTime: event.timestamp,
       jobs: state.jobs.concat(event.data.jobId),
     }),
   },

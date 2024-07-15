@@ -8,23 +8,6 @@ const validateJobDetails = (details) => {
   assert(stages.length < 6, 'too many stages');
 };
 
-const validateCustomerDetails = (details) => {
-  const { firstName, lastName, businessName, contactName } = details;
-
-  assert(!firstName && lastName, 'first name required');
-  assert(firstName && !lastName, 'last name required');
-
-  assert(firstName || businessName, 'name required');
-
-  assert(
-    (firstName || lastName) && (businessName || contactName),
-    'name conflict',
-  );
-
-  assert(contactName && !businessName, 'business name required');
-  assert(businessName && !contactName, 'contact name required');
-};
-
 module.exports = {
   Self: {
     __resolveType: x => x.type.charAt(0).toUpperCase() + x.type.slice(1),
@@ -69,25 +52,33 @@ module.exports = {
 
     customers: (_, __, { tools }) => tools.read.cache.list('customer')
       .then(ids => Promise.all(ids
-        .map(id => tools.read.standard('customer', id)))),
+        .map(id => tools.read.standard('customer', id)))
+        .then(customers => customers
+          .sort((a, b) => a.modifiedTime - b.modifiedTime))),
 
     customer: (_, { id }, { tools }) => tools.read.standard('customer', id),
 
     leads: (_, __, { tools }) => tools.read.cache.list('lead')
       .then(ids => Promise.all(ids
-        .map(id => tools.read.standard('lead', id)))),
+        .map(id => tools.read.standard('lead', id)))
+        .then(leads => leads
+          .sort((a, b) => a.modifiedTime - b.modifiedTime))),
 
     lead: (_, { id }, { tools }) => tools.read.standard('lead', id),
 
     jobs: (_, __, { tools }) => tools.read.cache.list('job')
       .then(ids => Promise.all(ids
-        .map(id => tools.read.standard('job', id)))),
+        .map(id => tools.read.standard('job', id)))
+        .then(jobs => jobs
+          .sort((a, b) => a.modifiedTime - b.modifiedTime))),
 
     job: (_, { id }, { tools }) => tools.read.standard('job', id),
 
     proposals: (_, __, { tools }) => tools.read.cache.list('proposal')
       .then(ids => Promise.all(ids
-        .map(id => tools.read.standard('proposal', id)))),
+        .map(id => tools.read.standard('proposal', id)))
+        .then(proposals => proposals
+          .sort((a, b) => a.modifiedTime - b.modifiedTime))),
 
     proposal: (_, { id }, { tools }) => tools.read.standard('proposal', id),
 
@@ -128,17 +119,14 @@ module.exports = {
     },
 
     createCustomer: async (_, { details }, { tools }) => {
-      validateCustomerDetails(details);
       const customerId = tools.uuidv4();
-      const { addresses, ...rest } = details;
 
       const event = {
         key: `customer:${customerId}`,
         type: 'wasCreated',
         data: {
           id: customerId,
-          addresses: addresses.map(a => ({ id: tools.uuidv4(), ...a })),
-          ...rest,
+          ...details,
         },
       };
 
@@ -148,7 +136,8 @@ module.exports = {
     editCustomer: async (_, { id, details }, { tools }) => {
       const { isUUID } = tools;
       assert(isUUID(id), 'target id is invalid.');
-      validateCustomerDetails(details);
+      const exists = await tools.read.exists(`customer:${id}`);
+      assert(exists, 'customer not found');
 
       const event = {
         key: `customer:${id}`,

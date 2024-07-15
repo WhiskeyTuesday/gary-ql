@@ -243,16 +243,20 @@ module.exports = {
   customer: {
     wasCreated: eventData({
       id: uuid,
+
       isTaxExempt: Joi.boolean().required(),
+      taxDetails: Joi.string().optional(),
+
       firstName: Joi.string().optional(),
       lastName: Joi.string().optional(),
       businessName: Joi.string().optional(),
       contactName: Joi.string().optional(),
+
       emailAddress: Joi.string().email().required(),
-      phoneNumber: phoneNumberNorthAmerica,
-      addresses: Joi.array().items(addressObjectWithId).required(),
+      phoneNumber: phoneNumberNorthAmerica.required(),
+
       referralType: Joi.string()
-        .valid('SERP', 'SOCIAL', 'FRIEND', 'OTHER').required(),
+        .valid('SERP', 'SOCIAL', 'FRIEND', 'OTHER').optional(),
       referralDetails: Joi.string().optional(),
 
       memo: memo.optional(),

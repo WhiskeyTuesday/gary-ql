@@ -188,15 +188,15 @@ module.exports = gql`
   }
 
   input CustomerInput {
-    firstName: String
-    lastName: String
-    contactName: String
+    firstName: String!
+    lastName: String!
+
     businessName: String
 
     phoneNumber: String!
     emailAddress: String!
-    taxExempt: Boolean!
-    addresses: [AddressInput!]!
+    isTaxExempt: Boolean!
+    taxDetails: String
 
     memo: String
   }
