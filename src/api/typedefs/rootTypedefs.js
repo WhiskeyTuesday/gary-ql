@@ -198,8 +198,12 @@ module.exports = gql`
 
     phoneNumber: String!
     emailAddress: String!
+
     isTaxExempt: Boolean!
     taxDetails: String
+
+    referralType: ReferralType
+    referralDetails: String
 
     memo: String
   }
