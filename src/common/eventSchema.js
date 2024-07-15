@@ -110,7 +110,7 @@ const jobStage = Joi.object().keys({
   id: uuid,
   windows: Joi.array().items(Joi.object().keys({
     id: uuid,
-    name: Joi.string().required(),
+    location: Joi.string().required(),
     filmId: uuid,
     glassType,
     windowType,
@@ -344,11 +344,11 @@ module.exports = {
       stageIds: Joi.array().items(uuid).required(),
     }),
 
-    hadProposalRejected: eventData({}),
+    hadProposalRejected: eventData({ id: uuid }),
 
-    hadProposalCancelled: eventData({}),
+    hadProposalCancelled: eventData({ id: uuid }),
 
-    hadProposalExpired: eventData({}),
+    hadProposalExpired: eventData({ id: uuid }),
 
     hadInstallerAssigned: eventData({ installerId: uuid }),
 
@@ -386,7 +386,8 @@ module.exports = {
         windows: Joi.array().items(Joi.object().keys({
           id: uuid,
           filmId: uuid,
-          name: Joi.string().required(),
+          filmName: Joi.string().required(),
+          location: Joi.string().required(),
           glassType,
           windowType,
           width: Joi.number().integer().min(1).max(250).required(),
@@ -414,6 +415,19 @@ module.exports = {
     wasSuperseded: eventData({
       newProposalId: uuid,
 
+      memo: memo.optional(),
+    }),
+
+    wasExpired: eventData({
+      memo: memo.optional(),
+    }),
+
+    wasRejected: eventData({
+      memo: memo.optional(),
+    }),
+
+    wasAccepted: eventData({
+      stageIds: Joi.array().items(uuid).required(),
       memo: memo.optional(),
     }),
   },

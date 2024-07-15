@@ -541,10 +541,20 @@ module.exports = [
                 return [...Array(howMany)].map((_, idx) => ({
                   id: ctx.faker.string.uuid(),
                   windows: (() => {
-                    const windows = ctx.faker.number.int({ min: 1, max: 5 });
+                    const windows = ctx.faker.number.int({ min: 1, max: 9 });
                     return [...Array(windows)].map(() => ({
                       id: ctx.faker.string.uuid(),
-                      name: ctx.faker.commerce.productName(),
+                      location: ctx.faker.helpers.arrayElement([
+                        'living-room',
+                        'kitchen',
+                        'bedroom',
+                        'bathroom',
+                        'office',
+                        'upstairs bedroom',
+                        'downstairs bedroom',
+                        'hallway',
+                        'garage',
+                      ]),
                       filmId: ctx.faker.helpers.arrayElement(filmTypes),
                       windowType: ctx.faker.helpers.arrayElement(windowTypes),
                       glassType: ctx.faker.helpers.arrayElement(glassTypes),
@@ -602,7 +612,7 @@ module.exports = [
           }
         };
 
-        const getName = async (w) => {
+        const getFilmName = async (w) => {
           const material = await cache.entry('material', w.filmId);
           return material.name;
         };
@@ -611,9 +621,9 @@ module.exports = [
           const sqft = Math.round((w.width * w.height) / 144);
           const lnft = Math.round(((w.width + w.height) * 2) / 12);
           const price = await calcPrice(w);
-          const name = await getName(w);
+          const filmName = await getFilmName(w);
           const { status: _, ...rest } = w;
-          return { ...rest, sqft, lnft, price, name };
+          return { ...rest, sqft, lnft, price, filmName };
         }));
 
         const films = windows.reduce((acc, w) => {
@@ -622,7 +632,7 @@ module.exports = [
           }
 
           acc[w.filmId] = {
-            name: w.name,
+            name: w.filmName,
             sqft: acc[w.filmId].sqft + w.sqft,
             lnft: acc[w.filmId].lnft + w.lnft,
             priceTotal: acc[w.filmId].priceTotal + w.price,
@@ -737,7 +747,7 @@ module.exports = [
           key: `job:${p.jobId}`,
           type: 'hadProposalCancelled',
           metadata: { actor: { type: 'salesAgent', id: p.salesAgentId } },
-          data: { proposalId: p.id },
+          data: { id: p.id },
         },
       ]));
     },
@@ -803,7 +813,7 @@ module.exports = [
           key: `job:${j.id}`,
           type: 'hadProposalExpired',
           metadata: { actor: systemAgent },
-          data: {},
+          data: { id: j.proposals[j.proposals.length - 1] },
         },
         {
           key: `proposal:${j.proposals[j.proposals.length - 1]}`,
@@ -831,12 +841,20 @@ module.exports = [
       return relevant.flatMap((j) => {
         // 10% chance of outright rejection
         if (ctx.faker.datatype.boolean(0.1)) {
-          return {
-            key: `job:${j.id}`,
-            type: 'hadProposalRejected',
-            metadata: { actor: systemAgent },
-            data: {},
-          };
+          return [
+            {
+              key: `job:${j.id}`,
+              type: 'hadProposalRejected',
+              metadata: { actor: systemAgent },
+              data: { id: j.proposals[j.proposals.length - 1] },
+            },
+            {
+              key: `proposal:${j.proposals[j.proposals.length - 1]}`,
+              type: 'wasRejected',
+              metadata: { actor: systemAgent },
+              data: {},
+            },
+          ];
         }
         // 80% change of stage approval
         const approved = j.stages
@@ -844,19 +862,35 @@ module.exports = [
 
         // if no stages approved, reject outright
         if (!approved.length) {
-          return {
-            key: `job:${j.id}`,
-            type: 'hadProposalRejected',
-            metadata: { actor: systemAgent },
-            data: {},
-          };
+          return [
+            {
+              key: `job:${j.id}`,
+              type: 'hadProposalRejected',
+              metadata: { actor: systemAgent },
+              data: { id: j.proposals[j.proposals.length - 1] },
+            },
+            {
+              key: `proposal:${j.proposals[j.proposals.length - 1]}`,
+              type: 'wasRejected',
+              metadata: { actor: systemAgent },
+              data: {},
+            },
+          ];
         } else {
-          return {
-            key: `job:${j.id}`,
-            type: 'hadProposalAccepted',
-            metadata: { actor: systemAgent },
-            data: { stageIds: approved.map(s => s.id) },
-          };
+          return [
+            {
+              key: `job:${j.id}`,
+              type: 'hadProposalAccepted',
+              metadata: { actor: systemAgent },
+              data: { stageIds: approved.map(s => s.id) },
+            },
+            {
+              key: `proposal:${j.proposals[j.proposals.length - 1]}`,
+              type: 'wasAccepted',
+              metadata: { actor: systemAgent },
+              data: { stageIds: approved.map(s => s.id) },
+            },
+          ];
         }
       });
     },
