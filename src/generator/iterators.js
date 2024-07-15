@@ -327,7 +327,6 @@ module.exports = [
     function: async ({ ctx, cache }) => {
       const { location } = ctx.faker;
       const customers = await cache.list('customer');
-      if (!customers.length) throw new Error('No customers found');
       const noAddress = customers.filter(c => !c.addresses.length);
 
       const admins = await cache.list('admin');
