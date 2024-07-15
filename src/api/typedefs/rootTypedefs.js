@@ -119,6 +119,7 @@ module.exports = gql`
   }
 
   type Window {
+    id: ID!
     location: String!
     type: WindowType!
     glassType: GlassType!
