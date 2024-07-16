@@ -3,13 +3,13 @@ const gql = require('graphql-tag');
 module.exports = gql`
   type Staff {
     id: ID!
+    status: String!
     userId: ID!
     token: Token!
-    status: String!
     profile: StaffProfile!
     leads: [Lead]!
     jobs: [Job]!
-  }
+ }
 
   type StaffProfile {
     id: ID!

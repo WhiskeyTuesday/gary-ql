@@ -3,6 +3,7 @@ const gql = require('graphql-tag');
 module.exports = gql`
   type SalesAgent {
     id: ID!
+    status: String!
     profile: SalesAgentProfile!
     leads: [Lead]!
     jobs: [Job]!
