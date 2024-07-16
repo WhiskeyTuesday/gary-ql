@@ -202,7 +202,6 @@ module.exports = {
     changedSettings: eventData({
       contactPhoneNumber: phoneNumberNorthAmerica,
       contactEmailAddress: Joi.string().email().required(),
-      mailingAddress: Joi.string().required(),
     }),
 
     wasDeactivated: eventData({ memo }), // TODO

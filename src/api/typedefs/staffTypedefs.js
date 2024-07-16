@@ -4,7 +4,6 @@ module.exports = gql`
   type StaffSettings {
     contactPhoneNumber: String
     contactEmailAddress: String
-    mailingAddress: String
   }
 
   type Staff {

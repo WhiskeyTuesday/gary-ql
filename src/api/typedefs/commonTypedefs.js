@@ -20,7 +20,17 @@ module.exports = gql`
     staff(id: ID!): Staff
     installers: [Installer]
     installer(id: ID!): Installer
+    windowPrice(window: WindowPriceInput!): Int!
+    windowsPrice(windows: [WindowPriceInput]!): Int!
+    proposalPreview(jobId: ID! stageIds: [ID]!): Proposal
   }
+
+  input WindowPriceInput {
+    materialId: ID!
+    widthInches: Int!
+    heightInches: Int!
+  }
+
 
   input WindowInput {
     location: String!

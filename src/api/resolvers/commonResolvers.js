@@ -8,6 +8,16 @@ const validateJobDetails = (details) => {
   assert(stages.length < 6, 'too many stages');
 };
 
+const calcWindow = ({ price, unit, widthInches, heightInches }) => {
+  const sqft = (widthInches * heightInches) / 144;
+  return (() => {
+    switch (unit) {
+      case 'sqft': return Math.round(price * sqft);
+      default: throw new Error('unsupported unit');
+    }
+  })();
+};
+
 module.exports = {
   Self: {
     __resolveType: x => x.type.charAt(0).toUpperCase() + x.type.slice(1),
@@ -100,6 +110,21 @@ module.exports = {
         .map(id => tools.read.standard('installer', id)))),
 
     installer: (_, { id }, { tools }) => tools.read.standard('installer', id),
+
+    windowPrice: async (_, args, { tools }) => {
+      const { materialId, widthInches, heightInches } = args;
+      const { price, unit } = await tools.read.standard('material', materialId);
+      return calcWindow({ price, unit, widthInches, heightInches });
+    },
+
+    windowsPrice: async (_, { windows }, { tools }) => {
+      const { read: { standard } } = tools;
+      return Promise.all(windows.map(async (w) => {
+        const { materialId, widthInches, heightInches } = w;
+        const { price, unit } = standard('material', materialId);
+        return calcWindow({ price, unit, widthInches, heightInches });
+      }));
+    },
   },
 
   Mutation: {
