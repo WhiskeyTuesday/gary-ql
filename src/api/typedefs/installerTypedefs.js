@@ -4,7 +4,6 @@ module.exports = gql`
   type Installer {
     id: ID!
     profile: InstallerProfile!
-    settings: InstallerSettings!
     assignments: [Job]!
   }
 
@@ -12,10 +11,8 @@ module.exports = gql`
     id: ID!
     firstName: String!
     lastName: String!
-  }
-
-  type InstallerSettings {
-    placeholder: Boolean!
+    emailAddress: String!
+    phoneNumber: String!
   }
 
   extend type Mutation {

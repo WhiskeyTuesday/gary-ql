@@ -23,12 +23,7 @@ module.exports = gql`
     staffSelf: Staff
   }
 
-  input StaffSettingsInput {
-    placeholder: Boolean
-  }
-
   extend type Mutation {
-    staffChangeSettings(settings: StaffSettingsInput!): String
     assignSalesAgent(leadId: ID!, salesAgentId: ID!): String
     unassignSalesAgent(jobId: ID!): String
     assignInstallers(jobId: ID!, installerIds: [ID]!): String

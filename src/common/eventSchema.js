@@ -199,11 +199,6 @@ module.exports = {
     hadTokenAssociated: eventData({ token }),
     wasAssociatedToUser: eventData({ userId: uuid }),
 
-    changedSettings: eventData({
-      contactPhoneNumber: phoneNumberNorthAmerica,
-      contactEmailAddress: Joi.string().email().required(),
-    }),
-
     wasDeactivated: eventData({ memo }), // TODO
     wasReactivated: eventData({ memo }), // TODO
 

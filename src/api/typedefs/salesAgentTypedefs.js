@@ -4,7 +4,6 @@ module.exports = gql`
   type SalesAgent {
     id: ID!
     profile: SalesAgentProfile!
-    settings: SalesAgentSettings!
     leads: [Lead]!
     jobs: [Job]!
     allLeads: [Lead]!
@@ -15,10 +14,8 @@ module.exports = gql`
     id: ID!
     firstName: String!
     lastName: String!
-  }
-
-  type SalesAgentSettings {
-    placeholder: Boolean!
+    emailAddress: String!
+    phoneNumber: String!
   }
 
   extend type Mutation {

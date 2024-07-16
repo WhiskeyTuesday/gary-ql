@@ -88,15 +88,10 @@ module.exports = {
         phoneNumber: event.data.phoneNumber,
       },
 
-      settings: {},
     }),
 
     hadTokenAssociated: event => ({
       token: event.data.token,
-    }),
-
-    changedSettings: event => ({
-      settings: event.data,
     }),
 
     wasinactive: () => ({ status: 'inactive' }),
@@ -122,16 +117,10 @@ module.exports = {
         emailAddress: event.data.emailAddress,
         phoneNumber: event.data.phoneNumber,
       },
-
-      settings: {},
     }),
 
     hadTokenAssociated: event => ({
       token: event.data.token,
-    }),
-
-    changedSettings: event => ({
-      settings: event.data,
     }),
 
     wasEdited: event => ({

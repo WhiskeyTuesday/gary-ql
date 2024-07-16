@@ -4,7 +4,6 @@ module.exports = gql`
   type Admin {
     id: ID!
     profile: AdminProfile!
-    settings: AdminSettings!
     leads: [Lead]!
     jobs: [Job]!
   }
@@ -15,10 +14,6 @@ module.exports = gql`
     lastName: String!
     emailAddress: String!
     phoneNumber: String!
-  }
-
-  type AdminSettings {
-    placeholder: Boolean!
   }
 
   input StaffInput {

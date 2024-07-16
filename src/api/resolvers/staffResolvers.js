@@ -30,16 +30,6 @@ module.exports = {
   },
 
   Mutation: {
-    staffChangeSettings: async (_, { settings }, { actor, tools }) => (
-      tools.write({
-        event: {
-          key: `staff:${actor.id}`,
-          type: 'changedSettings',
-          data: { ...settings },
-        },
-      })
-    ),
-
     assignSalesAgent: async (_, { leadId, salesAgentId }, { tools }) => {
       const { isUUID } = tools;
       assert(isUUID(leadId), 'target leadId is invalid.');
