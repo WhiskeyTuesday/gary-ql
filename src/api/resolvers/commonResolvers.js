@@ -13,7 +13,7 @@ const calcWindow = ({ price, unit, widthInches, heightInches }) => {
   return (() => {
     switch (unit) {
       case 'sqft': return Math.round(price * sqft);
-      default: throw new Error('unsupported unit');
+      default: throw new Error(`unsupported unit: ${unit}`);
     }
   })();
 };
@@ -111,9 +111,12 @@ module.exports = {
 
     installer: (_, { id }, { tools }) => tools.read.standard('installer', id),
 
-    windowPrice: async (_, args, { tools }) => {
-      const { materialId, widthInches, heightInches } = args;
-      const { price, unit } = await tools.read.standard('material', materialId);
+    windowPrice: async (_, { window }, { tools }) => {
+      const { read: { standard } } = tools;
+      const { materialId, widthInches, heightInches } = window;
+      assert(tools.isUUID(materialId));
+      const { price, unit } = await standard('material', materialId);
+      assert(price && unit, 'material not found');
       return calcWindow({ price, unit, widthInches, heightInches });
     },
 
@@ -121,7 +124,9 @@ module.exports = {
       const { read: { standard } } = tools;
       return Promise.all(windows.map(async (w) => {
         const { materialId, widthInches, heightInches } = w;
-        const { price, unit } = standard('material', materialId);
+        assert(tools.isUUID(materialId));
+        const { price, unit } = await standard('material', materialId);
+        assert(price && unit, 'material not found');
         return calcWindow({ price, unit, widthInches, heightInches });
       }));
     },

@@ -21,7 +21,7 @@ module.exports = gql`
     installers: [Installer]
     installer(id: ID!): Installer
     windowPrice(window: WindowPriceInput!): Int!
-    windowsPrice(windows: [WindowPriceInput]!): Int!
+    windowsPrice(windows: [WindowPriceInput]!): [Int]!
     proposalPreview(jobId: ID! stageIds: [ID]!): Proposal
   }
 
