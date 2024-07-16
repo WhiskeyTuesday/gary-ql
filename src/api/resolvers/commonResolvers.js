@@ -92,6 +92,12 @@ module.exports = {
 
     proposal: (_, { id }, { tools }) => tools.read.standard('proposal', id),
 
+    admins: (_, __, { tools }) => tools.read.cache.list('admin')
+      .then(ids => Promise.all(ids
+        .map(id => tools.read.standard('admin', id)))),
+
+    admin: (_, { id }, { tools }) => tools.read.standard('admin', id),
+
     salesAgents: (_, __, { tools }) => tools.read.cache.list('salesAgent')
       .then(ids => Promise.all(ids
         .map(id => tools.read.standard('salesAgent', id)))),
