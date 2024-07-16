@@ -66,6 +66,7 @@ module.exports = gql`
 
   type Material {
     id: ID!
+    status: String!
     name: String!
     price: CurrencyAmount!
     unit: String!

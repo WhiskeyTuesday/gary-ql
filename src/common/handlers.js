@@ -84,6 +84,8 @@ module.exports = {
         id: event.data.id,
         lastName: event.data.lastName,
         firstName: event.data.firstName,
+        emailAddress: event.data.emailAddress,
+        phoneNumber: event.data.phoneNumber,
       },
 
       settings: {},
@@ -117,8 +119,8 @@ module.exports = {
         id: event.data.id,
         lastName: event.data.lastName,
         firstName: event.data.firstName,
-        emailAdress: event.data.emailAdress,
-        phoneNumber: event.data.phoneNumber
+        emailAddress: event.data.emailAddress,
+        phoneNumber: event.data.phoneNumber,
       },
 
       settings: {},
@@ -136,7 +138,7 @@ module.exports = {
       profile: {
         firstName: event.data.firstName,
         lastName: event.data.lastName,
-        emailAdress: event.data.emailAdress,
+        emailAddress: event.data.emailAddress,
         phoneNumber: event.data.phoneNumber,
       },
     }),
@@ -216,7 +218,7 @@ module.exports = {
       status: 'active',
       firstName: event.data.firstName,
       lastName: event.data.lastName,
-      email: event.data.email,
+      emailAddress: event.data.emailAddress,
       phoneNumber: event.data.phoneNumber,
       assignments: [],
     }),

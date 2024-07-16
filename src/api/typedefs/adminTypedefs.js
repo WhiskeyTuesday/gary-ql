@@ -13,6 +13,8 @@ module.exports = gql`
     id: ID!
     firstName: String!
     lastName: String!
+    emailAddress: String!
+    phoneNumber: String!
   }
 
   type AdminSettings {
