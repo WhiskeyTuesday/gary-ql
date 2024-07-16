@@ -1,18 +1,12 @@
 const gql = require('graphql-tag');
 
 module.exports = gql`
-  type StaffSettings {
-    contactPhoneNumber: String
-    contactEmailAddress: String
-  }
-
   type Staff {
     id: ID!
     userId: ID!
     token: Token!
     status: String!
     profile: StaffProfile!
-    settings: StaffSettings!
     leads: [Lead]!
     jobs: [Job]!
   }
@@ -21,6 +15,8 @@ module.exports = gql`
     id: ID!
     firstName: String!
     lastName: String!
+    emailAddress: String!
+    phoneNumber: String!
   }
 
   extend type Query {
