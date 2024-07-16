@@ -123,8 +123,9 @@ module.exports = {
       token: event.data.token,
     }),
 
-    wasEdited: event => ({
+    wasEdited: (event, state) => ({
       profile: {
+        id: state.profile.id,
         firstName: event.data.firstName,
         lastName: event.data.lastName,
         emailAddress: event.data.emailAddress,
@@ -140,21 +141,27 @@ module.exports = {
     wasCreated: event => ({
       id: event.data.id,
       status: 'active',
-      firstName: event.data.firstName,
-      lastName: event.data.lastName,
-      email: event.data.email,
-      phoneNumber: event.data.phoneNumber,
+      profile: {
+        id: event.data.id,
+        firstName: event.data.firstName,
+        lastName: event.data.lastName,
+        emailAddress: event.data.emailAddress,
+        phoneNumber: event.data.phoneNumber,
+      },
       jobs: [],
       leads: [],
       allJobs: [],
       allLeads: [],
     }),
 
-    wasEdited: event => ({
-      firstName: event.data.firstName,
-      lastName: event.data.lastName,
-      email: event.data.email,
-      phoneNumber: event.data.phoneNumber,
+    wasEdited: (event, state) => ({
+      profile: {
+        id: state.profile.id,
+        firstName: event.data.firstName,
+        lastName: event.data.lastName,
+        emailAddress: event.data.emailAddress,
+        phoneNumber: event.data.phoneNumber,
+      },
     }),
 
     hadTokenAssociated: () => ({}),
@@ -205,18 +212,24 @@ module.exports = {
     wasCreated: event => ({
       id: event.data.id,
       status: 'active',
-      firstName: event.data.firstName,
-      lastName: event.data.lastName,
-      emailAddress: event.data.emailAddress,
-      phoneNumber: event.data.phoneNumber,
+      profile: {
+        id: event.data.id,
+        firstName: event.data.firstName,
+        lastName: event.data.lastName,
+        emailAddress: event.data.emailAddress,
+        phoneNumber: event.data.phoneNumber,
+      },
       assignments: [],
     }),
 
-    wasEdited: event => ({
-      firstName: event.data.firstName,
-      lastName: event.data.lastName,
-      email: event.data.email,
-      phoneNumber: event.data.phoneNumber,
+    wasEdited: (event, state) => ({
+      profile: {
+        id: state.profile.id,
+        firstName: event.data.firstName,
+        lastName: event.data.lastName,
+        emailAddress: event.data.emailAddress,
+        phoneNumber: event.data.phoneNumber,
+      },
     }),
 
     hadTokenAssociated: () => ({}),
