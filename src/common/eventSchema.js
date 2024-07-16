@@ -135,6 +135,25 @@ const newJob = eventData({
   memo: memo.optional(),
 });
 
+const customerDetails = {
+  isTaxExempt: Joi.boolean().required(),
+  taxDetails: Joi.string().optional(),
+
+  firstName: Joi.string().optional(),
+  lastName: Joi.string().optional(),
+  businessName: Joi.string().optional(),
+  contactName: Joi.string().optional(),
+
+  emailAddress: Joi.string().email().required(),
+  phoneNumber: phoneNumberNorthAmerica.required(),
+
+  referralType: Joi.string()
+    .valid('SERP', 'SOCIAL', 'FRIEND', 'OTHER').optional(),
+  referralDetails: Joi.string().optional(),
+
+  memo: memo.optional(),
+};
+
 module.exports = {
   referralCode: {
     wasCreated: eventData({ code: referralCode, userId: uuid }),
@@ -257,36 +276,10 @@ module.exports = {
   customer: {
     wasCreated: eventData({
       id: uuid,
-
-      isTaxExempt: Joi.boolean().required(),
-      taxDetails: Joi.string().optional(),
-
-      firstName: Joi.string().optional(),
-      lastName: Joi.string().optional(),
-      businessName: Joi.string().optional(),
-      contactName: Joi.string().optional(),
-
-      emailAddress: Joi.string().email().required(),
-      phoneNumber: phoneNumberNorthAmerica.required(),
-
-      referralType: Joi.string()
-        .valid('SERP', 'SOCIAL', 'FRIEND', 'OTHER').optional(),
-      referralDetails: Joi.string().optional(),
-
-      memo: memo.optional(),
+      ...customerDetails,
     }),
 
-    wasModified: eventData({
-      isTaxExempt: Joi.boolean().required(),
-      firstName: Joi.string().optional(),
-      lastName: Joi.string().optional(),
-      businessName: Joi.string().optional(),
-      contactName: Joi.string().optional(),
-      emailAddress: Joi.string().email().required(),
-      phoneNumber: phoneNumberNorthAmerica,
-
-      memo: memo.optional(),
-    }),
+    wasModified: eventData(customerDetails),
 
     wasDeactivated: eventData({ memo }),
     wasReactivated: eventData({ memo }),

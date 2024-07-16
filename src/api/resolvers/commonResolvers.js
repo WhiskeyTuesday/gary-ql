@@ -54,7 +54,7 @@ module.exports = {
       .then(ids => Promise.all(ids
         .map(id => tools.read.standard('customer', id)))
         .then(customers => customers
-          .sort((a, b) => a.modifiedTime - b.modifiedTime))),
+          .sort((a, b) => b.modifiedTime - a.modifiedTime))),
 
     customer: (_, { id }, { tools }) => tools.read.standard('customer', id),
 
@@ -62,7 +62,7 @@ module.exports = {
       .then(ids => Promise.all(ids
         .map(id => tools.read.standard('lead', id)))
         .then(leads => leads
-          .sort((a, b) => a.modifiedTime - b.modifiedTime))),
+          .sort((a, b) => b.modifiedTime - a.modifiedTime))),
 
     lead: (_, { id }, { tools }) => tools.read.standard('lead', id),
 
@@ -70,7 +70,7 @@ module.exports = {
       .then(ids => Promise.all(ids
         .map(id => tools.read.standard('job', id)))
         .then(jobs => jobs
-          .sort((a, b) => a.modifiedTime - b.modifiedTime))),
+          .sort((a, b) => b.modifiedTime - a.modifiedTime))),
 
     job: (_, { id }, { tools }) => tools.read.standard('job', id),
 
@@ -78,7 +78,7 @@ module.exports = {
       .then(ids => Promise.all(ids
         .map(id => tools.read.standard('proposal', id)))
         .then(proposals => proposals
-          .sort((a, b) => a.modifiedTime - b.modifiedTime))),
+          .sort((a, b) => b.modifiedTime - a.modifiedTime))),
 
     proposal: (_, { id }, { tools }) => tools.read.standard('proposal', id),
 
