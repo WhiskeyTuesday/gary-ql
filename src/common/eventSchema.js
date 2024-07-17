@@ -130,10 +130,9 @@ const customerDetails = {
   isTaxExempt: Joi.boolean().required(),
   taxDetails: Joi.string().optional(),
 
-  firstName: Joi.string().optional(),
-  lastName: Joi.string().optional(),
+  firstName: Joi.string().required(),
+  lastName: Joi.string().required(),
   businessName: Joi.string().optional(),
-  contactName: Joi.string().optional(),
 
   emailAddress: Joi.string().email().required(),
   phoneNumber: phoneNumberNorthAmerica.required(),

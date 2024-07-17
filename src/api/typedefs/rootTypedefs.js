@@ -51,9 +51,12 @@ module.exports = gql`
 
   type Customer {
     id: ID!
-    name: String!
     addresses: [Address]!
-    contactName: String!
+
+    firstName: String!
+    lastName: String!
+    businessName: String
+
     phoneNumber: String!
     emailAddress: String!
     jobs: [Job]!

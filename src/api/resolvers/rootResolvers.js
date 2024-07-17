@@ -18,13 +18,6 @@ module.exports = {
   },
 
   Customer: {
-    name: (customer) => {
-      const { firstName, lastName, businessName } = customer;
-      return firstName
-        ? `${firstName} ${lastName}`
-        : businessName;
-    },
-
     leads: async ({ leads }, _, { tools }) => (await Promise.all(
       leads.map(l => tools.read.standard('lead', l)),
     )).sort((a, b) => b.modifiedTime - a.modifiedTime),
@@ -32,13 +25,6 @@ module.exports = {
     jobs: async ({ jobs }, _, { tools }) => (await Promise.all(
       jobs.map(j => tools.read.standard('job', j)),
     )).sort((a, b) => b.modifiedTime - a.modifiedTime),
-
-    contactName: (customer) => {
-      const { firstName, lastName, contactName } = customer;
-      return firstName
-        ? `${firstName} ${lastName}`
-        : contactName;
-    },
 
     phoneNumber: ({ phoneNumber }) => phoneNumber
       .slice(2) // remove +1 (US country code)

@@ -43,7 +43,6 @@ const customerDetails = event => ({
   firstName: event.data.firstName,
   lastName: event.data.lastName,
   businessName: event.data.businessName,
-  contactName: event.data.contactName,
   emailAddress: event.data.emailAddress,
   phoneNumber: event.data.phoneNumber,
   isTaxExempt: event.data.isTaxExempt,
