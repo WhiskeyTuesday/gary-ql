@@ -18,6 +18,20 @@ const calcWindow = ({ price, unit, widthInches, heightInches }) => {
   })();
 };
 
+const parseCustomerNames = (details) => {
+  const { firstName, lastName, businessName } = details;
+  const contactName = businessName
+    ? `${firstName} ${lastName}`
+    : undefined;
+
+  return {
+    firstName: businessName ? undefined : firstName,
+    lastName: businessName ? undefined : lastName,
+    businessName,
+    contactName,
+  };
+};
+
 module.exports = {
   Self: {
     __resolveType: x => x.type.charAt(0).toUpperCase() + x.type.slice(1),
@@ -291,25 +305,22 @@ module.exports = {
     createCustomer: async (_, { details }, { tools }) => {
       const customerId = tools.uuidv4();
 
-      const { firstName, lastName, businessName } = details;
-      const contactName = businessName ? `${firstName} ${lastName}` : undefined;
-      const names = {
-        firstName: businessName ? undefined : firstName,
-        lastName: businessName ? undefined : lastName,
-        businessName,
-        contactName,
-      };
-
-      const { phoneNumber, emailAddress } = details;
-      const { isTaxExempt, taxDetails, memo } = details;
-      const { referralType, referralDetails } = details;
+      const {
+        phoneNumber,
+        emailAddress,
+        isTaxExempt,
+        taxDetails,
+        referralType,
+        referralDetails,
+        memo,
+      } = details;
 
       const event = {
         key: `customer:${customerId}`,
         type: 'wasCreated',
         data: {
           id: customerId,
-          ...names,
+          ...parseCustomerNames(details),
           phoneNumber,
           emailAddress,
           isTaxExempt,
@@ -330,10 +341,30 @@ module.exports = {
       const exists = await tools.read.exists(`customer:${id}`);
       assert(exists, 'customer not found');
 
+      const {
+        phoneNumber,
+        emailAddress,
+        isTaxExempt,
+        taxDetails,
+        referralType,
+        referralDetails,
+        memo,
+      } = details;
+
       const event = {
         key: `customer:${id}`,
         type: 'wasModified',
-        data: details,
+        data: {
+          ...parseCustomerNames(details),
+          phoneNumber,
+          emailAddress,
+          isTaxExempt,
+          taxDetails,
+          referralType,
+          referralDetails,
+
+          memo,
+        },
       };
 
       return tools.write({ event });
