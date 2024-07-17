@@ -19,7 +19,7 @@ const token = Joi.object().keys({
   sub: Joi.string().required(), // TODO uuid or whatever firebase does?
 }).required();
 
-const currencyCode = Joi.string().valid('usd', 'cad').required();
+const currencyCode = Joi.string().valid('USD', 'CAD').required();
 const currencyAmount = Joi.number().integer().min(0).required();
 
 const provinceCodes = [
@@ -93,8 +93,8 @@ const windowType = Joi.string().valid(
 ).required();
 
 const materialUnit = Joi.string().valid(
-  'sqft',
-  'sqm',
+  'SQ_FT',
+  'SQM',
 ).required();
 
 const jobStage = Joi.object().keys({
@@ -426,5 +426,15 @@ module.exports = {
       price: Joi.number().integer().min(1).required(),
       currencyCode,
     }),
+
+    wasModified: eventData({
+      name: Joi.string().optional(),
+      unit: materialUnit.optional(),
+      price: Joi.number().integer().min(1).optional(),
+      currencyCode: currencyCode.optional(),
+    }),
+
+    wasDeprecated: eventData({ memo: memo.optional() }),
+    wasReinstated: eventData({ memo: memo.optional() }),
   },
 };

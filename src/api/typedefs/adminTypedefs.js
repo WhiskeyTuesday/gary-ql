@@ -54,25 +54,26 @@ module.exports = gql`
     currencyCode: CurrencyCode!
   }
 
+  # TODO respond with the actual aggregate for optemistic UI
   extend type Mutation {
-    createMaterial(details: MaterialInput!): ID!
-    editMaterial(details: MaterialInput!): ID!
-    deprecateMaterial(id: ID!): Boolean!
-    reinstateMaterial(id: ID!): Boolean!
+    createMaterial(id: ID! details: MaterialInput!): String!
+    editMaterial(id: ID! details: MaterialInput!): String!
+    deprecateMaterial(id: ID!): String!
+    reinstateMaterial(id: ID!): String!
 
-    createStaff(details: StaffInput!): ID!
-    editStaff(id: ID! details: StaffInput!): Boolean!
-    deactivateStaff(id: ID!): Boolean!
-    reactivateStaff(id: ID!): Boolean!
+    createStaff(details: StaffInput!): String!
+    editStaff(id: ID! details: StaffInput!): String!
+    deactivateStaff(id: ID!): String!
+    reactivateStaff(id: ID!): String!
 
-    createSalesAgent(details: SalesAgentInput!): ID!
-    editSalesAgent(id: ID! details: SalesAgentInput!): Boolean!
-    deactivateSalesAgent(id: ID!): Boolean!
-    reactivateSalesAgent(id: ID!): Boolean!
+    createSalesAgent(details: SalesAgentInput!): String!
+    editSalesAgent(id: ID! details: SalesAgentInput!): String!
+    deactivateSalesAgent(id: ID!): String!
+    reactivateSalesAgent(id: ID!): String!
 
-    createInstaller(details: InstallerInput!): ID!
-    editInstaller(id: ID! details: InstallerInput!): Boolean!
-    deactivateInstaller(id: ID!): Boolean!
-    reactivateInstaller(id: ID!): Boolean!
+    createInstaller(details: InstallerInput!): String!
+    editInstaller(id: ID! details: InstallerInput!): String!
+    deactivateInstaller(id: ID!): String!
+    reactivateInstaller(id: ID!): String!
   }
 `;

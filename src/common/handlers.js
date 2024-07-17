@@ -504,7 +504,7 @@ module.exports = {
       status: 'deprecated',
     }),
 
-    reinstateMaterial: () => ({
+    wasReinstated: () => ({
       status: 'active',
     }),
   },

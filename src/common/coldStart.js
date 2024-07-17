@@ -149,7 +149,7 @@ module.exports = async (databases, implementationConfig) => {
           key: `material:${id}`,
           type: 'wasCreated',
           metadata: { actor: systemAgent },
-          data: { id, name, price: 100, unit: 'sqft', currencyCode: 'usd' },
+          data: { id, name, price: 100, unit: 'SQ_FT', currencyCode: 'USD' },
         };
       }),
     ];

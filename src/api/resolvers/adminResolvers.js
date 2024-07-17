@@ -22,12 +22,11 @@ module.exports = {
       return materialId;
     },
 
-    editMaterial: async (_, { details }, { tools }) => {
-      const { id, ...rest } = details;
+    editMaterial: async (_, { id, details }, { tools }) => {
       const event = {
         key: `material:${id}`,
-        type: 'wasEdited',
-        data: rest,
+        type: 'wasModified',
+        data: details,
       };
 
       const response = await tools.write({ event });
@@ -38,6 +37,8 @@ module.exports = {
     deprecateMaterial: async (_, { id }, { tools }) => {
       const material = await tools.read.standard('material', id);
       if (!material) { throw new Error('material not found'); }
+
+      if (material.status === 'deprecated') { return 'OK'; }
 
       const event = {
         key: `material:${id}`,
@@ -51,6 +52,7 @@ module.exports = {
     reinstateMaterial: async (_, { id }, { tools }) => {
       const material = await tools.read.standard('material', id);
       if (!material) { throw new Error('material not found'); }
+      if (material.status === 'active') { return 'OK'; }
 
       const event = {
         key: `material:${id}`,
