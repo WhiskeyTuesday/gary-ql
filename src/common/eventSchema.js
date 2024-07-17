@@ -57,27 +57,18 @@ const countryCode = Joi.string().valid( // ISO 3166-1 alpha-2
   'ca', // Canada
 ).required();
 
-const addressObject = Joi.object().keys({
+const addressObject = {
   lineOne: Joi.string().required(), // TODO format, length
   lineTwo: Joi.string().optional(), // TODO format, length
   city: Joi.string().required(), // TODO format, length
   state: stateCode,
-  // TODO: valid US zip, zip+4, or valid Canadian postal code
-  // the regex prevents any spaces (including leading/trailing)
   postalCode: Joi.string().lowercase().max(10).pattern(/^\S+$/).required(),
   country: countryCode,
-}).required();
+};
 
 const addressObjectWithId = Joi.object().keys({
   id: uuid,
-  lineOne: Joi.string().required(), // TODO format, length
-  lineTwo: Joi.string().optional(), // TODO format, length
-  city: Joi.string().required(), // TODO format, length
-  state: stateCode,
-  // TODO: valid US zip, zip+4, or valid Canadian postal code
-  // the regex prevents any spaces (including leading/trailing)
-  postalCode: Joi.string().lowercase().max(10).pattern(/^\S+$/).required(),
-  country: countryCode,
+  ...addressObject,
 }).required();
 
 const glassType = Joi.string().valid(

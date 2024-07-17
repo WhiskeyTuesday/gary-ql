@@ -136,6 +136,128 @@ module.exports = {
         return calcWindow({ price, unit, widthInches, heightInches });
       }));
     },
+
+    proposalPreview: async (_, { jobId, stageIds }, { tools }) => {
+      const emptyProposal = {
+        films: {},
+        stages: [],
+        subtotal: 0,
+        taxAmount: 0,
+        total: 0,
+      };
+
+      if (stageIds.length === 0) { return emptyProposal; }
+
+      const { read: { standard } } = tools;
+      assert(tools.isUUID(jobId));
+      const job = await standard('job', jobId);
+      assert(job, 'job not found');
+      const stages = job.stages.filter(s => stageIds.includes(s.id));
+      assert(stages.length === stageIds.length, 'stage not found');
+
+      const filmDetails = async (filmId) => {
+        assert(tools.isUUID(filmId));
+        const { price, unit } = await standard('material', filmId);
+        assert(price && unit, 'material not found');
+        return { price, unit };
+      };
+
+      const films = await Promise.all(job.films.map(filmDetails));
+
+      const stageProposal = (stage) => {
+        const windows = stage.windows.map((window) => {
+          const { status: _, filmId, ...rest } = window;
+          assert(films.find(f => f.id === filmId), 'film not found');
+
+          const {
+            price: filmPrice,
+            name: filmName,
+            unit,
+          } = films.find(f => f.id === filmId);
+
+          const price = calcWindow({
+            price: filmPrice,
+            unit,
+            widthInches: rest.width,
+            heightInches: rest.height,
+          });
+
+          return {
+            sqft: (rest.width * rest.height) / 144,
+            lnft: (rest.width + rest.height) * 2,
+            filmName,
+            filmId,
+            price,
+          };
+        });
+
+        const filmsUsed = windows.reduce((acc, window) => {
+          if (!acc[window.filmName]) {
+            acc[window.filmName] = {
+              sqft: 0,
+              lnft: 0,
+              priceTotal: 0,
+              filmId: window.filmId,
+            };
+          }
+
+          acc[window.filmName].sqft += window.sqft;
+          acc[window.filmName].lnft += window.lnft;
+          acc[window.filmName].priceTotal += window.price;
+
+          return acc;
+        }, {});
+
+        const subtotal = Object.values(filmsUsed)
+          .reduce((acc, { priceTotal }) => acc + priceTotal, 0);
+
+        return {
+          windows,
+          films: filmsUsed,
+          subtotal,
+        };
+      };
+
+      const stageProposals = stages.map(stageProposal);
+
+      const filmsUsed = stageProposals.reduce((acc, { films: stageFilms }) => {
+        Object.entries(stageFilms)
+          .forEach(([filmName, { sqft, lnft, priceTotal }]) => {
+            if (!acc[filmName]) {
+              acc[filmName] = {
+                sqft: 0,
+                lnft: 0,
+                priceTotal: 0,
+                filmId: stageFilms[filmName].filmId,
+              };
+            }
+
+            acc[filmName].sqft += sqft;
+            acc[filmName].lnft += lnft;
+            acc[filmName].priceTotal += priceTotal;
+          });
+
+        return acc;
+      }, {});
+
+      const subtotal = Object.values(filmsUsed)
+        .reduce((acc, { priceTotal }) => acc + priceTotal, 0);
+
+      const customer = await standard('customer', job.customerId);
+      const { isTaxExempt } = customer;
+      const taxAmount = Math.round(subtotal * 0.0825);
+      const total = subtotal + (isTaxExempt ? 0 : taxAmount);
+
+      const jobProposal = {
+        films: filmsUsed,
+        stages: stageProposals,
+        subtotal,
+        taxAmount,
+        total,
+      };
+
+      return jobProposal;
+    },
   },
 
   Mutation: {
