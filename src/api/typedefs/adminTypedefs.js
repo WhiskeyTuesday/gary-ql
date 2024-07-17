@@ -63,10 +63,10 @@ module.exports = gql`
 
   # TODO respond with the actual aggregate for optemistic UI
   extend type Mutation {
-    createMaterial(details: MaterialInput!): String!
-    editMaterial(id: ID! details: MaterialInput!): String!
-    deprecateMaterial(id: ID!): String!
-    reinstateMaterial(id: ID!): String!
+    createMaterial(details: MaterialInput!): Material
+    editMaterial(id: ID! details: MaterialInput!): Material
+    deprecateMaterial(id: ID!): Material
+    reinstateMaterial(id: ID!): Material
 
     createAdmin(details: AdminInput!): String!
     editAdmin(id: ID! details: AdminInput!): String!
