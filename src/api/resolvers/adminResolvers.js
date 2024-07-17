@@ -23,6 +23,9 @@ module.exports = {
     },
 
     editMaterial: async (_, { id, details }, { tools }) => {
+      assert(tools.isUUID(id), 'target id is invalid');
+      const materialExists = await tools.read.exists(`material:${id}`);
+      assert(materialExists, 'material not found');
       const event = {
         key: `material:${id}`,
         type: 'wasModified',
@@ -35,6 +38,7 @@ module.exports = {
     },
 
     deprecateMaterial: async (_, { id }, { tools }) => {
+      assert(tools.isUUID(id), 'target id is invalid');
       const material = await tools.read.standard('material', id);
       if (!material) { throw new Error('material not found'); }
 
@@ -50,6 +54,7 @@ module.exports = {
     },
 
     reinstateMaterial: async (_, { id }, { tools }) => {
+      assert(tools.isUUID(id), 'target id is invalid');
       const material = await tools.read.standard('material', id);
       if (!material) { throw new Error('material not found'); }
       if (material.status === 'active') { return 'OK'; }
@@ -61,6 +66,68 @@ module.exports = {
       };
 
       return tools.write({ event });
+    },
+
+    createAdmin: async (_, { memo, details }, { tools }) => {
+      const adminId = tools.uuidv4();
+      const event = {
+        key: `admin:${adminId}`,
+        type: 'wasCreated',
+        data: {
+          memo,
+          id: adminId,
+          ...details,
+        },
+      };
+
+      const response = await tools.write({ event });
+      assert(response === 'OK', 'write failed');
+      return adminId;
+    },
+
+    editAdmin: async (_, { id, details }, { tools }) => {
+      assert(tools.isUUID(id), 'target id is invalid');
+      const admin = await tools.read.exists(`admin:${id}`);
+      if (!admin) { throw new Error('admin not found'); }
+
+      const event = {
+        key: `admin:${id}`,
+        type: 'wasEdited',
+        data: details,
+      };
+
+      return tools.write({ event });
+    },
+
+    deactivateAdmin: async (_, { id, memo }, { tools, actor }) => {
+      if (!tools.isUUID(id)) { throw new Error('target id is invalid.'); }
+      const admin = await tools.read.standard('admin', id);
+      if (!admin) { throw new Error('admin not found'); }
+
+      if (actor.id === id) { throw new Error('cannot deactivate self'); }
+
+      if (admin.status === 'deactivated') { return 'OK'; }
+      return tools.write({
+        event: {
+          key: `admin:${id}`,
+          type: 'wasDeactivated',
+          data: { memo },
+        },
+      });
+    },
+
+    reactivateAdmin: async (_, { id, memo }, { tools }) => {
+      if (!tools.isUUID(id)) { throw new Error('target id is invalid.'); }
+      const admin = await tools.read.standard('admin', id);
+      if (!admin) { throw new Error('admin not found'); }
+      if (admin.status === 'active') { return 'OK'; }
+      return tools.write({
+        event: {
+          key: `admin:${id}`,
+          type: 'wasReactivated',
+          data: { memo },
+        },
+      });
     },
 
     createStaff: async (_, { memo, details }, { tools }) => {
@@ -81,6 +148,7 @@ module.exports = {
     },
 
     editStaff: async (_, { id, details }, { tools }) => {
+      assert(tools.isUUID(id), 'target id is invalid');
       const staff = await tools.read.standard('staff', id);
       if (!staff) { throw new Error('staff not found'); }
 
@@ -93,12 +161,14 @@ module.exports = {
       return tools.write({ event });
     },
 
-    deactivateStaff: (_, { staffId, memo }, { tools }) => {
-      const { isUUID } = tools;
-      if (!isUUID(staffId)) { throw new Error('target staffId is invalid.'); }
+    deactivateStaff: (_, { id, memo }, { tools }) => {
+      assert(tools.isUUID(id), 'target id is invalid');
+      const staff = tools.read.standard('staff', id);
+      assert(staff, 'staff not found');
+      if (staff.status === 'deactivated') { return 'OK'; }
 
       const event = {
-        key: `staff:${staffId}`,
+        key: `staff:${id}`,
         type: 'wasDeactivated',
         data: { memo },
       };
@@ -106,12 +176,14 @@ module.exports = {
       return tools.write({ event });
     },
 
-    reactivateStaff: (_, { staffId, memo }, { tools }) => {
-      const { isUUID } = tools;
-      if (!isUUID(staffId)) { throw new Error('target staffId is invalid.'); }
+    reactivateStaff: (_, { id, memo }, { tools }) => {
+      assert(tools.isUUID(id), 'target id is invalid');
+      const staff = tools.read.standard('staff', id);
+      assert(staff, 'staff not found');
+      if (staff.status === 'active') { return 'OK'; }
 
       const event = {
-        key: `staff:${staffId}`,
+        key: `staff:${id}`,
         type: 'wasReactivated',
         data: { memo },
       };
@@ -141,12 +213,13 @@ module.exports = {
       return agentId;
     },
 
-    editSalesAgent: async (_, { salesAgentId, details }, { tools }) => {
-      const agent = await tools.read.standard('salesAgent', salesAgentId);
+    editSalesAgent: async (_, { id, details }, { tools }) => {
+      assert(tools.isUUID(id), 'target id is invalid');
+      const agent = await tools.read.standard('salesAgent', id);
       if (!agent) { throw new Error('agent not found'); }
 
       const event = {
-        key: `salesAgent:${salesAgentId}`,
+        key: `salesAgent:${id}`,
         type: 'wasEdited',
         data: details,
       };
@@ -154,30 +227,28 @@ module.exports = {
       return tools.write({ event });
     },
 
-    deactivateSalesAgent: async (_, { salesAgentId, memo }, { tools }) => {
-      const { isUUID } = tools;
-      if (!isUUID(salesAgentId)) { throw new Error('target id is invalid.'); }
-      const agent = await tools.read.standard('salesAgent', salesAgentId);
+    deactivateSalesAgent: async (_, { id, memo }, { tools }) => {
+      assert(tools.isUUID(id), 'target id is invalid');
+      const agent = await tools.read.standard('salesAgent', id);
       if (!agent) { throw new Error('agent not found'); }
-      assert(agent.status === 'active', 'agent is already deactivated');
+      if (agent.status === 'deactivated') { return 'OK'; }
       return tools.write({
         event: {
-          key: `salesAgent:${salesAgentId}`,
+          key: `salesAgent:${id}`,
           type: 'wasDeactivated',
           data: { memo },
         },
       });
     },
 
-    reactivateSalesAgent: async (_, { salesAgentId, memo }, { tools }) => {
-      const { isUUID } = tools;
-      if (!isUUID(salesAgentId)) { throw new Error('target id is invalid.'); }
-      const agent = await tools.read.standard('salesAgent', salesAgentId);
+    reactivateSalesAgent: async (_, { id, memo }, { tools }) => {
+      assert(tools.isUUID(id), 'target id is invalid');
+      const agent = await tools.read.standard('salesAgent', id);
       if (!agent) { throw new Error('agent not found'); }
-      assert(agent.status === 'deactivated', 'agent is already active');
+      if (agent.status === 'active') { return 'OK'; }
       return tools.write({
         event: {
-          key: `salesAgent:${salesAgentId}`,
+          key: `salesAgent:${id}`,
           type: 'wasReactivated',
           data: { memo },
         },
@@ -206,12 +277,13 @@ module.exports = {
       return installerId;
     },
 
-    editInstaller: async (_, { installerId, details }, { tools }) => {
-      const installer = await tools.read.standard('installer', installerId);
+    editInstaller: async (_, { id, details }, { tools }) => {
+      assert(tools.isUUID(id), 'target id is invalid');
+      const installer = await tools.read.standard('installer', id);
       if (!installer) { throw new Error('installer not found'); }
 
       const event = {
-        key: `installer:${installerId}`,
+        key: `installer:${id}`,
         type: 'wasEdited',
         data: details,
       };
@@ -219,30 +291,28 @@ module.exports = {
       return tools.write({ event });
     },
 
-    deactivateInstaller: async (_, { installerId, memo }, { tools }) => {
-      const { isUUID } = tools;
-      if (!isUUID(installerId)) { throw new Error('target id is invalid.'); }
-      const installer = await tools.read.standard('installer', installerId);
+    deactivateInstaller: async (_, { id, memo }, { tools }) => {
+      assert(tools.isUUID(id), 'target id is invalid');
+      const installer = await tools.read.standard('installer', id);
       if (!installer) { throw new Error('installer not found'); }
-      assert(installer.status === 'active', 'installer is already deactivated');
+      if (installer.status === 'deactivated') { return 'OK'; }
       return tools.write({
         event: {
-          key: `installer:${installerId}`,
+          key: `installer:${id}`,
           type: 'wasDeactivated',
           data: { memo },
         },
       });
     },
 
-    reactivateInstaller: async (_, { installerId, memo }, { tools }) => {
-      const { isUUID } = tools;
-      if (!isUUID(installerId)) { throw new Error('target id is invalid.'); }
-      const installer = await tools.read.standard('installer', installerId);
+    reactivateInstaller: async (_, { id, memo }, { tools }) => {
+      assert(tools.isUUID(id), 'target id is invalid');
+      const installer = await tools.read.standard('installer', id);
       if (!installer) { throw new Error('installer not found'); }
-      assert(installer.status === 'deactivated', 'installer is already active');
+      if (installer.status === 'active') { return 'OK'; }
       return tools.write({
         event: {
-          key: `installer:${installerId}`,
+          key: `installer:${id}`,
           type: 'wasReactivated',
           data: { memo },
         },

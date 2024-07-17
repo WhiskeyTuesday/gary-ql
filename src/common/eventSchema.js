@@ -152,7 +152,6 @@ module.exports = {
   superuser: {
     wasCreated: eventData({ memo, token, id: uuid, simulation: Joi.boolean() }),
     hadTokenAssociated: eventData({ token }),
-    createdStaff: eventData({ id: uuid, memo }),
   },
 
   admin: {
@@ -165,6 +164,18 @@ module.exports = {
     }),
 
     hadTokenAssociated: eventData({ token }),
+
+    wasEdited: eventData({
+      memo: memo.optional(),
+
+      firstName: Joi.string().max(50).required(),
+      lastName: Joi.string().max(50).required(),
+      emailAddress: Joi.string().email().required(),
+      phoneNumber: phoneNumberNorthAmerica,
+    }),
+
+    wasDeactivated: eventData({ memo: memo.optional() }),
+    wasReactivated: eventData({ memo: memo.optional() }),
   },
 
   staff: {
@@ -189,8 +200,8 @@ module.exports = {
     hadTokenAssociated: eventData({ token }),
     wasAssociatedToUser: eventData({ userId: uuid }),
 
-    wasDeactivated: eventData({ memo }), // TODO
-    wasReactivated: eventData({ memo }), // TODO
+    wasDeactivated: eventData({ memo: memo.optional() }),
+    wasReactivated: eventData({ memo: memo.optional() }),
 
     createdStaff: eventData({ id: uuid, memo }),
     deactivatedStaff: eventData({ id: uuid, memo }),
@@ -218,8 +229,8 @@ module.exports = {
     }),
 
     hadTokenAssociated: eventData({ token }),
-    wasDeactivated: eventData({ memo }),
-    wasReactivated: eventData({ memo }),
+    wasDeactivated: eventData({ memo: memo.optional() }),
+    wasReactivated: eventData({ memo: memo.optional() }),
 
     wasAssignedLead: eventData({ leadId: uuid }),
     createdJob: eventData({ jobId: uuid }),
@@ -249,8 +260,8 @@ module.exports = {
     }),
 
     hadTokenAssociated: eventData({ token }),
-    wasDeactivated: eventData({ memo }),
-    wasReactivated: eventData({ memo }),
+    wasDeactivated: eventData({ memo: memo.optional() }),
+    wasReactivated: eventData({ memo: memo.optional() }),
 
     wasAssignedJob: eventData({ jobId: uuid }),
     wasUnassignedJob: eventData({ jobId: uuid }),
@@ -265,8 +276,8 @@ module.exports = {
 
     wasModified: eventData(customerDetails),
 
-    wasDeactivated: eventData({ memo }),
-    wasReactivated: eventData({ memo }),
+    wasDeactivated: eventData({ memo: memo.optional() }),
+    wasReactivated: eventData({ memo: memo.optional() }),
 
     hadAddressAdded: eventData({ address: addressObjectWithId }),
     hadAddressDeprecated: eventData({ addressId: uuid }),

@@ -13,13 +13,6 @@ module.exports = gql`
     admin(id: ID!): Admin
   }
 
-  input AdminInput {
-    firstName: String!
-    lastName: String!
-    email: String!
-    password: String!
-  }
-
   extend type Mutation {
     suCreateStaff(memo: String!, details: StaffInput!): ID
     suCreateAdmin(memo: String!, details: AdminInput!): ID

@@ -17,6 +17,13 @@ module.exports = gql`
     phoneNumber: String!
   }
 
+  input AdminInput {
+    firstName: String!
+    lastName: String!
+    emailAddress: String!
+    phoneNumber: String!
+  }
+
   input StaffInput {
     firstName: String!
     lastName: String!
@@ -60,6 +67,11 @@ module.exports = gql`
     editMaterial(id: ID! details: MaterialInput!): String!
     deprecateMaterial(id: ID!): String!
     reinstateMaterial(id: ID!): String!
+
+    createAdmin(details: AdminInput!): String!
+    editAdmin(id: ID! details: AdminInput!): String!
+    deactivateAdmin(id: ID!): String!
+    reactivateAdmin(id: ID!): String!
 
     createStaff(details: StaffInput!): String!
     editStaff(id: ID! details: StaffInput!): String!

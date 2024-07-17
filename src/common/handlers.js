@@ -89,11 +89,21 @@ module.exports = {
 
     }),
 
+    wasEdited: (event, state) => ({
+      profile: {
+        id: state.profile.id,
+        firstName: event.data.firstName,
+        lastName: event.data.lastName,
+        emailAddress: event.data.emailAddress,
+        phoneNumber: event.data.phoneNumber,
+      },
+    }),
+
     hadTokenAssociated: event => ({
       token: event.data.token,
     }),
 
-    wasinactive: () => ({ status: 'inactive' }),
+    wasDeactivated: () => ({ status: 'inactive' }),
     wasReactivated: () => ({ status: 'active' }),
 
     createdStaff: () => ({}),
