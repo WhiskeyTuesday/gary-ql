@@ -252,9 +252,21 @@ module.exports = {
         films: filmsUsed,
         stages: stageProposals,
         subtotal,
+        isTaxExempt,
         taxAmount,
         total,
       };
+
+      // ensure that if this proposal was real it would be valid
+      const { error } = tools.schemae.events.proposal.wasCreated({
+        id: tools.uuidv4(),
+        jobId,
+        salesAgentId: job.salesAgentId,
+
+        ...jobProposal,
+      });
+
+      if (error) { throw new Error('invalid proposal error'); }
 
       return jobProposal;
     },
