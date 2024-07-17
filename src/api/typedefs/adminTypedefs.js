@@ -68,24 +68,24 @@ module.exports = gql`
     deprecateMaterial(id: ID!): Material
     reinstateMaterial(id: ID!): Material
 
-    createAdmin(details: AdminInput!): String!
-    editAdmin(id: ID! details: AdminInput!): String!
-    deactivateAdmin(id: ID!): String!
-    reactivateAdmin(id: ID!): String!
+    createAdmin(details: AdminInput!): Admin
+    editAdmin(id: ID! details: AdminInput!): Admin
+    deactivateAdmin(id: ID!): Admin
+    reactivateAdmin(id: ID!): Admin
 
-    createStaff(details: StaffInput!): String!
-    editStaff(id: ID! details: StaffInput!): String!
-    deactivateStaff(id: ID!): String!
-    reactivateStaff(id: ID!): String!
+    createStaff(details: StaffInput!): Staff
+    editStaff(id: ID! details: StaffInput!): Staff
+    deactivateStaff(id: ID!): Staff
+    reactivateStaff(id: ID!): Staff
 
-    createSalesAgent(details: SalesAgentInput!): String!
-    editSalesAgent(id: ID! details: SalesAgentInput!): String!
-    deactivateSalesAgent(id: ID!): String!
-    reactivateSalesAgent(id: ID!): String!
+    createSalesAgent(details: SalesAgentInput!): SalesAgent
+    editSalesAgent(id: ID! details: SalesAgentInput!): SalesAgent
+    deactivateSalesAgent(id: ID!): SalesAgent
+    reactivateSalesAgent(id: ID!): SalesAgent
 
-    createInstaller(details: InstallerInput!): String!
-    editInstaller(id: ID! details: InstallerInput!): String!
-    deactivateInstaller(id: ID!): String!
-    reactivateInstaller(id: ID!): String!
+    createInstaller(details: InstallerInput!): Installer
+    editInstaller(id: ID! details: InstallerInput!): Installer
+    deactivateInstaller(id: ID!): Installer
+    reactivateInstaller(id: ID!): Installer
   }
 `;

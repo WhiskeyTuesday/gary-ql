@@ -161,6 +161,8 @@ module.exports = {
       lastName: Joi.string().max(50).required(),
       emailAddress: Joi.string().email().required(),
       phoneNumber: phoneNumberNorthAmerica,
+
+      memo: memo.optional(),
     }),
 
     hadTokenAssociated: eventData({ token }),
@@ -180,12 +182,13 @@ module.exports = {
 
   staff: {
     wasCreated: eventData({
-      memo: memo.optional(),
       id: uuid,
       firstName: Joi.string().max(50).required(),
       lastName: Joi.string().max(50).required(),
       emailAddress: Joi.string().email().required(),
       phoneNumber: phoneNumberNorthAmerica,
+
+      memo: memo.optional(),
     }),
 
     wasEdited: eventData({
