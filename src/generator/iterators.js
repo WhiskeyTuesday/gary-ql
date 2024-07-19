@@ -606,9 +606,9 @@ module.exports = [
           const sqft = (w.width * w.height) / 144;
 
           switch (material.unit) {
-            case 'sqft': return Math.round(material.price * sqft);
-            case 'sqm': return Math.round(material.price * sqft * 10.7639);
-            default: throw new Error('Unknown unit');
+            case 'SQ_FT': return Math.round(material.price * sqft);
+            case 'SQ_M': return Math.round(material.price * sqft * 10.7639);
+            default: throw new Error(`Unknown unit ${material.unit}`);
           }
         };
 
