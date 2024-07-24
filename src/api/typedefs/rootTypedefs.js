@@ -85,6 +85,7 @@ module.exports = gql`
     job: Job!
 
     salesAgent: SalesAgent
+    notes: String
   }
 
   type JobStage {

@@ -307,6 +307,8 @@ module.exports = {
       visitTimestamp: false,
       createdTime: event.timestamp,
       modifiedTime: event.timestamp,
+
+      notes: event.data.memo || '',
     }),
 
     hadSalesAgentAssigned: event => ({
