@@ -36,6 +36,11 @@ module.exports = {
       'customer',
       lead.customerId,
     ),
+
+    salesAgent: async (lead, _, { tools }) => tools.read.standard(
+      'salesAgent',
+      lead.salesAgentId,
+    ),
   },
 
   Job: {

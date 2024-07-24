@@ -83,6 +83,8 @@ module.exports = gql`
     visitTimestamp: Int!
     customer: Customer!
     job: Job!
+
+    salesAgent: SalesAgent
   }
 
   type JobStage {
