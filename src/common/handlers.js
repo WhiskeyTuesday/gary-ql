@@ -275,14 +275,18 @@ module.exports = {
     wasReactivated: () => ({ status: 'active' }),
 
     hadAddressAdded: (event, state) => ({
-      addresses: state.addresses.concat(event.data.address),
       modifiedTime: event.timestamp,
+      addresses: state.addresses.concat({
+        ...event.data.address,
+        isActive: true,
+      }),
     }),
 
     hadAddressDeprecated: (event, state) => ({
       modifiedTime: event.timestamp,
-      addresses: state.addresses
-        .filter(address => address.id !== event.data.id),
+      addresses: state.addresses.map(address => address.id === event.data.id
+        ? ({ ...address, isActive: false })
+        : address),
     }),
 
     hadLeadCreated: (event, state) => ({

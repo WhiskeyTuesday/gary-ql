@@ -40,6 +40,7 @@ module.exports = gql`
     city: String!
     state: String!
     postalCode: String!
+    isActive: Boolean!
   }
 
   enum ReferralType {
