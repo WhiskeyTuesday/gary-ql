@@ -75,7 +75,7 @@ module.exports = {
   FilmProposal: {
     film: async (root, _, { tools }) => tools.read.standard(
       'material',
-      root.filmId,
+      root.id,
     ),
   },
 

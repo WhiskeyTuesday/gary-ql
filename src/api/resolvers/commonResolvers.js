@@ -12,7 +12,7 @@ const calcWindow = ({ price, unit, widthInches, heightInches }) => {
   const sqft = (widthInches * heightInches) / 144;
   return (() => {
     switch (unit) {
-      case 'sqft': return Math.round(price * sqft);
+      case 'SQ_FT': return Math.round(price * sqft);
       default: throw new Error(`unsupported unit: ${unit}`);
     }
   })();
@@ -137,7 +137,7 @@ module.exports = {
       }));
     },
 
-    proposalPreview: async (_, { jobId }, { tools }) => {
+    proposalPreview: async (_, { jobId }, { tools, schemae }) => {
       const emptyProposal = {
         films: {},
         stages: [],
@@ -156,35 +156,42 @@ module.exports = {
 
       const filmDetails = async (filmId) => {
         assert(tools.isUUID(filmId));
-        const { price, unit } = await standard('material', filmId);
-        assert(price && unit, 'material not found');
-        return { price, unit };
+        const { price, unit, id, name } = await standard('material', filmId);
+        assert(price && unit && id && name, 'material not found');
+        return { price, unit, id, name };
       };
 
-      if (job.films.length === 0) { return emptyProposal; }
-      const films = await Promise.all(job.films.map(filmDetails));
+      if (job.materials.length === 0) { return emptyProposal; }
+      const films = await Promise.all(job.materials.map(filmDetails));
 
       const stageProposal = (stage) => {
         const windows = stage.windows.map((window) => {
-          const { status: _, filmId, ...rest } = window;
-          assert(films.find(f => f.id === filmId), 'film not found');
-
           const {
-            price: filmPrice,
-            name: filmName,
-            unit,
-          } = films.find(f => f.id === filmId);
+            status: _,
+            filmId,
+            width,
+            height,
+            ...rest
+          } = window;
+
+          const film = films.find(f => f.id === filmId);
+          assert(film, 'film not found');
+
+          const { price: filmPrice, name: filmName, unit } = film;
 
           const price = calcWindow({
             price: filmPrice,
             unit,
-            widthInches: rest.width,
-            heightInches: rest.height,
+            widthInches: width,
+            heightInches: height,
           });
 
           return {
-            sqft: (rest.width * rest.height) / 144,
-            lnft: (rest.width + rest.height) * 2,
+            ...rest,
+            sqft: Math.round((width * height) / 144),
+            lnft: (width + height) * 2,
+            width,
+            height,
             filmName,
             filmId,
             price,
@@ -248,9 +255,20 @@ module.exports = {
       const taxAmount = Math.round(subtotal * 0.0825);
       const total = subtotal + (isTaxExempt ? 0 : taxAmount);
 
+      const filmsToArray = films => Object.entries(films).map(([k, v]) => {
+        const { filmId: id, ...rest } = v;
+        return {
+          name: k,
+          id,
+          ...rest,
+        };
+      });
+
       const jobProposal = {
-        stages: stageProposals,
-        films: filmsUsed,
+        stages: stageProposals
+          .map(s => ({ ...s, films: filmsToArray(s.films) })),
+
+        films: filmsToArray(filmsUsed),
         isTaxExempt,
         taxAmount,
         subtotal,
@@ -258,7 +276,7 @@ module.exports = {
       };
 
       // ensure that if this proposal was real it would be valid
-      const { error } = tools.schemae.events.proposal.wasCreated({
+      const { error } = schemae.events.proposal.wasCreated.validate({
         id: tools.uuidv4(),
         jobId,
         salesAgentId: job.salesAgentId,
@@ -266,7 +284,10 @@ module.exports = {
         ...jobProposal,
       });
 
-      if (error) { throw new Error('invalid proposal error'); }
+      if (error) {
+        console.error(error);
+        throw new Error('invalid proposal error');
+      }
 
       return jobProposal;
     },

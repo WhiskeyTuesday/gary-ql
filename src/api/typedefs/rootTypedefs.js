@@ -167,9 +167,9 @@ module.exports = gql`
     films: [FilmProposal]!
     stages: [StageProposal]!
     isTaxExempt: Boolean!
-    taxAmount: CurrencyAmount!
-    subtotal: CurrencyAmount!
-    total: CurrencyAmount!
+    taxAmount: Int!
+    subtotal: Int!
+    total: Int!
   }
 
   type Proposal {
@@ -179,9 +179,9 @@ module.exports = gql`
     films: [FilmProposal]!
     stages: [StageProposal]!
     isTaxExempt: Boolean!
-    taxAmount: CurrencyAmount!
-    subtotal: CurrencyAmount!
-    total: CurrencyAmount!
+    taxAmount: Int!
+    subtotal: Int!
+    total: Int!
   }
 
   type Query {
