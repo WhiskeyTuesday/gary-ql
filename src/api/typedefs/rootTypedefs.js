@@ -142,13 +142,45 @@ module.exports = gql`
     height: Int!
   }
 
+  type FilmProposal {
+    sqFt: Int!
+    lnFt: Int!
+    priceTotal: Int!
+    film: Material!
+  }
+
+  type WindowProposal {
+    sqFt: Int!
+    lnFt: Int!
+    filmName: String!
+    film: Material!
+    price: Int!
+  }
+
+  type StageProposal {
+    windows: [WindowProposal]!
+    films: [FilmProposal]!
+    subtotal: Int!
+  }
+
+  type ProposalPreview {
+    films: [FilmProposal]!
+    stages: [StageProposal]!
+    isTaxExempt: Boolean!
+    taxAmount: CurrencyAmount!
+    subtotal: CurrencyAmount!
+    total: CurrencyAmount!
+  }
+
   type Proposal {
     id: ID!
-    jobId: ID!
-    stageIds: [ID!]!
-    windows: [Window!]!
-    subtotal: CurrencyAmount!
+    job: Job!
+    salesAgent: SalesAgent!
+    films: [FilmProposal]!
+    stages: [StageProposal]!
+    isTaxExempt: Boolean!
     taxAmount: CurrencyAmount!
+    subtotal: CurrencyAmount!
     total: CurrencyAmount!
   }
 
@@ -179,6 +211,8 @@ module.exports = gql`
     addressId: ID!
     customerId: ID!
     isTaxExempt: Boolean!
+
+    memo: String
   }
 
   input CustomerInput {

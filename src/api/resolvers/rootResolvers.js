@@ -72,6 +72,32 @@ module.exports = {
     ),
   },
 
+  FilmProposal: {
+    film: async (root, _, { tools }) => tools.read.standard(
+      'material',
+      root.filmId,
+    ),
+  },
+
+  WindowProposal: {
+    film: async (root, _, { tools }) => tools.read.standard(
+      'material',
+      root.filmId,
+    ),
+  },
+
+  Proposal: {
+    job: async (root, _, { tools }) => tools.read.standard(
+      'job',
+      root.jobId,
+    ),
+
+    salesAgent: async (root, _, { tools }) => tools.read.standard(
+      'salesAgent',
+      root.salesAgentId,
+    ),
+  },
+
   Query: {
     time: (_, __, { clock }) => clock.now().toString(),
   },

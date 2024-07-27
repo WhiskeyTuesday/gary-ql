@@ -137,7 +137,7 @@ module.exports = {
       }));
     },
 
-    proposalPreview: async (_, { jobId, stageIds }, { tools }) => {
+    proposalPreview: async (_, { jobId }, { tools }) => {
       const emptyProposal = {
         films: {},
         stages: [],
@@ -146,14 +146,13 @@ module.exports = {
         total: 0,
       };
 
-      if (stageIds.length === 0) { return emptyProposal; }
 
       const { read: { standard } } = tools;
       assert(tools.isUUID(jobId));
       const job = await standard('job', jobId);
       assert(job, 'job not found');
-      const stages = job.stages.filter(s => stageIds.includes(s.id));
-      assert(stages.length === stageIds.length, 'stage not found');
+      const { stages } = job;
+      if (stages.length === 0) { return emptyProposal; }
 
       const filmDetails = async (filmId) => {
         assert(tools.isUUID(filmId));
@@ -162,6 +161,7 @@ module.exports = {
         return { price, unit };
       };
 
+      if (job.films.length === 0) { return emptyProposal; }
       const films = await Promise.all(job.films.map(filmDetails));
 
       const stageProposal = (stage) => {
@@ -249,11 +249,11 @@ module.exports = {
       const total = subtotal + (isTaxExempt ? 0 : taxAmount);
 
       const jobProposal = {
-        films: filmsUsed,
         stages: stageProposals,
-        subtotal,
+        films: filmsUsed,
         isTaxExempt,
         taxAmount,
+        subtotal,
         total,
       };
 
