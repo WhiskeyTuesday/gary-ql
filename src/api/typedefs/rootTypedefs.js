@@ -143,21 +143,23 @@ module.exports = gql`
   }
 
   type FilmProposal {
-    sqFt: Int!
-    lnFt: Int!
+    sqft: Int!
+    lnft: Int!
     priceTotal: Int!
     film: Material!
   }
 
   type WindowProposal {
-    sqFt: Int!
-    lnFt: Int!
+    id: ID!
+    sqft: Int!
+    lnft: Int!
     filmName: String!
     film: Material!
     price: Int!
   }
 
   type StageProposal {
+    id: ID!
     windows: [WindowProposal]!
     films: [FilmProposal]!
     subtotal: Int!

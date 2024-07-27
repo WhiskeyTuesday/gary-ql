@@ -219,6 +219,7 @@ module.exports = {
           .reduce((acc, { priceTotal }) => acc + priceTotal, 0);
 
         return {
+          id: stage.id,
           windows,
           films: filmsUsed,
           subtotal,
@@ -289,6 +290,7 @@ module.exports = {
         throw new Error('invalid proposal error');
       }
 
+      console.log(jobProposal);
       return jobProposal;
     },
   },

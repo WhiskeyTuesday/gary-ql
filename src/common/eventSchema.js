@@ -375,6 +375,7 @@ module.exports = {
       })).required(),
 
       stages: Joi.array().items(Joi.object().keys({
+        id: uuid,
         films: Joi.array().items(Joi.object().keys({
           id: uuid,
           name: Joi.string().required(),
