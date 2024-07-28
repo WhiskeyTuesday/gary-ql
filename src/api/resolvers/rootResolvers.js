@@ -37,10 +37,12 @@ module.exports = {
       lead.customerId,
     ),
 
-    salesAgent: async (lead, _, { tools }) => tools.read.standard(
-      'salesAgent',
-      lead.salesAgentId,
-    ),
+    salesAgent: async (lead, _, { tools }) => lead.salesAgentId
+      ? tools.read.standard(
+        'salesAgent',
+        lead.salesAgentId,
+      )
+      : undefined,
   },
 
   Job: {
