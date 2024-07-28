@@ -281,13 +281,21 @@ module.exports = [
       const customers = await Promise.all((await cache.list('customer'))
         .map(id => cache.entry('customer', id)));
 
-      const noAddress = customers.filter(c => !c.addresses.length);
-
       const admins = await cache.list('admin');
       if (!admins.length) throw new Error('No admin found');
       const aid = ctx.faker.helpers.arrayElement(admins);
 
-      const noAddressEvents = noAddress.map(c => ({
+      const noAddress = customers.filter(c => !c.addresses.length);
+      const withAddress = customers.filter(c => c.addresses.length);
+
+      const toAdd = [
+        ...noAddress,
+        ...withAddress.map(
+          (c) => (ctx.faker.number.int({ min: 1, max: 100 }) > 98) ? c : [],
+        ),
+      ].flat();
+
+      return toAdd.map(c => ({
         key: `customer:${c.id}`,
         type: 'hadAddressAdded',
         metadata: { actor: { type: 'admin', id: aid } },
@@ -302,11 +310,6 @@ module.exports = [
           },
         },
       }));
-
-      // TODO add events probabalistically on customers that
-      // already have addresses.
-
-      return noAddressEvents;
     },
   },
   {
@@ -645,9 +648,10 @@ module.exports = [
           .reduce((acc, f) => acc + f.priceTotal, 0);
 
         return {
+          id: s.id,
           windows,
-          films: Object.entries(films).map(([id, f]) => ({ id, ...f })),
           subtotal,
+          films: Object.entries(films).map(([id, f]) => ({ id, ...f })),
         };
       };
 
