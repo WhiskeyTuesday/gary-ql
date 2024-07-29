@@ -78,6 +78,7 @@ module.exports = gql`
 
   type Lead {
     id: ID!
+    addressId: ID!
     status: String!
     createdTime: Int!
     modifiedTime: Int!
