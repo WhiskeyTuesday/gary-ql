@@ -299,16 +299,129 @@ module.exports = {
     trackLead: async (_, { details }, { tools }) => {
       const leadId = tools.uuidv4();
 
-      const event = {
-        key: `lead:${leadId}`,
-        type: 'wasCreated',
-        data: {
-          id: leadId,
-          ...details,
+      const { salesAgentId, ...rest } = details;
+
+      const events = [
+        {
+          key: `lead:${leadId}`,
+          type: 'wasCreated',
+          data: {
+            id: leadId,
+            ...rest,
+          },
         },
+        ...salesAgentId ? [
+          {
+            key: `lead:${leadId}`,
+            type: 'hadSalesAgentAssigned',
+            data: { agentId: salesAgentId },
+          },
+          {
+            key: `salesAgent:${salesAgentId}`,
+            type: 'wasAssignedLead',
+            data: { leadId },
+          },
+        ] : [],
+      ];
+
+      const response = await tools.write({ events });
+      if (response !== 'OK') {
+        throw new Error('failed to write');
+      }
+
+      return tools.read.aggregateFromDatabase({
+        type: 'lead',
+        id: leadId,
+      });
+    },
+
+    editLead: async (
+      _,
+      { id, salesAgentId, visitTimestamp, notes },
+      { tools },
+    ) => {
+      assert(tools.isUUID(id), 'target id is invalid.');
+      const exists = await tools.read.exists(`lead:${id}`);
+      assert(exists, 'lead not found');
+
+      const lead = await tools.read.standard('lead', id);
+
+      const existingAgentId = lead.salesAgentId;
+      const salesAgentEvents = salesAgentId && salesAgentId !== existingAgentId
+        ? [
+            {
+              key: `lead:${id}`,
+              type: 'hadSalesAgentAssigned',
+              data: { agentId: salesAgentId },
+            },
+            {
+              key: `salesAgent:${salesAgentId}`,
+              type: 'wasAssignedLead',
+              data: { leadId: id },
+            },
+            ...existingAgentId ? [{
+              key: `salesAgent:${lead.salesAgentId}`,
+              type: 'wasUnassignedLead',
+              data: { leadId: id },
+            }] : [],
+        ]
+        : [];
+
+      const existingNotes = lead.notes;
+      const noteEvent = notes && notes.trim() !== existingNotes
+        ? [{
+          key: `lead:${id}`,
+          type: 'hadMemoEdited',
+          data: { memo: notes },
+        }]
+        : [];
+
+      const existingTimestamp = lead.visitTimestamp;
+      const timeEvent = visitTimestamp && visitTimestamp !== existingTimestamp
+        ? [{
+          key: `lead:${id}`,
+          type: 'hadVisitScheduled',
+          data: { visitTimestamp },
+        }]
+        : [];
+
+      const events = [
+        ...salesAgentEvents,
+        ...timeEvent,
+        ...noteEvent,
+      ];
+
+      const response = await tools.write({ events });
+      if (response !== 'OK') {
+        throw new Error('failed to write');
+      }
+
+      return tools.read.aggregateFromDatabase({
+        type: 'lead',
+        id,
+      });
+    },
+
+    rejectLead: async (_, { id }, { tools }) => {
+      assert(tools.isUUID(id), 'target id is invalid.');
+      const exists = await tools.read.exists(`lead:${id}`);
+      assert(exists, 'lead not found');
+
+      const event = {
+        key: `lead:${id}`,
+        type: 'wasRejected',
+        data: {},
       };
 
-      return tools.write({ event });
+      const response = await tools.write({ event });
+      if (response !== 'OK') {
+        throw new Error('failed to write');
+      }
+
+      return tools.read.aggregateFromDatabase({
+        type: 'lead',
+        id,
+      });
     },
 
     createCustomer: async (_, { details }, { tools }) => {

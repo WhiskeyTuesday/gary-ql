@@ -236,6 +236,7 @@ module.exports = {
     wasReactivated: eventData({ memo: memo.optional() }),
 
     wasAssignedLead: eventData({ leadId: uuid }),
+    wasUnassignedLead: eventData({ leadId: uuid }),
     createdJob: eventData({ jobId: uuid }),
     wasAssignedJob: eventData({ jobId: uuid }),
     wasUnassignedJob: eventData({ jobId: uuid }),
@@ -300,6 +301,8 @@ module.exports = {
 
       memo: memo.optional(),
     }),
+
+    hadMemoEdited: eventData({ memo }),
 
     hadSalesAgentAssigned: eventData({
       agentId: uuid,

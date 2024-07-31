@@ -185,6 +185,14 @@ module.exports = {
       allLeads: state.allLeads.concat(event.data.leadId),
     }),
 
+    wasUnassignedLead: (event, state) => ({
+      leads: state.leads
+        .filter(lead => lead.id !== event.data.leadId),
+
+      allLeads: state.allLeads
+        .filter(leadId => leadId !== event.data.leadId),
+    }),
+
     createdJob: (event, state) => ({
       jobs: state.jobs
         .filter(job => !isOld(job, event))
@@ -327,6 +335,11 @@ module.exports = {
       modifiedTime: event.timestamp,
 
       notes: event.data.memo || '',
+    }),
+
+    hadMemoEdited: (event, state) => ({
+      modifiedTime: event.timestamp,
+      notes: event.data.memo,
     }),
 
     hadSalesAgentAssigned: event => ({

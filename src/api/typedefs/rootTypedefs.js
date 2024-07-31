@@ -215,6 +215,7 @@ module.exports = gql`
     customerId: ID!
     isTaxExempt: Boolean!
 
+    salesAgentId: ID
     memo: String
   }
 
