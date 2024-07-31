@@ -61,7 +61,9 @@ module.exports = gql`
     createCustomer(details: CustomerInput!): String
     editCustomer(id: ID!, details: CustomerInput!): String
     addAddress(customerId: ID!, address: AddressInput!): String
+    editAddress(customerId: ID!, addressId: ID! address: AddressInput!): String
     deprecateAddress(customerId: ID!, addressId: ID!): String
+    reinstateAddress(customerId: ID!, addressId: ID!): String
     createJobDirect(details: JobInput!): String
     convertLead(leadId: ID!, details: JobInput!): String
     modifyJob(id: ID! details: JobInput!): String

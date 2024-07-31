@@ -37,7 +37,10 @@ module.exports = {
 
       const response = await tools.write({ event });
       assert(response === 'OK', 'write failed');
-      return tools.read.standard('material', id);
+      return tools.read.aggregateFromDatabase({
+        type: 'material',
+        id,
+      });
     },
 
     deprecateMaterial: async (_, { id }, { tools }) => {

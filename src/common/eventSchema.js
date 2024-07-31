@@ -283,7 +283,9 @@ module.exports = {
     wasReactivated: eventData({ memo: memo.optional() }),
 
     hadAddressAdded: eventData({ address: addressObjectWithId }),
+    hadAddressEdited: eventData({ address: addressObjectWithId }),
     hadAddressDeprecated: eventData({ addressId: uuid }),
+    hadAddressReinstated: eventData({ addressId: uuid }),
 
     hadLeadCreated: eventData({ leadId: uuid }),
     hadJobCreated: eventData({ jobId: uuid }),

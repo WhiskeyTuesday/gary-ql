@@ -282,10 +282,24 @@ module.exports = {
       }),
     }),
 
+    hadAddressEdited: (event, state) => ({
+      modifiedTime: event.timestamp,
+      addresses: state.addresses
+        .filter(a => a.id !== event.data.address.id)
+        .concat({ ...event.data.address, isActive: true }),
+    }),
+
     hadAddressDeprecated: (event, state) => ({
       modifiedTime: event.timestamp,
       addresses: state.addresses.map(address => address.id === event.data.id
         ? ({ ...address, isActive: false })
+        : address),
+    }),
+
+    hadAddressReinstated: (event, state) => ({
+      modifiedTime: event.timestamp,
+      addresses: state.addresses.map(address => address.id === event.data.id
+        ? ({ ...address, isActive: true })
         : address),
     }),
 

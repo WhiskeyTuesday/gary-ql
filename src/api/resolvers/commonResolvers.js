@@ -349,12 +349,39 @@ module.exports = {
       const customer = await tools.read.standard('customer', customerId);
       assert(customer, 'customer not found');
 
-      const locationId = tools.uuidv4();
+      const id = tools.uuidv4();
 
       const event = {
         key: `customer:${customerId}`,
         type: 'hadAddressAdded',
-        data: { id: locationId, ...address },
+        data: { address: { id, ...address, country: 'us' } },
+      };
+
+      return tools.write({ event });
+    },
+
+    editAddress: async (_, { customerId, addressId, address }, { tools }) => {
+      const { isUUID } = tools;
+      assert(isUUID(customerId), 'target customerId is invalid.');
+      assert(isUUID(addressId), 'target addressId is invalid.');
+
+      const customer = await tools.read.standard('customer', customerId);
+      assert(customer, 'customer not found');
+      assert(
+        customer.addresses.find(a => a.id === addressId),
+        'address not found',
+      );
+
+      const event = {
+        key: `customer:${customerId}`,
+        type: 'hadAddressEdited',
+        data: {
+          address: {
+            id: addressId,
+            ...address,
+            country: 'us',
+          },
+        },
       };
 
       return tools.write({ event });
@@ -375,6 +402,27 @@ module.exports = {
       const event = {
         key: `customer:${customerId}`,
         type: 'hadAddressDeprecated',
+        data: { id: addressId },
+      };
+
+      return tools.write({ event });
+    },
+
+    reinstateAddress: async (_, { customerId, addressId }, { tools }) => {
+      const { isUUID } = tools;
+      assert(isUUID(customerId), 'target customerId is invalid.');
+      assert(isUUID(addressId), 'target addressId is invalid.');
+
+      const customer = await tools.read.standard('customer', customerId);
+      assert(customer, 'customer not found');
+      assert(
+        customer.addresses.find(a => a.id === addressId),
+        'address not found',
+      );
+
+      const event = {
+        key: `customer:${customerId}`,
+        type: 'hadAddressReinstated',
         data: { id: addressId },
       };
 
