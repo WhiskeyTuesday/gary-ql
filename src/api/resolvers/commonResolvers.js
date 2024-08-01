@@ -381,7 +381,7 @@ module.exports = {
         ? [{
           key: `lead:${id}`,
           type: 'hadVisitScheduled',
-          data: { visitTimestamp },
+          data: { scheduledTimestamp: visitTimestamp },
         }]
         : [];
 
