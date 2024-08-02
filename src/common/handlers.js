@@ -360,10 +360,10 @@ module.exports = {
       convertedMemo: event.data.memo,
     }),
 
-    wasDropped: event => ({
-      status: 'dropped',
+    wasRejected: event => ({
+      status: 'rejected',
       modifiedTime: event.timestamp,
-      droppedMemo: event.data.memo,
+      rejectedMemo: event.data.memo,
     }),
 
     wasExpired: event => ({

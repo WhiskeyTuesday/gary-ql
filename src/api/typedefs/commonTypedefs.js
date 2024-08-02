@@ -59,7 +59,7 @@ module.exports = gql`
   extend type Mutation {
     trackLead(details: LeadInput!): Lead
     editLead(id: ID! salesAgentId: ID visitTimestamp: Int notes: String): Lead
-    rejectLead(Id: ID!): Lead
+    markLeadRejected(id: ID!): Lead
     createCustomer(details: CustomerInput!): String
     editCustomer(id: ID!, details: CustomerInput!): String
     addAddress(customerId: ID!, address: AddressInput!): String

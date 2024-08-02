@@ -318,7 +318,7 @@ module.exports = {
       memo: memo.optional(),
     }),
 
-    wasDropped: eventData({
+    wasRejected: eventData({
       memo: memo.optional(),
     }),
 

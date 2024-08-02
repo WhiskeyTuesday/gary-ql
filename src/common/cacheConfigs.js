@@ -12,7 +12,7 @@ const configs = [
   {
     name: 'dropped_leads',
     conditionFn: x => [
-      'dropped',
+      'rejected',
       'expired',
     ].includes(x.status),
     aggregateTypes: ['lead'],

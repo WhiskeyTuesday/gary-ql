@@ -402,7 +402,7 @@ module.exports = {
       });
     },
 
-    rejectLead: async (_, { id }, { tools }) => {
+    markLeadRejected: async (_, { id }, { tools }) => {
       assert(tools.isUUID(id), 'target id is invalid.');
       const exists = await tools.read.exists(`lead:${id}`);
       assert(exists, 'lead not found');
