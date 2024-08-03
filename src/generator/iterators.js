@@ -479,6 +479,32 @@ module.exports = [
     },
   },
   {
+    name: 'create-draft-jobs',
+    firstInstance: [2, 'days'],
+    type: 'simple',
+    period: [17, 'minutes'],
+    function: async ({ ctx, cache }) => {
+      // should really be from leads
+      // but I'm just going to q&d it for now
+      // select a random customer (with an address)
+      // select a random address
+      // select a random sales agent
+      // select a random admin
+      // create a job (with no details)
+      //
+      // it should be... from a lead though
+      // we... have no...
+      // way to convert from draft to... initial though
+      // so I'd have to add a button or... what I should
+      // really do is change... uhh the requirements for
+      // create to make all the fields optional or something
+      // and then... validate completion before sending
+      // proposals or something
+
+      return [];
+    },
+  },
+  {
     name: 'create-jobs',
     firstInstance: [2, 'days'],
     type: 'simple',
@@ -538,8 +564,15 @@ module.exports = [
               isTaxExempt,
               customerId,
               addressId,
-              materials: filmTypes,
-              stages: (() => {
+              materials: [],
+              stages: [{
+                id: ctx.faker.string.uuid(),
+                windows: [],
+
+                memo: 'generator',
+              }],
+              // materials: filmTypes,
+              /*stages: (() => {
                 const howMany = ctx.faker.number.int({ min: 1, max: 5 });
                 return [...Array(howMany)].map((_, idx) => ({
                   id: ctx.faker.string.uuid(),
@@ -568,7 +601,7 @@ module.exports = [
 
                   memo: `generator stage ${idx}`,
                 }));
-              })(),
+              })(),*/
 
               memo: `generator job ${id}`,
             },
@@ -582,6 +615,12 @@ module.exports = [
           {
             key: `customer:${customerId}`,
             type: 'hadJobCreated',
+            metadata: { actor: { type: 'salesAgent', id: salesAgentId } },
+            data: { jobId: id },
+          },
+          {
+            key: `salesAgent:${salesAgentId}`,
+            type: 'createdJob',
             metadata: { actor: { type: 'salesAgent', id: salesAgentId } },
             data: { jobId: id },
           },

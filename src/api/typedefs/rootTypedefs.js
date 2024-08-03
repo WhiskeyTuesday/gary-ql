@@ -100,6 +100,7 @@ module.exports = gql`
   type Job {
     id: ID!
     status: String!
+    proposalStatus: String!
     address: Address!
     salesAgent: SalesAgent!
     customer: Customer!

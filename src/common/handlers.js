@@ -7,36 +7,6 @@ const isOld = (item, event) => {
   return (item.timestamp + interval) <= event.timestamp;
 };
 
-const newJob = event => ({
-  id: event.data.id,
-  status: 'draft',
-  createdTime: event.timestamp,
-  modifiedTime: event.timestamp,
-
-  isTaxExempt: event.data.isTaxExempt,
-  salesAgentId: event.data.salesAgentId,
-  customerId: event.data.customerId,
-  addressId: event.data.addressId,
-  materials: event.data.materials,
-  leadId: event.data.leadId,
-
-  stages: event.data.stages
-    .map(stage => ({
-      ...stage,
-      status: 'initial',
-      windows: stage.windows.map(window => ({
-        ...window,
-        status: 'initial',
-      })),
-    })),
-
-  proposals: [],
-  installers: [],
-
-  startTimestamp: event.data.startTimestamp || false,
-  notes: event.data.memo || '',
-});
-
 const customerDetails = event => ({
   createdTime: event.timestamp,
   modifiedTime: event.timestamp,
@@ -373,15 +343,34 @@ module.exports = {
   },
 
   job: {
-    wasDrafted: event => newJob(event),
-
-    wasPublished: () => ({
-      status: 'initial',
-    }),
-
     wasCreated: event => ({
-      ...newJob(event),
+      id: event.data.id,
       status: 'initial',
+      createdTime: event.timestamp,
+      modifiedTime: event.timestamp,
+
+      isTaxExempt: event.data.isTaxExempt,
+      salesAgentId: event.data.salesAgentId,
+      customerId: event.data.customerId,
+      addressId: event.data.addressId,
+      materials: event.data.materials,
+      leadId: event.data.leadId,
+
+      stages: event.data.stages
+        .map(stage => ({
+          ...stage,
+          status: 'initial',
+          windows: stage.windows.map(window => ({
+            ...window,
+            status: 'initial',
+          })),
+        })),
+
+      proposals: [],
+      installers: [],
+
+      startTimestamp: event.data.startTimestamp || false,
+      notes: event.data.memo || '',
     }),
 
     wasModified: (event, state) => ({
@@ -413,7 +402,7 @@ module.exports = {
 
     hadProposalRejected: event => ({
       modifiedTime: event.timestamp,
-      status: 'rejected',
+      status: 'intiial',
     }),
 
     hadProposalCancelled: event => ({
@@ -423,7 +412,7 @@ module.exports = {
 
     hadProposalExpired: event => ({
       modifiedTime: event.timestamp,
-      status: 'expired',
+      status: 'intiial',
     }),
 
     hadInstallerAssigned: (event, state) => ({

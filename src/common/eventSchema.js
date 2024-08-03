@@ -112,20 +112,6 @@ const jobStage = Joi.object().keys({
   memo: memo.optional(),
 }).required();
 
-const newJob = eventData({
-  id: uuid,
-  leadId: uuid,
-  addressId: uuid,
-  customerId: uuid,
-  salesAgentId: uuid,
-  materials: Joi.array().items(uuid).min(1).max(3).required(),
-  isTaxExempt: Joi.boolean().required(),
-  stages: Joi.array().items(jobStage).required(),
-
-  startTimestamp: Joi.date().timestamp('unix').optional(),
-  memo: memo.optional(),
-});
-
 const customerDetails = {
   isTaxExempt: Joi.boolean().required(),
   taxDetails: Joi.string().optional(),
@@ -326,16 +312,24 @@ module.exports = {
   },
 
   job: {
-    wasDrafted: newJob,
+    wasCreated: eventData({
+      id: uuid,
+      addressId: uuid,
+      customerId: uuid,
+      salesAgentId: uuid,
+      isTaxExempt: Joi.boolean().required(),
 
-    wasPublished: eventData({}),
-
-    wasCreated: newJob,
+      leadId: uuid.optional(),
+      materials: Joi.array().items(uuid.optional()).min(0).max(3).required(),
+      stages: Joi.array().items(jobStage).min(1).max(5).required(),
+      startTimestamp: Joi.date().timestamp('unix').optional(),
+      memo: memo.optional(),
+    }),
 
     wasModified: eventData({
-      materials: Joi.array().items(uuid).min(1).max(3).optional(),
+      materials: Joi.array().items(uuid.optional()).min(0).max(3).required(),
       startTimestamp: Joi.date().timestamp('unix').optional(),
-      stages: Joi.array().items(jobStage).optional(),
+      stages: Joi.array().items(jobStage).min(1).max(5).required(),
       memo: memo.optional(),
     }),
 

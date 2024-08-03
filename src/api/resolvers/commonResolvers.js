@@ -1,13 +1,5 @@
 const assert = require('assert').strict;
 
-const validateJobDetails = (details) => {
-  const { materials, stages } = details;
-  assert(materials.length > 0, 'must provide at least one material');
-  assert(materials.length < 4, 'too many materials');
-  assert(stages.length > 0, 'must provide at least one stage');
-  assert(stages.length < 6, 'too many stages');
-};
-
 const calcWindow = ({ price, unit, widthInches, heightInches }) => {
   const sqft = (widthInches * heightInches) / 144;
   return (() => {
@@ -542,31 +534,61 @@ module.exports = {
       return tools.write({ event });
     },
 
-    createJobDirect: async (_, { details }, { tools }) => {
+    createJobDirect: async (_, { details }, { tools, actor }) => {
       const jobId = tools.uuidv4();
-      validateJobDetails(details);
+      const actorIsSalesAgent = actor.type === 'salesAgent'
+        && actor.id === details.salesAgentId;
 
-      const event = {
-        key: `job:${jobId}`,
-        type: 'wasCreated',
-        data: { id: jobId, ...details },
-      };
+      const events = [
+        {
+          key: `job:${jobId}`,
+          type: 'wasCreated',
+          data: { id: jobId, ...details },
+        },
+        {
+          key: `customer:${details.customerId}`,
+          type: 'hadJobCreated',
+          data: { jobId },
+        },
+        {
+          key: `salesAgent:${details.salesAgentId}`,
+          type: actorIsSalesAgent ? 'createdJob' : 'wasAssignedJob',
+          data: { jobId },
+        },
+      ];
 
-      return tools.write({ event });
+      return tools.write({ events });
     },
 
-    convertLead: async (_, { leadId, details }, { tools }) => {
+    convertLead: async (_, { leadId, details }, { tools, actor }) => {
       const { isUUID } = tools;
       assert(isUUID(leadId), 'target leadId is invalid.');
-      validateJobDetails(details);
+      const jobId = tools.uuidv4();
 
-      const event = {
-        key: `lead:${leadId}`,
-        type: 'wasConverted',
-        data: details,
-      };
+      const events = [
+        {
+          key: `lead:${leadId}`,
+          type: 'wasConverted',
+          data: { jobId },
+        },
+        {
+          key: `job:${jobId}`,
+          type: 'wasCreated',
+          data: { id: jobId, ...details },
+        },
+        {
+          key: `customer:${details.customerId}`,
+          type: 'hadJobCreated',
+          data: { jobId },
+        },
+        {
+          key: `salesAgent:${details.salesAgentId}`,
+          type: 'wasAssignedJob',
+          data: { jobId },
+        },
+      ];
 
-      return tools.write({ event });
+      return tools.write({ events });
     },
 
     modifyJob: async (_, { id, details }, { tools }) => {
@@ -575,19 +597,97 @@ module.exports = {
 
       const job = await tools.read.standard('job', id);
       assert(job, 'job not found');
-      assert(job.status !== 'draft', 'job is still a draft');
+      assert(job.status === 'initial', 'job is already in progress');
 
-      assert(
-        ['initial', 'rejected', 'expired'].includes(job.status),
-        'job is already in progress',
-      );
+      const events = [
+        {
+          key: `customer:${job.customerId}`,
+          type: 'hadJobModified',
+          data: { jobId: id },
+        },
+        {
+          key: `salesAgent:${job.salesAgentId}`,
+          type: 'hadJobModified',
+          data: { jobId: id },
+        },
+        {
+          key: `lead:${job.leadId}`,
+          type: 'hadJobModified',
+          data: { jobId: id },
+        },
+        {
+          key: `job:${id}`,
+          type: 'wasModified',
+          data: details,
+        },
+      ];
 
-      validateJobDetails(details);
+      return tools.write({ events });
+    },
+
+    sendProposal: async (_, { jobId, stageIds }, { tools }) => {
+      const id = tools.uuidv4();
+      assert(stageIds.length > 0, 'must provide at least one stageId');
+
+      // verify that proposal is valid (ie. job is in a valid complete state)
+
+      // TODO call sendgrid
+      // TODO if fail return error
+      // otherwise:
+      const emailDetails = false; // TODO some kind of identifier or something
+
+      if (emailDetails === false) {
+        throw new Error('failed to send email');
+      }
 
       const event = {
-        key: `job:${id}`,
-        type: 'wasModified',
-        data: details,
+        key: `job:${jobId}`,
+        type: 'hadProposalSent',
+        data: { id, stageIds, emailDetails },
+      };
+
+      return tools.write({ event });
+    },
+
+    cancelProposal: async (_, { jobId, proposalId }, { tools }) => {
+      const { isUUID } = tools;
+      assert(isUUID(proposalId), 'target proposalId is invalid.');
+      assert(isUUID(jobId), 'target jobId is invalid.');
+
+      // verify proposal is still pending
+
+      // TODO call sendgrid
+      // TODO if fail return error
+      // otherwise:
+      // const emailDetails = false; // TODO some kind of identifier?
+
+      const event = {
+        key: `job:${jobId}`,
+        type: 'hadProposalRevoked',
+        data: { id: proposalId },
+      };
+
+      return tools.write({ event });
+    },
+
+    supercedeProposal: async (_, { jobId, stageIds }, { tools }) => {
+      const id = tools.uuidv4();
+      assert(tools.isUUID(jobId), 'target jobId is invalid');
+      assert(stageIds.length > 0, 'must provide at least one stageId');
+
+      // verify proposal is still pending
+      // verify job/proposal is still valid
+      // verify that it's different than the current proposal I guess
+
+      // TODO call sendgrid
+      // TODO if fail return error
+      // otherwise:
+      // const emailDetails = false; // TODO some kind of identifier?
+
+      const event = {
+        key: `job:${jobId}`,
+        type: 'hadProposalSuperceded',
+        data: { id, stageIds },
       };
 
       return tools.write({ event });

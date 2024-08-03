@@ -18,10 +18,4 @@ module.exports = gql`
     emailAddress: String!
     phoneNumber: String!
   }
-
-  extend type Mutation {
-    sendProposal(jobId: ID! stageIds: [ID!]!): String
-    cancelProposal(jobId: ID! proposalId: ID!): String
-    supercedeProposal(jobId: ID! stageIds: [ID!]!): String
-  }
 `;

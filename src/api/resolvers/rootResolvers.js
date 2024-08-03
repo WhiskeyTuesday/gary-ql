@@ -46,6 +46,10 @@ module.exports = {
   },
 
   Job: {
+    proposalStatus: async (job, _, { tools }) => job.proposals.length
+      ? (await tools.read.standard('proposal', job.proposals.at(-1))).status
+      : 'unproposed',
+
     customer: async (job, _, { tools }) => tools.read.standard(
       'customer',
       job.customerId,

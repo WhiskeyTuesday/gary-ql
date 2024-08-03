@@ -69,5 +69,8 @@ module.exports = gql`
     createJobDirect(details: JobInput!): String
     convertLead(leadId: ID!, details: JobInput!): String
     modifyJob(id: ID! details: JobInput!): String
+    sendProposal(jobId: ID! stageIds: [ID!]!): String
+    cancelProposal(jobId: ID! proposalId: ID!): String
+    supercedeProposal(jobId: ID! stageIds: [ID!]!): String
   }
 `;
