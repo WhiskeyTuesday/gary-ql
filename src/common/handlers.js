@@ -353,19 +353,10 @@ module.exports = {
       salesAgentId: event.data.salesAgentId,
       customerId: event.data.customerId,
       addressId: event.data.addressId,
-      materials: event.data.materials,
       leadId: event.data.leadId,
 
-      stages: event.data.stages
-        .map(stage => ({
-          ...stage,
-          status: 'initial',
-          windows: stage.windows.map(window => ({
-            ...window,
-            status: 'initial',
-          })),
-        })),
-
+      stages: [],
+      materials: [],
       proposals: [],
       installers: [],
 
@@ -374,7 +365,16 @@ module.exports = {
     }),
 
     wasModified: (event, state) => ({
-      stages: event.data.stages || state.stages,
+      stages: (event.data.stages || state.stages)
+        .map(stage => ({
+          ...stage,
+          status: stage.status || 'initial',
+          windows: stage.windows.map(window => ({
+            ...window,
+            status: window.status || 'initial',
+          })),
+        })),
+
       materials: event.data.materials || state.materials,
       startTimestamp: event.data.startTimestamp || state.startTimestamp,
       modifiedTime: event.timestamp,

@@ -599,6 +599,19 @@ module.exports = {
       assert(job, 'job not found');
       assert(job.status === 'initial', 'job is already in progress');
 
+      // verify job has <= 3 materials
+      // and that all windows use only those materials
+
+      const { materials, stages } = details;
+      assert(materials.length <= 3, 'too many materials');
+      const materialsUsed = stages.flatMap(s => s.windows.map(w => w.materialId));
+      console.log(materialsUsed); // TODO remove
+      assert(
+        materialsUsed.every(m => materials.includes(m)),
+        'Invalid material. Windows must all use the same (max 3)'
+        + 'materials specified on the job',
+      );
+
       const events = [
         {
           key: `customer:${job.customerId}`,

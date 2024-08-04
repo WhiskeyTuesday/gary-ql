@@ -48,13 +48,32 @@ module.exports = gql`
     notes: String
   }
 
-  input JobInput {
+  input JobDetailsInput {
     materials: [ID!]!
     stages: [StageInput!]!
 
     notes: String
   }
 
+  input JobCreatedInput {
+    isTaxExempt: Boolean!
+    customerId: ID!
+    addressId: ID!
+
+    salesAgentId: ID
+
+    notes: String
+  }
+
+  input LeadConvertedInput {
+    isTaxExempt: Boolean!
+    customerId: ID!
+
+    leadId: ID!
+    salesAgentId: ID!
+
+    notes: String
+  }
 
   extend type Mutation {
     trackLead(details: LeadInput!): Lead
@@ -66,9 +85,9 @@ module.exports = gql`
     editAddress(customerId: ID!, addressId: ID! address: AddressInput!): String
     deprecateAddress(customerId: ID!, addressId: ID!): String
     reinstateAddress(customerId: ID!, addressId: ID!): String
-    createJobDirect(details: JobInput!): String
-    convertLead(leadId: ID!, details: JobInput!): String
-    modifyJob(id: ID! details: JobInput!): String
+    createJobDirect(details: JobCreatedInput!): String
+    convertLead(leadId: ID!, details: LeadConvertedInput!): String
+    modifyJob(id: ID! details: JobDetailsInput!): String
     sendProposal(jobId: ID! stageIds: [ID!]!): String
     cancelProposal(jobId: ID! proposalId: ID!): String
     supercedeProposal(jobId: ID! stageIds: [ID!]!): String
