@@ -131,8 +131,9 @@ module.exports = {
 
     proposalPreview: async (_, { jobId }, { tools, schemae }) => {
       const emptyProposal = {
-        films: {},
+        films: [],
         stages: [],
+        isTaxExempt: false,
         subtotal: 0,
         taxAmount: 0,
         total: 0,
@@ -556,7 +557,7 @@ module.exports = {
         },
       ];
 
-      const response = tools.write({ events });
+      const response = await tools.write({ events });
 
       if (response !== 'OK') {
         throw new Error('failed to write');
@@ -601,7 +602,7 @@ module.exports = {
         },
       ];
 
-      const response = tools.write({ events });
+      const response = await tools.write({ events });
 
       if (response !== 'OK') {
         throw new Error('failed to write');
@@ -661,7 +662,7 @@ module.exports = {
         },
       ];
 
-      const response = tools.write({ events });
+      const response = await tools.write({ events });
 
       if (response !== 'OK') {
         throw new Error('failed to write');
