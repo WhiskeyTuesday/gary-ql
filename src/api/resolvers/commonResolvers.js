@@ -138,7 +138,6 @@ module.exports = {
         total: 0,
       };
 
-
       const { read: { standard } } = tools;
       assert(tools.isUUID(jobId));
       const job = await standard('job', jobId);
@@ -248,7 +247,7 @@ module.exports = {
       const taxAmount = Math.round(subtotal * 0.0825);
       const total = subtotal + (isTaxExempt ? 0 : taxAmount);
 
-      const filmsToArray = films => Object.entries(films).map(([k, v]) => {
+      const filmsToArray = fs => Object.entries(fs).map(([k, v]) => {
         const { filmId: id, ...rest } = v;
         return {
           name: k,
@@ -278,11 +277,11 @@ module.exports = {
       });
 
       if (error) {
+        // eslint-disable-next-line no-console
         console.error(error);
         throw new Error('invalid proposal error');
       }
 
-      console.log(jobProposal);
       return jobProposal;
     },
   },
@@ -341,21 +340,21 @@ module.exports = {
       const existingAgentId = lead.salesAgentId;
       const salesAgentEvents = salesAgentId && salesAgentId !== existingAgentId
         ? [
-            {
-              key: `lead:${id}`,
-              type: 'hadSalesAgentAssigned',
-              data: { agentId: salesAgentId },
-            },
-            {
-              key: `salesAgent:${salesAgentId}`,
-              type: 'wasAssignedLead',
-              data: { leadId: id },
-            },
-            ...existingAgentId ? [{
-              key: `salesAgent:${lead.salesAgentId}`,
-              type: 'wasUnassignedLead',
-              data: { leadId: id },
-            }] : [],
+          {
+            key: `lead:${id}`,
+            type: 'hadSalesAgentAssigned',
+            data: { agentId: salesAgentId },
+          },
+          {
+            key: `salesAgent:${salesAgentId}`,
+            type: 'wasAssignedLead',
+            data: { leadId: id },
+          },
+          ...existingAgentId ? [{
+            key: `salesAgent:${lead.salesAgentId}`,
+            type: 'wasUnassignedLead',
+            data: { leadId: id },
+          }] : [],
         ]
         : [];
 
@@ -557,12 +556,24 @@ module.exports = {
         },
       ];
 
-      return tools.write({ events });
+      const response = tools.write({ events });
+
+      if (response !== 'OK') {
+        throw new Error('failed to write');
+      }
+
+      return tools.read.aggregateFromDatabase({
+        type: 'job',
+        id: jobId,
+      });
     },
 
     convertLead: async (_, { leadId, details }, { tools, actor }) => {
       const { isUUID } = tools;
       assert(isUUID(leadId), 'target leadId is invalid.');
+      const lead = await tools.read.standard('lead', leadId);
+      assert(lead, 'lead not found');
+
       const jobId = tools.uuidv4();
 
       const events = [
@@ -583,12 +594,23 @@ module.exports = {
         },
         {
           key: `salesAgent:${details.salesAgentId}`,
-          type: 'wasAssignedJob',
+          type: actor.type === 'salesAgent' && actor.id === details.salesAgentId
+            ? 'createdJob'
+            : 'wasAssignedJob',
           data: { jobId },
         },
       ];
 
-      return tools.write({ events });
+      const response = tools.write({ events });
+
+      if (response !== 'OK') {
+        throw new Error('failed to write');
+      }
+
+      return tools.read.aggregateFromDatabase({
+        type: 'job',
+        id: jobId,
+      });
     },
 
     modifyJob: async (_, { id, details }, { tools }) => {
@@ -604,8 +626,12 @@ module.exports = {
 
       const { materials, stages } = details;
       assert(materials.length <= 3, 'too many materials');
-      const materialsUsed = stages.flatMap(s => s.windows.map(w => w.materialId));
+      const materialsUsed = stages
+        .flatMap(s => s.windows.map(w => w.materialId));
+
+      // eslint-disable-next-line no-console
       console.log(materialsUsed); // TODO remove
+
       assert(
         materialsUsed.every(m => materials.includes(m)),
         'Invalid material. Windows must all use the same (max 3)'
@@ -635,7 +661,16 @@ module.exports = {
         },
       ];
 
-      return tools.write({ events });
+      const response = tools.write({ events });
+
+      if (response !== 'OK') {
+        throw new Error('failed to write');
+      }
+
+      return tools.read.aggregateFromDatabase({
+        type: 'job',
+        id,
+      });
     },
 
     sendProposal: async (_, { jobId, stageIds }, { tools }) => {

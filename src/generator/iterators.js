@@ -290,9 +290,10 @@ module.exports = [
 
       const toAdd = [
         ...noAddress,
-        ...withAddress.map(
-          (c) => (ctx.faker.number.int({ min: 1, max: 100 }) > 98) ? c : [],
-        ),
+        ...withAddress
+          .map(c => ((ctx.faker.number.int({ min: 1, max: 100 }) > 98)
+            ? c
+            : [])),
       ].flat();
 
       return toAdd.map(c => ({
@@ -479,32 +480,6 @@ module.exports = [
     },
   },
   {
-    name: 'create-draft-jobs',
-    firstInstance: [2, 'days'],
-    type: 'simple',
-    period: [17, 'minutes'],
-    function: async ({ ctx, cache }) => {
-      // should really be from leads
-      // but I'm just going to q&d it for now
-      // select a random customer (with an address)
-      // select a random address
-      // select a random sales agent
-      // select a random admin
-      // create a job (with no details)
-      //
-      // it should be... from a lead though
-      // we... have no...
-      // way to convert from draft to... initial though
-      // so I'd have to add a button or... what I should
-      // really do is change... uhh the requirements for
-      // create to make all the fields optional or something
-      // and then... validate completion before sending
-      // proposals or something
-
-      return [];
-    },
-  },
-  {
     name: 'create-jobs',
     firstInstance: [2, 'days'],
     type: 'simple',
@@ -520,35 +495,7 @@ module.exports = [
         .filter(l => (l.status === 'pending-visit')
           && parseInt(l.visitTimestamp, 10) < ctx.clock.unix());
 
-      const materials = await cache.list('material');
-
-      // TODO these are hard-coded here and in typedefs
-      // and in the eventSchema...
-      // and... will probably be somewhere else too. Not
-      // ideal.
-      const windowTypes = [
-        'CLEAR_SINGLE_PANE',
-        'CLEAR_DUAL_PANE',
-        'TINTED_SP',
-        'TINTED_DP',
-        'LOW_E_DP',
-        'HIGH_PERF_LOW_E_DP',
-        'CLEAR_SP_LAMINATED',
-        'CLEAR_DP_LAMINATED',
-        'TINTED_SP_LAMINATED',
-        'TINTED_DP_LAMINATED',
-        'TRIPLE_PANE_CLEAR',
-        'OTHER',
-      ];
-
-      const glassTypes = [
-        'ANNEALED',
-        'HEAT_STRENGTHENED',
-        'TEMPERED',
-      ];
-
       return visited.flatMap((l) => {
-        const filmTypes = ctx.faker.helpers.arrayElements(materials, 3);
         const { salesAgentId, customerId, addressId, isTaxExempt } = l;
 
         const id = ctx.faker.string.uuid();
@@ -564,44 +511,6 @@ module.exports = [
               isTaxExempt,
               customerId,
               addressId,
-              materials: [],
-              stages: [{
-                id: ctx.faker.string.uuid(),
-                windows: [],
-
-                memo: 'generator',
-              }],
-              // materials: filmTypes,
-              /*stages: (() => {
-                const howMany = ctx.faker.number.int({ min: 1, max: 5 });
-                return [...Array(howMany)].map((_, idx) => ({
-                  id: ctx.faker.string.uuid(),
-                  windows: (() => {
-                    const windows = ctx.faker.number.int({ min: 1, max: 9 });
-                    return [...Array(windows)].map(() => ({
-                      id: ctx.faker.string.uuid(),
-                      location: ctx.faker.helpers.arrayElement([
-                        'living-room',
-                        'kitchen',
-                        'bedroom',
-                        'bathroom',
-                        'office',
-                        'upstairs bedroom',
-                        'downstairs bedroom',
-                        'hallway',
-                        'garage',
-                      ]),
-                      filmId: ctx.faker.helpers.arrayElement(filmTypes),
-                      windowType: ctx.faker.helpers.arrayElement(windowTypes),
-                      glassType: ctx.faker.helpers.arrayElement(glassTypes),
-                      width: ctx.faker.number.int({ min: 10, max: 100 }),
-                      height: ctx.faker.number.int({ min: 10, max: 100 }),
-                    }));
-                  })(),
-
-                  memo: `generator stage ${idx}`,
-                }));
-              })(),*/
 
               memo: `generator job ${id}`,
             },
@@ -629,12 +538,80 @@ module.exports = [
     },
   },
   {
-    name: 'edit-job',
+    name: 'modify-job',
     firstInstance: [2, 'days'],
     type: 'simple',
     period: [31, 'minutes'],
-    // TODO ignoring for now
-    function: async () => [],
+    function: async ({ ctx, cache }) => {
+      // TODO these are hard-coded here and in typedefs
+      // and in the eventSchema...
+      // and... will probably be somewhere else too. Not
+      // ideal.
+      const windowTypes = [
+        'CLEAR_SINGLE_PANE',
+        'CLEAR_DUAL_PANE',
+        'TINTED_SP',
+        'TINTED_DP',
+        'LOW_E_DP',
+        'HIGH_PERF_LOW_E_DP',
+        'CLEAR_SP_LAMINATED',
+        'CLEAR_DP_LAMINATED',
+        'TINTED_SP_LAMINATED',
+        'TINTED_DP_LAMINATED',
+        'TRIPLE_PANE_CLEAR',
+        'OTHER',
+      ];
+
+      const glassTypes = [
+        'ANNEALED',
+        'HEAT_STRENGTHENED',
+        'TEMPERED',
+      ];
+
+      const materials = await cache.list('material');
+      const filmTypes = ctx.faker.helpers.arrayElements(materials, 3);
+
+      // get jobs
+      const jobIds = await cache.list('job');
+
+      // TODO this should probably be based on volume
+      const howMany = ctx.faker.number.int({ min: 1, max: 10 });
+
+      const jobs = await Promise
+        .all(ctx.faker.helpers.arrayElements(jobIds, howMany));
+
+      const events = jobs
+        .filter(j => j.status === 'initial')
+        .filter(j => j.stages.length === 0)
+        .flatMap(() => ({
+          stages: [...Array(ctx.faker.number.int({ min: 1, max: 5 }))]
+            .map(() => ({
+              id: ctx.faker.string.uuid(),
+              windows: [...Array(ctx.faker.number.int({ min: 1, max: 9 }))]
+                .map(() => ({
+                  id: ctx.faker.string.uuid(),
+                  location: ctx.faker.helpers.arrayElement([
+                    'living-room',
+                    'kitchen',
+                    'bedroom',
+                    'bathroom',
+                    'office',
+                    'upstairs bedroom',
+                    'downstairs bedroom',
+                    'hallway',
+                    'garage',
+                  ]),
+                  filmId: ctx.faker.helpers.arrayElement(filmTypes),
+                  windowType: ctx.faker.helpers.arrayElement(windowTypes),
+                  glassType: ctx.faker.helpers.arrayElement(glassTypes),
+                  width: ctx.faker.number.int({ min: 10, max: 100 }),
+                  height: ctx.faker.number.int({ min: 10, max: 100 }),
+                })),
+            })),
+        }));
+
+      return events;
+    },
   },
   {
     name: 'generate-proposals',

@@ -68,8 +68,7 @@ module.exports = gql`
   input LeadConvertedInput {
     isTaxExempt: Boolean!
     customerId: ID!
-
-    leadId: ID!
+    addressId: ID!
     salesAgentId: ID!
 
     notes: String
@@ -85,11 +84,11 @@ module.exports = gql`
     editAddress(customerId: ID!, addressId: ID! address: AddressInput!): String
     deprecateAddress(customerId: ID!, addressId: ID!): String
     reinstateAddress(customerId: ID!, addressId: ID!): String
-    createJobDirect(details: JobCreatedInput!): String
-    convertLead(leadId: ID!, details: LeadConvertedInput!): String
-    modifyJob(id: ID! details: JobDetailsInput!): String
-    sendProposal(jobId: ID! stageIds: [ID!]!): String
-    cancelProposal(jobId: ID! proposalId: ID!): String
-    supercedeProposal(jobId: ID! stageIds: [ID!]!): String
+    createJobDirect(details: JobCreatedInput!): Job
+    convertLead(leadId: ID!, details: LeadConvertedInput!): Job
+    modifyJob(id: ID! details: JobDetailsInput!): Job
+    sendProposal(jobId: ID! stageIds: [ID!]!): Proposal
+    cancelProposal(jobId: ID! proposalId: ID!): Boolean
+    supercedeProposal(jobId: ID! stageIds: [ID!]!): Proposal
   }
 `;
