@@ -269,16 +269,16 @@ module.exports = {
 
     hadAddressDeprecated: (event, state) => ({
       modifiedTime: event.timestamp,
-      addresses: state.addresses.map(address => address.id === event.data.id
+      addresses: state.addresses.map(address => (address.id === event.data.id
         ? ({ ...address, isActive: false })
-        : address),
+        : address)),
     }),
 
     hadAddressReinstated: (event, state) => ({
       modifiedTime: event.timestamp,
-      addresses: state.addresses.map(address => address.id === event.data.id
+      addresses: state.addresses.map(address => (address.id === event.data.id
         ? ({ ...address, isActive: true })
-        : address),
+        : address)),
     }),
 
     hadLeadCreated: (event, state) => ({
@@ -307,7 +307,7 @@ module.exports = {
       notes: event.data.memo || '',
     }),
 
-    hadMemoEdited: (event, state) => ({
+    hadMemoEdited: event => ({
       modifiedTime: event.timestamp,
       notes: event.data.memo,
     }),

@@ -639,6 +639,11 @@ module.exports = {
         + 'materials specified on the job',
       );
 
+      // handle installer changes
+      // handle notes changes
+      // handle materials changes
+      // handle window/stage changes
+
       const events = [
         {
           key: `customer:${job.customerId}`,

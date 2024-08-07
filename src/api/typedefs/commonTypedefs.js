@@ -51,6 +51,7 @@ module.exports = gql`
   input JobDetailsInput {
     materials: [ID!]!
     stages: [StageInput!]!
+    installers: [ID]!
 
     notes: String
   }

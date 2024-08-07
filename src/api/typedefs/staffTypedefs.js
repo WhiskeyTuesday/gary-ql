@@ -22,11 +22,4 @@ module.exports = gql`
   extend type Query {
     staffSelf: Staff
   }
-
-  extend type Mutation {
-    assignSalesAgent(leadId: ID!, salesAgentId: ID!): String
-    unassignSalesAgent(jobId: ID!): String
-    assignInstallers(jobId: ID!, installerIds: [ID]!): String
-    unassignInstallers(jobId: ID!, installerIds: [ID]!): String
-  }
 `;
