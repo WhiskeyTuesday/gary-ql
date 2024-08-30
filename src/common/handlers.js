@@ -375,8 +375,9 @@ module.exports = {
           })),
         })),
 
-      materials: event.data.materials || state.materials,
-      startTimestamp: event.data.startTimestamp || state.startTimestamp,
+      materials: event.data.materials,
+      notes: event.data.notes || state.notes,
+
       modifiedTime: event.timestamp,
       modificationMemos: event.data.memo
         ? state.modificationMemos.concat(event.data.memo)
@@ -416,17 +417,29 @@ module.exports = {
     }),
 
     hadInstallerAssigned: (event, state) => ({
+      modifiedTime: event.timestamp,
       installers: state.installers.concat(event.data.installerId),
       status: 'pending-installation',
     }),
 
     hadInstallerUnassigned: (event, state) => ({
+      modifiedTime: event.timestamp,
       status: state.installers.length === 1
         ? 'pending-installer-assignment'
         : state.status,
 
       installers: state.installers
         .filter(installerId => installerId !== event.data.installerId),
+    }),
+
+    hasInstallationScheduled: event => ({
+      modifiedTime: event.timestamp,
+      startTimestamp: event.data.startTimestamp,
+    }),
+
+    hadInstallationUnscheduled: event => ({
+      modifiedTime: event.timestamp,
+      startTimestamp: false,
     }),
 
     hadWindowsCompleted: (event, state) => {

@@ -578,36 +578,43 @@ module.exports = [
       const howMany = ctx.faker.number.int({ min: 1, max: 10 });
 
       const jobs = await Promise
-        .all(ctx.faker.helpers.arrayElements(jobIds, howMany));
+        .all(ctx.faker.helpers.arrayElements(jobIds, howMany)
+          .map(id => cache.entry('job', id)));
 
       const events = jobs
         .filter(j => j.status === 'initial')
         .filter(j => j.stages.length === 0)
-        .flatMap(() => ({
-          stages: [...Array(ctx.faker.number.int({ min: 1, max: 5 }))]
-            .map(() => ({
-              id: ctx.faker.string.uuid(),
-              windows: [...Array(ctx.faker.number.int({ min: 1, max: 9 }))]
-                .map(() => ({
-                  id: ctx.faker.string.uuid(),
-                  location: ctx.faker.helpers.arrayElement([
-                    'living-room',
-                    'kitchen',
-                    'bedroom',
-                    'bathroom',
-                    'office',
-                    'upstairs bedroom',
-                    'downstairs bedroom',
-                    'hallway',
-                    'garage',
-                  ]),
-                  filmId: ctx.faker.helpers.arrayElement(filmTypes),
-                  windowType: ctx.faker.helpers.arrayElement(windowTypes),
-                  glassType: ctx.faker.helpers.arrayElement(glassTypes),
-                  width: ctx.faker.number.int({ min: 10, max: 100 }),
-                  height: ctx.faker.number.int({ min: 10, max: 100 }),
-                })),
-            })),
+        .flatMap(j => ({
+          key: `job:${j.id}`,
+          type: 'wasModified',
+          metadata: { actor: systemAgent },
+          data: {
+            materials: filmTypes,
+            stages: [...Array(ctx.faker.number.int({ min: 1, max: 5 }))]
+              .map(() => ({
+                id: ctx.faker.string.uuid(),
+                windows: [...Array(ctx.faker.number.int({ min: 1, max: 9 }))]
+                  .map(() => ({
+                    id: ctx.faker.string.uuid(),
+                    location: ctx.faker.helpers.arrayElement([
+                      'living-room',
+                      'kitchen',
+                      'bedroom',
+                      'bathroom',
+                      'office',
+                      'upstairs bedroom',
+                      'downstairs bedroom',
+                      'hallway',
+                      'garage',
+                    ]),
+                    filmId: ctx.faker.helpers.arrayElement(filmTypes),
+                    windowType: ctx.faker.helpers.arrayElement(windowTypes),
+                    glassType: ctx.faker.helpers.arrayElement(glassTypes),
+                    width: ctx.faker.number.int({ min: 10, max: 100 }),
+                    height: ctx.faker.number.int({ min: 10, max: 100 }),
+                  })),
+              })),
+          },
         }));
 
       return events;

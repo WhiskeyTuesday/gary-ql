@@ -35,25 +35,34 @@ module.exports = gql`
 
 
   input WindowInput {
+    id: ID!
     location: String!
     type: WindowType!
     glassType: GlassType!
+    materialId: ID!
     width: Int!
     height: Int!
   }
 
   input StageInput {
+    id: ID!
     windows: [WindowInput!]!
 
     notes: String
   }
 
-  input JobDetailsInput {
-    materials: [ID!]!
-    stages: [StageInput!]!
-    installers: [ID]!
+  input InstallerChangeInput {
+    added: [ID]
+    removed: [ID]
+  }
 
+  input JobDetailsInput {
+    stages: [StageInput!]
+    materials: [ID!]
+    installers: InstallerChangeInput
+    startTimestamp: Int
     notes: String
+    memo: String
   }
 
   input JobCreatedInput {

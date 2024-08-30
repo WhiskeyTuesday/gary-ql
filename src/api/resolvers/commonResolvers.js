@@ -622,49 +622,82 @@ module.exports = {
       assert(job, 'job not found');
       assert(job.status === 'initial', 'job is already in progress');
 
-      // verify job has <= 3 materials
-      // and that all windows use only those materials
+      const modificationEvent = (() => {
+        const { materials, stages } = details;
 
-      const { materials, stages } = details;
-      assert(materials.length <= 3, 'too many materials');
-      const materialsUsed = stages
-        .flatMap(s => s.windows.map(w => w.materialId));
+        assert(
+          (materials && stages) || (!materials && !stages),
+          'must provide both materials and stages',
+        );
 
-      // eslint-disable-next-line no-console
-      console.log(materialsUsed); // TODO remove
+        if (!stages) { return []; }
 
-      assert(
-        materialsUsed.every(m => materials.includes(m)),
-        'Invalid material. Windows must all use the same (max 3)'
-        + 'materials specified on the job',
-      );
+        // verify job has <= 3 materials
+        // and that all windows use only those materials
+        assert(materials.length <= 3, 'too many materials');
+        const materialsUsed = stages
+          .flatMap(s => s.windows.map(w => w.materialId));
 
-      // handle installer changes
-      // handle notes changes
-      // handle materials changes
-      // handle window/stage changes
+        assert(
+          materialsUsed.every(m => materials.includes(m)),
+          'Invalid material. Windows must all use the same (max 3)'
+          + 'materials specified on the job',
+        );
 
-      const events = [
-        {
-          key: `customer:${job.customerId}`,
-          type: 'hadJobModified',
-          data: { jobId: id },
-        },
-        {
-          key: `salesAgent:${job.salesAgentId}`,
-          type: 'hadJobModified',
-          data: { jobId: id },
-        },
-        {
-          key: `lead:${job.leadId}`,
-          type: 'hadJobModified',
-          data: { jobId: id },
-        },
-        {
+        assert(
+          stages.every(s => isUUID(s.id)),
+          'stage id is invalid',
+        );
+
+        assert(
+          stages.every(s => s.windows.every(w => isUUID(w.id))),
+          'window id is invalid',
+        );
+
+        return [{
           key: `job:${id}`,
           type: 'wasModified',
           data: details,
-        },
+        }];
+      })();
+
+      // TODO we do the added/removed determination in the client so...
+      const installerEvents = (() => {
+        const { installers } = details;
+        if (!installers) { return []; }
+
+        const { added, removed } = installers;
+
+        return [
+          ...added.map(i => ({
+            key: `job:${id}`,
+            type: 'hadInstallerAssigned',
+            data: { installerId: i },
+          })),
+
+          ...removed.map(i => ({
+            key: `job:${id}`,
+            type: 'hadInstallerUnassigned',
+            data: { installerId: i },
+          })),
+        ];
+      })();
+
+      const scheduleEvents = (() => {
+        const { startTimestamp } = details;
+        if (!startTimestamp) { return []; }
+
+        return [{
+          key: `job:${id}`,
+          type: 'hadScheduleSet',
+          data: { startTimestamp },
+        }];
+      })();
+
+      const events = [
+        ...modificationEvent,
+        ...installerEvents,
+        ...scheduleEvents,
       ];
 
       const response = await tools.write({ events });

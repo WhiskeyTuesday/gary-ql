@@ -326,8 +326,8 @@ module.exports = {
 
     wasModified: eventData({
       materials: Joi.array().items(uuid.optional()).min(0).max(3).required(),
-      startTimestamp: Joi.date().timestamp('unix').optional(),
       stages: Joi.array().items(jobStage).min(1).max(5).required(),
+      notes: memo.optional(),
       memo: memo.optional(),
     }),
 
@@ -350,6 +350,12 @@ module.exports = {
     hadInstallerAssigned: eventData({ installerId: uuid }),
 
     hadInstallerUnassigned: eventData({ installerId: uuid }),
+
+    hasInstallationScheduled: eventData({
+      startTimestamp: Joi.date().timestamp('unix').required(),
+    }),
+
+    hasInstallationUnscheduled: eventData({}),
 
     hadWindowsCompleted: eventData({
       stageId: uuid,
