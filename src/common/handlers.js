@@ -403,7 +403,7 @@ module.exports = {
 
     hadProposalRejected: event => ({
       modifiedTime: event.timestamp,
-      status: 'intiial',
+      status: 'initial',
     }),
 
     hadProposalCancelled: event => ({
@@ -413,7 +413,7 @@ module.exports = {
 
     hadProposalExpired: event => ({
       modifiedTime: event.timestamp,
-      status: 'intiial',
+      status: 'initial',
     }),
 
     hadInstallerAssigned: (event, state) => ({
