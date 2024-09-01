@@ -285,7 +285,7 @@ module.exports = {
       addressId: uuid,
       isTaxExempt: Joi.boolean().required(),
 
-      memo: memo.optional(),
+      notes: memo.optional(),
     }),
 
     hadMemoEdited: eventData({ memo }),

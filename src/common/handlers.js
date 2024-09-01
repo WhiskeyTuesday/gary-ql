@@ -304,7 +304,7 @@ module.exports = {
       createdTime: event.timestamp,
       modifiedTime: event.timestamp,
 
-      notes: event.data.memo || '',
+      notes: event.data.notes || '',
     }),
 
     hadMemoEdited: event => ({
