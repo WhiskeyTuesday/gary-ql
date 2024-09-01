@@ -288,7 +288,7 @@ module.exports = {
       notes: memo.optional(),
     }),
 
-    hadMemoEdited: eventData({ memo }),
+    hadNotesEdited: eventData({ notes: memo }),
 
     hadSalesAgentAssigned: eventData({
       agentId: uuid,
@@ -326,10 +326,12 @@ module.exports = {
 
     wasModified: eventData({
       materials: Joi.array().items(uuid.optional()).min(0).max(3).required(),
-      stages: Joi.array().items(jobStage).min(1).max(5).required(),
+      stages: Joi.array().items(jobStage.optional()).min(0).max(5).required(),
       notes: memo.optional(),
       memo: memo.optional(),
     }),
+
+    hadNotesEdited: eventData({ notes: memo }),
 
     wasProposed: eventData({
       memo: memo.optional(),
@@ -351,7 +353,7 @@ module.exports = {
 
     hadInstallerUnassigned: eventData({ installerId: uuid }),
 
-    hasInstallationScheduled: eventData({
+    hadInstallationScheduled: eventData({
       startTimestamp: Joi.date().timestamp('unix').required(),
     }),
 

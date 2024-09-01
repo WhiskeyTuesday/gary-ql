@@ -57,8 +57,8 @@ module.exports = gql`
   }
 
   input JobDetailsInput {
-    stages: [StageInput!]
-    materials: [ID!]
+    stages: [StageInput]
+    materials: [ID]
     installers: InstallerChangeInput
     startTimestamp: Int
     notes: String

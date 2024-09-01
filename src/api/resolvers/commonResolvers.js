@@ -620,17 +620,68 @@ module.exports = {
 
       const job = await tools.read.standard('job', id);
       assert(job, 'job not found');
-      assert(job.status === 'initial', 'job is already in progress');
 
-      const modificationEvent = (() => {
-        const { materials, stages } = details;
+      const { installers, startTimestamp, notes } = details;
+      const added = installers && installers.added;
+      const removed = installers && installers.removed;
 
-        assert(
-          (materials && stages) || (!materials && !stages),
-          'must provide both materials and stages',
+      const installersChanged = installers && (added.length || removed.length);
+
+      const startTimestampChanged = startTimestamp
+        && startTimestamp !== job.startTimestamp;
+
+      const notesChanged = notes && notes !== job.notes;
+
+      const events = [];
+      if (installersChanged) {
+        if (!['pending-installer-assignment', 'pending-installation']
+          .includes(job.status)) {
+          throw new Error('job is not in a valid state for installer changes');
+        }
+
+        events.push(...[
+          ...added.map(i => ({
+            key: `job:${id}`,
+            type: 'hadInstallerAssigned',
+            data: { installerId: i },
+          })),
+
+          ...removed.map(i => ({
+            key: `job:${id}`,
+            type: 'hadInstallerUnassigned',
+            data: { installerId: i },
+          })),
+        ]);
+      }
+
+      if (startTimestampChanged) {
+        events.push({
+          key: `job:${id}`,
+          type: 'hadInstallationScheduled',
+          data: { startTimestamp: details.startTimestamp },
+        });
+      }
+
+      if (notesChanged) {
+        events.push({
+          key: `job:${id}`,
+          type: 'hadNotesEdited',
+          data: { notes: details.notes },
+        });
+      }
+
+      const { materials, stages } = details;
+      const materialsChanged = materials
+        && (
+          job.materials.some(m => !materials.includes(m))
+          || materials.some(m => !job.materials.includes(m))
         );
 
-        if (!stages) { return []; }
+      const stagesChanged = JSON.stringify(stages)
+        !== JSON.stringify(job.stages);
+
+      if (materialsChanged || stagesChanged) {
+        assert(job.status === 'initial', 'job is already in progress');
 
         // verify job has <= 3 materials
         // and that all windows use only those materials
@@ -654,51 +705,12 @@ module.exports = {
           'window id is invalid',
         );
 
-        return [{
+        events.push({
           key: `job:${id}`,
           type: 'wasModified',
-          data: details,
-        }];
-      })();
-
-      // TODO we do the added/removed determination in the client so...
-      const installerEvents = (() => {
-        const { installers } = details;
-        if (!installers) { return []; }
-
-        const { added, removed } = installers;
-
-        return [
-          ...added.map(i => ({
-            key: `job:${id}`,
-            type: 'hadInstallerAssigned',
-            data: { installerId: i },
-          })),
-
-          ...removed.map(i => ({
-            key: `job:${id}`,
-            type: 'hadInstallerUnassigned',
-            data: { installerId: i },
-          })),
-        ];
-      })();
-
-      const scheduleEvents = (() => {
-        const { startTimestamp } = details;
-        if (!startTimestamp) { return []; }
-
-        return [{
-          key: `job:${id}`,
-          type: 'hadScheduleSet',
-          data: { startTimestamp },
-        }];
-      })();
-
-      const events = [
-        ...modificationEvent,
-        ...installerEvents,
-        ...scheduleEvents,
-      ];
+          data: { stages, materials },
+        });
+      }
 
       const response = await tools.write({ events });
 

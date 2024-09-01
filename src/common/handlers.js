@@ -307,9 +307,9 @@ module.exports = {
       notes: event.data.notes || '',
     }),
 
-    hadMemoEdited: event => ({
+    hadNotesEdited: event => ({
       modifiedTime: event.timestamp,
-      notes: event.data.memo,
+      notes: event.data.notes,
     }),
 
     hadSalesAgentAssigned: event => ({
@@ -376,12 +376,16 @@ module.exports = {
         })),
 
       materials: event.data.materials,
-      notes: event.data.notes || state.notes,
 
       modifiedTime: event.timestamp,
       modificationMemos: event.data.memo
         ? state.modificationMemos.concat(event.data.memo)
         : state.modificationMemos,
+    }),
+
+    hadNotesEdited: event => ({
+      modifiedTime: event.timestamp,
+      notes: event.data.notes,
     }),
 
     wasProposed: (event, state) => ({
@@ -432,7 +436,7 @@ module.exports = {
         .filter(installerId => installerId !== event.data.installerId),
     }),
 
-    hasInstallationScheduled: event => ({
+    hadInstallationScheduled: event => ({
       modifiedTime: event.timestamp,
       startTimestamp: event.data.startTimestamp,
     }),
