@@ -91,11 +91,17 @@ module.exports = gql`
     createCustomer(details: CustomerInput!): String
     editCustomer(id: ID!, details: CustomerInput!): String
     addAddress(customerId: ID!, address: AddressInput!): String
-    editAddress(customerId: ID!, addressId: ID! address: AddressInput!): String
-    deprecateAddress(customerId: ID!, addressId: ID!): String
-    reinstateAddress(customerId: ID!, addressId: ID!): String
+    editAddress(
+      customerId: ID!
+      addressId: ID!
+      address: AddressInput!
+      activate: Boolean
+      deactivate: Boolean
+    ): Customer
+    deprecateAddress(customerId: ID! addressId: ID!): String
+    reinstateAddress(customerId: ID! addressId: ID!): String
     createJobDirect(details: JobCreatedInput!): Job
-    convertLead(leadId: ID!, details: LeadConvertedInput!): Job
+    convertLead(leadId: ID! details: LeadConvertedInput!): Job
     modifyJob(id: ID! details: JobDetailsInput!): Job
     sendProposal(jobId: ID! stageIds: [ID!]!): Proposal
     cancelProposal(jobId: ID! proposalId: ID!): Boolean

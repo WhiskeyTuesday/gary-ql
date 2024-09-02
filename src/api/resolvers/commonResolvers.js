@@ -465,31 +465,61 @@ module.exports = {
       return tools.write({ event });
     },
 
-    editAddress: async (_, { customerId, addressId, address }, { tools }) => {
+    editAddress: async (
+      _,
+      { customerId, addressId, address, activate, deactivate },
+      { tools },
+    ) => {
       const { isUUID } = tools;
       assert(isUUID(customerId), 'target customerId is invalid.');
       assert(isUUID(addressId), 'target addressId is invalid.');
 
       const customer = await tools.read.standard('customer', customerId);
       assert(customer, 'customer not found');
-      assert(
-        customer.addresses.find(a => a.id === addressId),
-        'address not found',
-      );
+      const exAddress = customer.addresses.find(a => a.id === addressId);
+      assert(exAddress, 'address not found');
 
-      const event = {
-        key: `customer:${customerId}`,
-        type: 'hadAddressEdited',
-        data: {
-          address: {
-            id: addressId,
-            ...address,
-            country: 'us',
+      const activationEvents = (() => {
+        if (!(activate || deactivate)) {
+          return [];
+        }
+
+        if (activate && deactivate) {
+          throw new Error('cannot activate and deactivate');
+        }
+
+        if (activate && exAddress.isActive) { return []; }
+        if (deactivate && !exAddress.isActive) { return []; }
+
+        return [{
+          key: `customer:${customerId}`,
+          type: activate ? 'hadAddressReinstated' : 'hadAddressDeprecated',
+          data: { addressId },
+        }];
+      })();
+
+      const events = [
+        {
+          key: `customer:${customerId}`,
+          type: 'hadAddressEdited',
+          data: {
+            address: {
+              id: addressId,
+              ...address,
+              country: 'us',
+            },
           },
         },
-      };
+        ...activationEvents,
+      ];
 
-      return tools.write({ event });
+      const response = await tools.write({ events });
+      assert(response === 'OK', 'failed to write');
+
+      return tools.read.aggregateFromDatabase({
+        type: 'customer',
+        id: customerId,
+      });
     },
 
     deprecateAddress: async (_, { customerId, addressId }, { tools }) => {

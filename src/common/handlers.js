@@ -264,21 +264,27 @@ module.exports = {
       modifiedTime: event.timestamp,
       addresses: state.addresses
         .filter(a => a.id !== event.data.address.id)
-        .concat({ ...event.data.address, isActive: true }),
+        .concat({
+          ...event.data.address,
+          isActive: state.addresses
+            .find(a => a.id === event.data.address.id).isActive,
+        }),
     }),
 
     hadAddressDeprecated: (event, state) => ({
       modifiedTime: event.timestamp,
-      addresses: state.addresses.map(address => (address.id === event.data.id
-        ? ({ ...address, isActive: false })
-        : address)),
+      addresses: state.addresses
+        .map(address => (address.id === event.data.addressId
+          ? ({ ...address, isActive: false })
+          : address)),
     }),
 
     hadAddressReinstated: (event, state) => ({
       modifiedTime: event.timestamp,
-      addresses: state.addresses.map(address => (address.id === event.data.id
-        ? ({ ...address, isActive: true })
-        : address)),
+      addresses: state.addresses
+        .map(address => (address.id === event.data.addressId
+          ? ({ ...address, isActive: true })
+          : address)),
     }),
 
     hadLeadCreated: (event, state) => ({
