@@ -138,7 +138,7 @@ module.exports = gql`
     id: ID!
     status: String!
     location: String!
-    windowType: WindowType!
+    type: WindowType!
     glassType: GlassType!
     film: Material!
     width: Int!

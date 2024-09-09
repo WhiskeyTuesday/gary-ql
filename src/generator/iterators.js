@@ -608,7 +608,7 @@ module.exports = [
                       'garage',
                     ]),
                     filmId: ctx.faker.helpers.arrayElement(filmTypes),
-                    windowType: ctx.faker.helpers.arrayElement(windowTypes),
+                    type: ctx.faker.helpers.arrayElement(windowTypes),
                     glassType: ctx.faker.helpers.arrayElement(glassTypes),
                     width: ctx.faker.number.int({ min: 10, max: 100 }),
                     height: ctx.faker.number.int({ min: 10, max: 100 }),

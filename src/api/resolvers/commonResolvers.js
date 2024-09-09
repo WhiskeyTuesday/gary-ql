@@ -716,8 +716,9 @@ module.exports = {
         // verify job has <= 3 materials
         // and that all windows use only those materials
         assert(materials.length <= 3, 'too many materials');
+
         const materialsUsed = stages
-          .flatMap(s => s.windows.map(w => w.materialId));
+          .flatMap(s => s.windows.map(w => w.filmId));
 
         assert(
           materialsUsed.every(m => materials.includes(m)),
