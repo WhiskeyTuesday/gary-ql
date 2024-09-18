@@ -15,8 +15,4 @@ module.exports = gql`
     emailAddress: String!
     phoneNumber: String!
   }
-
-  extend type Mutation {
-    markWindowsComplete(jobId: ID!, windowIds: [ID!]!): String
-  }
 `;

@@ -374,8 +374,8 @@ module.exports = {
       films: Joi.array().items(Joi.object().keys({
         id: uuid,
         name: Joi.string().required(),
-        sqft: Joi.number().integer().min(1).required(),
-        lnft: Joi.number().integer().min(1).required(),
+        sqft: Joi.number().integer().min(0).required(),
+        lnft: Joi.number().integer().min(0).required(),
         priceTotal: currencyAmount,
       })).required(),
 
@@ -384,8 +384,8 @@ module.exports = {
         films: Joi.array().items(Joi.object().keys({
           id: uuid,
           name: Joi.string().required(),
-          sqft: Joi.number().integer().min(1).required(),
-          lnft: Joi.number().integer().min(1).required(),
+          sqft: Joi.number().integer().min(0).required(),
+          lnft: Joi.number().integer().min(0).required(),
           priceTotal: currencyAmount,
         })).required(),
 
@@ -398,8 +398,8 @@ module.exports = {
           type: windowType,
           width: Joi.number().integer().min(1).max(250).required(),
           height: Joi.number().integer().min(1).max(250).required(),
-          sqft: Joi.number().integer().min(1).required(),
-          lnft: Joi.number().integer().min(1).required(),
+          sqft: Joi.number().integer().min(0).required(),
+          lnft: Joi.number().integer().min(0).required(),
           price: currencyAmount,
         })).required(),
 

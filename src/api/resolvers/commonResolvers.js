@@ -701,14 +701,35 @@ module.exports = {
       }
 
       const { materials, stages } = details;
+
       const materialsChanged = materials
         && (
           job.materials.some(m => !materials.includes(m))
           || materials.some(m => !job.materials.includes(m))
         );
 
-      const stagesChanged = JSON.stringify(stages)
-        !== JSON.stringify(job.stages);
+      const windowChanged = (w, wPrime) => {
+        const thingsWeCareAbout = [
+          'location',
+          'filmId',
+          'width',
+          'height',
+          'type',
+          'glassType',
+        ];
+
+        return thingsWeCareAbout.some(k => w[k] !== wPrime[k]);
+      };
+
+      const stageChanged = (s, sPrime) => {
+        const windowsChanged = s.windows
+          .some((w, i) => windowChanged(w, sPrime.windows[i]));
+
+        return windowsChanged;
+      };
+
+      const stagesChanged = stages
+        .some((s, i) => stageChanged(s, job.stages[i]));
 
       if (materialsChanged || stagesChanged) {
         assert(job.status === 'initial', 'job is already in progress');

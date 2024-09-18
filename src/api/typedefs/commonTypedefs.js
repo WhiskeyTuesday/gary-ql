@@ -106,5 +106,6 @@ module.exports = gql`
     sendProposal(jobId: ID! stageIds: [ID!]!): Proposal
     cancelProposal(jobId: ID! proposalId: ID!): Boolean
     supercedeProposal(jobId: ID! stageIds: [ID!]!): Proposal
+    markWindowsComplete(jobId: ID!, windowIds: [ID!]!): String
   }
 `;
