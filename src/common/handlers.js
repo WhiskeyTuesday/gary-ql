@@ -354,6 +354,7 @@ module.exports = {
       status: 'initial',
       createdTime: event.timestamp,
       modifiedTime: event.timestamp,
+      completedTime: false,
 
       isTaxExempt: event.data.isTaxExempt,
       salesAgentId: event.data.salesAgentId,
@@ -453,33 +454,35 @@ module.exports = {
     }),
 
     hadWindowsCompleted: (event, state) => {
-      const windows = stage => stage
-        .windows
-        .map(window => (event.data.windowIds.includes(window.id)
-          ? { ...window, status: 'completed' }
-          : window));
-
-      const stages = state.stages
-        .map(stage => (stage.id === event.data.stageId
-          ? {
-            ...stage,
-            windows: windows(state.stages
-              .find(s => s.id === event.data.stageId)),
-          }
-          : stage))
-        .map(stage => ({
-          ...stage,
-          status: stage.windows.every(window => window.status === 'completed')
+      const stages = state.stages.map((stage) => {
+        const windows = stage.windows.map(window => ({
+          ...window,
+          status: event.data.windowIds.includes(window.id)
             ? 'completed'
-            : stage.status,
+            : window.status,
         }));
+
+        const status = windows.every(window => window.status === 'completed')
+          ? 'completed'
+          : stage.status;
+
+        return {
+          ...stage,
+          windows,
+          status,
+        };
+      });
+
+      const status = stages
+        .every(stage => ['completed', 'rejected'].includes(stage.status))
+        ? 'completed'
+        : state.status;
 
       return ({
         modifiedTime: event.timestamp,
+        completedTime: status === 'completed' ? event.timestamp : false,
         stages,
-        status: stages.every(stage => (
-          (stage.status === 'completed') || (stage.status === 'rejected')
-        )) ? 'completed' : state.status,
+        status,
       });
     },
   },

@@ -722,14 +722,14 @@ module.exports = {
       };
 
       const stageChanged = (s, sPrime) => {
-        const windowsChanged = s.windows
+        const windowsChanged = (s.windows || [])
           .some((w, i) => windowChanged(w, sPrime.windows[i]));
 
         return windowsChanged;
       };
 
-      const stagesChanged = stages
-        .some((s, i) => stageChanged(s, job.stages[i]));
+      const stagesChanged = (stages.length !== job.stages.length)
+      || stages.some((s, i) => stageChanged((job.stages[i] || {}), s));
 
       if (materialsChanged || stagesChanged) {
         assert(job.status === 'initial', 'job is already in progress');
@@ -842,6 +842,51 @@ module.exports = {
       };
 
       return tools.write({ event });
+    },
+
+    markWindowsComplete: async (_, { jobId, windowIds }, { tools }) => {
+      assert(windowIds.length, 'no windows provided');
+
+      const job = await tools.read.standard('job', jobId);
+      assert(job, 'job not found');
+
+      const { stages } = job;
+      assert(stages, 'stages not found');
+
+      const relevantStages = stages.filter(({ windows }) => windows
+        .some(({ id }) => windowIds.includes(id)));
+
+      assert(relevantStages.length, 'stages not found');
+
+      const windowEvent = {
+        key: `job:${jobId}`,
+        type: 'hadWindowsCompleted',
+        data: { windowIds },
+      };
+
+      const completedStages = relevantStages.filter(({ windows }) => windows
+        .filter(({ id }) => !windowIds.includes(id))
+        .every(({ status }) => ['complete', 'cancelled', 'rejected']
+          .includes(status)));
+
+      const jobComplete = stages
+        .filter(({ id }) => !completedStages.some(({ id: cid }) => cid === id))
+        .every(({ status }) => ['complete', 'rejected'].includes(status));
+
+      const installerEvent = jobComplete ? [{
+        key: `installer:${job.installerId}`,
+        type: 'completedJob',
+        data: { jobId: job.id },
+      }] : [];
+
+      const salesAgentEvent = jobComplete ? [{
+        key: `salesAgent:${job.salesAgentId}`,
+        type: 'hadJobCompleted',
+        data: { jobId: job.id },
+      }] : [];
+
+      const events = [windowEvent, ...installerEvent, ...salesAgentEvent];
+      return tools.write({ events });
     },
   },
 };

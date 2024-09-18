@@ -110,6 +110,7 @@ module.exports = gql`
     proposals: [Proposal]!
 
     startTimestamp: Int
+    completedTime: Int
     notes: String
   }
 

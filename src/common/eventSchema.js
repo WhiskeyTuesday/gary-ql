@@ -360,7 +360,6 @@ module.exports = {
     hasInstallationUnscheduled: eventData({}),
 
     hadWindowsCompleted: eventData({
-      stageId: uuid,
       windowIds: Joi.array().items(uuid).required(),
     }),
   },

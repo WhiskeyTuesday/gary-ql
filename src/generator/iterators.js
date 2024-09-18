@@ -1018,7 +1018,7 @@ module.exports = [
           key: `job:${j.id}`,
           type: 'hadWindowsCompleted',
           metadata: { actor: { type: 'installer', id: installerId } },
-          data: { stageId: s.id, windowIds: [wid] },
+          data: { windowIds: [wid] },
         };
       }));
 
