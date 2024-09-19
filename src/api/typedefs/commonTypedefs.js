@@ -103,9 +103,9 @@ module.exports = gql`
     createJobDirect(details: JobCreatedInput!): Job
     convertLead(leadId: ID! details: LeadConvertedInput!): Job
     modifyJob(id: ID! details: JobDetailsInput!): Job
-    sendProposal(jobId: ID! stageIds: [ID!]!): Proposal
+    sendProposal(jobId: ID! sim: Boolean): Proposal
     cancelProposal(jobId: ID! proposalId: ID!): Boolean
     supercedeProposal(jobId: ID! stageIds: [ID!]!): Proposal
-    markWindowsComplete(jobId: ID!, windowIds: [ID!]!): String
+    markWindowsComplete(jobId: ID! windowIds: [ID!]!): String
   }
 `;

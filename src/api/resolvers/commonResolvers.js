@@ -10,6 +10,163 @@ const calcWindow = ({ price, unit, widthInches, heightInches }) => {
   })();
 };
 
+const generateProposal = async ({ tools, schemae, jobId }) => {
+  const emptyProposal = {
+    films: [],
+    stages: [],
+    isTaxExempt: false,
+    subtotal: 0,
+    taxAmount: 0,
+    total: 0,
+  };
+
+  const { read: { standard } } = tools;
+  assert(tools.isUUID(jobId));
+  const job = await standard('job', jobId);
+  assert(job, 'job not found');
+  const { stages } = job;
+  if (stages.length === 0) { return emptyProposal; }
+
+  const filmDetails = async (filmId) => {
+    assert(tools.isUUID(filmId));
+    const { price, unit, id, name } = await standard('material', filmId);
+    assert(price && unit && id && name, 'material not found');
+    return { price, unit, id, name };
+  };
+
+  if (job.materials.length === 0) { return emptyProposal; }
+  const films = await Promise.all(job.materials.map(filmDetails));
+
+  const stageProposal = (stage) => {
+    const windows = stage.windows.map((window) => {
+      const {
+        status: _,
+        filmId,
+        width,
+        height,
+        ...rest
+      } = window;
+
+      const film = films.find(f => f.id === filmId);
+      assert(film, 'film not found');
+
+      const { price: filmPrice, name: filmName, unit } = film;
+
+      const price = calcWindow({
+        price: filmPrice,
+        unit,
+        widthInches: width,
+        heightInches: height,
+      });
+
+      return {
+        ...rest,
+        sqft: Math.round((width * height) / 144),
+        lnft: (width + height) * 2,
+        width,
+        height,
+        filmName,
+        filmId,
+        price,
+      };
+    });
+
+    const filmsUsed = windows.reduce((acc, window) => {
+      if (!acc[window.filmName]) {
+        acc[window.filmName] = {
+          sqft: 0,
+          lnft: 0,
+          priceTotal: 0,
+          filmId: window.filmId,
+        };
+      }
+
+      acc[window.filmName].sqft += window.sqft;
+      acc[window.filmName].lnft += window.lnft;
+      acc[window.filmName].priceTotal += window.price;
+
+      return acc;
+    }, {});
+
+    const subtotal = Object.values(filmsUsed)
+      .reduce((acc, { priceTotal }) => acc + priceTotal, 0);
+
+    return {
+      id: stage.id,
+      windows,
+      films: filmsUsed,
+      subtotal,
+    };
+  };
+
+  const stageProposals = stages.map(stageProposal);
+
+  const filmsUsed = stageProposals.reduce((acc, { films: stageFilms }) => {
+    Object.entries(stageFilms)
+      .forEach(([filmName, { sqft, lnft, priceTotal }]) => {
+        if (!acc[filmName]) {
+          acc[filmName] = {
+            sqft: 0,
+            lnft: 0,
+            priceTotal: 0,
+            filmId: stageFilms[filmName].filmId,
+          };
+        }
+
+        acc[filmName].sqft += sqft;
+        acc[filmName].lnft += lnft;
+        acc[filmName].priceTotal += priceTotal;
+      });
+
+    return acc;
+  }, {});
+
+  const subtotal = Object.values(filmsUsed)
+    .reduce((acc, { priceTotal }) => acc + priceTotal, 0);
+
+  const customer = await standard('customer', job.customerId);
+  const { isTaxExempt } = customer;
+  const taxAmount = Math.round(subtotal * 0.0825);
+  const total = subtotal + (isTaxExempt ? 0 : taxAmount);
+
+  const filmsToArray = fs => Object.entries(fs).map(([k, v]) => {
+    const { filmId: id, ...rest } = v;
+    return {
+      name: k,
+      id,
+      ...rest,
+    };
+  });
+
+  const jobProposal = {
+    stages: stageProposals
+      .map(s => ({ ...s, films: filmsToArray(s.films) })),
+
+    films: filmsToArray(filmsUsed),
+    isTaxExempt,
+    taxAmount,
+    subtotal,
+    total,
+  };
+
+  // ensure that if this proposal was real it would be valid
+  const { error } = schemae.events.proposal.wasCreated.validate({
+    id: tools.uuidv4(),
+    jobId,
+    salesAgentId: job.salesAgentId,
+
+    ...jobProposal,
+  });
+
+  if (error) {
+    // eslint-disable-next-line no-console
+    console.error(error);
+    throw new Error('invalid proposal error');
+  }
+
+  return jobProposal;
+};
+
 module.exports = {
   Self: {
     __resolveType: x => x.type.charAt(0).toUpperCase() + x.type.slice(1),
@@ -129,162 +286,15 @@ module.exports = {
       }));
     },
 
-    proposalPreview: async (_, { jobId }, { tools, schemae }) => {
-      const emptyProposal = {
-        films: [],
-        stages: [],
-        isTaxExempt: false,
-        subtotal: 0,
-        taxAmount: 0,
-        total: 0,
-      };
-
-      const { read: { standard } } = tools;
-      assert(tools.isUUID(jobId));
-      const job = await standard('job', jobId);
-      assert(job, 'job not found');
-      const { stages } = job;
-      if (stages.length === 0) { return emptyProposal; }
-
-      const filmDetails = async (filmId) => {
-        assert(tools.isUUID(filmId));
-        const { price, unit, id, name } = await standard('material', filmId);
-        assert(price && unit && id && name, 'material not found');
-        return { price, unit, id, name };
-      };
-
-      if (job.materials.length === 0) { return emptyProposal; }
-      const films = await Promise.all(job.materials.map(filmDetails));
-
-      const stageProposal = (stage) => {
-        const windows = stage.windows.map((window) => {
-          const {
-            status: _,
-            filmId,
-            width,
-            height,
-            ...rest
-          } = window;
-
-          const film = films.find(f => f.id === filmId);
-          assert(film, 'film not found');
-
-          const { price: filmPrice, name: filmName, unit } = film;
-
-          const price = calcWindow({
-            price: filmPrice,
-            unit,
-            widthInches: width,
-            heightInches: height,
-          });
-
-          return {
-            ...rest,
-            sqft: Math.round((width * height) / 144),
-            lnft: (width + height) * 2,
-            width,
-            height,
-            filmName,
-            filmId,
-            price,
-          };
-        });
-
-        const filmsUsed = windows.reduce((acc, window) => {
-          if (!acc[window.filmName]) {
-            acc[window.filmName] = {
-              sqft: 0,
-              lnft: 0,
-              priceTotal: 0,
-              filmId: window.filmId,
-            };
-          }
-
-          acc[window.filmName].sqft += window.sqft;
-          acc[window.filmName].lnft += window.lnft;
-          acc[window.filmName].priceTotal += window.price;
-
-          return acc;
-        }, {});
-
-        const subtotal = Object.values(filmsUsed)
-          .reduce((acc, { priceTotal }) => acc + priceTotal, 0);
-
-        return {
-          id: stage.id,
-          windows,
-          films: filmsUsed,
-          subtotal,
-        };
-      };
-
-      const stageProposals = stages.map(stageProposal);
-
-      const filmsUsed = stageProposals.reduce((acc, { films: stageFilms }) => {
-        Object.entries(stageFilms)
-          .forEach(([filmName, { sqft, lnft, priceTotal }]) => {
-            if (!acc[filmName]) {
-              acc[filmName] = {
-                sqft: 0,
-                lnft: 0,
-                priceTotal: 0,
-                filmId: stageFilms[filmName].filmId,
-              };
-            }
-
-            acc[filmName].sqft += sqft;
-            acc[filmName].lnft += lnft;
-            acc[filmName].priceTotal += priceTotal;
-          });
-
-        return acc;
-      }, {});
-
-      const subtotal = Object.values(filmsUsed)
-        .reduce((acc, { priceTotal }) => acc + priceTotal, 0);
-
-      const customer = await standard('customer', job.customerId);
-      const { isTaxExempt } = customer;
-      const taxAmount = Math.round(subtotal * 0.0825);
-      const total = subtotal + (isTaxExempt ? 0 : taxAmount);
-
-      const filmsToArray = fs => Object.entries(fs).map(([k, v]) => {
-        const { filmId: id, ...rest } = v;
-        return {
-          name: k,
-          id,
-          ...rest,
-        };
-      });
-
-      const jobProposal = {
-        stages: stageProposals
-          .map(s => ({ ...s, films: filmsToArray(s.films) })),
-
-        films: filmsToArray(filmsUsed),
-        isTaxExempt,
-        taxAmount,
-        subtotal,
-        total,
-      };
-
-      // ensure that if this proposal was real it would be valid
-      const { error } = schemae.events.proposal.wasCreated.validate({
-        id: tools.uuidv4(),
-        jobId,
-        salesAgentId: job.salesAgentId,
-
-        ...jobProposal,
-      });
-
-      if (error) {
-        // eslint-disable-next-line no-console
-        console.error(error);
-        throw new Error('invalid proposal error');
-      }
-
-      return jobProposal;
-    },
+    proposalPreview: async (
+      _,
+      { jobId },
+      { tools, schemae },
+    ) => generateProposal({
+      tools,
+      schemae,
+      jobId,
+    }),
   },
 
   Mutation: {
@@ -776,28 +786,45 @@ module.exports = {
       });
     },
 
-    sendProposal: async (_, { jobId, stageIds }, { tools }) => {
+    sendProposal: async (_, { jobId, sim }, { tools }) => {
       const id = tools.uuidv4();
-      assert(stageIds.length > 0, 'must provide at least one stageId');
+      assert(
+        (['development', 'staging'].includes(process.env.NODE_ENV) || sim),
+        'sim only allowed in dev or staging',
+      );
 
       // verify that proposal is valid (ie. job is in a valid complete state)
+      const proposal = await generateProposal({ tools, jobId });
 
-      // TODO call sendgrid
-      // TODO if fail return error
-      // otherwise:
-      const emailDetails = false; // TODO some kind of identifier or something
+      // if simulated, just reutrn a dummy response
+      const emailDetails = sim
+        ? { sim: true }
+        // otherwise:
+        // TODO call sendgrid
+        // TODO if fail return error
+        // if not fail return actual response
+        : false;
 
       if (emailDetails === false) {
         throw new Error('failed to send email');
       }
 
-      const event = {
-        key: `job:${jobId}`,
-        type: 'hadProposalSent',
-        data: { id, stageIds, emailDetails },
-      };
+      const memo = sim ? 'simulated' : undefined;
 
-      return tools.write({ event });
+      const events = [
+        {
+          key: `job:${jobId}`,
+          type: 'wasProposed',
+          data: { memo, proposalId: id },
+        },
+        {
+          key: `proposal:${id}`,
+          type: 'wasCreated',
+          data: { id, ...proposal },
+        },
+      ];
+
+      return tools.write({ events });
     },
 
     cancelProposal: async (_, { jobId, proposalId }, { tools }) => {
