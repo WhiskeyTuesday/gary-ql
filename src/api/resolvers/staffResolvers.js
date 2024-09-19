@@ -8,12 +8,12 @@ module.exports = {
       const self = tools.read.self(actor);
 
       const leads = Promise.all(
-        (await tools.read.cache.list('lead'))
+        (await tools.read.standardList('lead'))
           .map(async l => tools.read.standard('lead', l)),
       );
 
       const jobs = Promise.all(
-        (await tools.read.cache.list('job'))
+        (await tools.read.standardList('job'))
           .map(async j => tools.read.standard('job', j)),
       );
 

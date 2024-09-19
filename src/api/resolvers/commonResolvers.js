@@ -21,8 +21,8 @@ module.exports = {
 
       const x = await (async () => {
         if (['staff', 'admin'].includes(actor.type)) {
-          const leads = await tools.read.cache.list('lead');
-          const jobs = await tools.read.cache.list('job');
+          const leads = await tools.read.standardList('lead');
+          const jobs = await tools.read.standardList('job');
 
           return {
             ...self,
@@ -46,13 +46,13 @@ module.exports = {
     roles: (_, __, { actor: { roles } }) => Object.entries(roles)
       .map(([k, v]) => ({ name: k, id: v })),
 
-    materials: (_, __, { tools }) => tools.read.cache.list('material')
+    materials: (_, __, { tools }) => tools.read.standardList('material')
       .then(ids => Promise.all(ids
         .map(id => tools.read.standard('material', id)))),
 
     material: (_, { id }, { tools }) => tools.read.standard('material', id),
 
-    customers: (_, __, { tools }) => tools.read.cache.list('customer')
+    customers: (_, __, { tools }) => tools.read.standardList('customer')
       .then(ids => Promise.all(ids
         .map(id => tools.read.standard('customer', id)))
         .then(customers => customers
@@ -60,7 +60,7 @@ module.exports = {
 
     customer: (_, { id }, { tools }) => tools.read.standard('customer', id),
 
-    leads: (_, __, { tools }) => tools.read.cache.list('lead')
+    leads: (_, __, { tools }) => tools.read.standardList('lead')
       .then(ids => Promise.all(ids
         .map(id => tools.read.standard('lead', id)))
         .then(leads => leads
@@ -68,7 +68,7 @@ module.exports = {
 
     lead: (_, { id }, { tools }) => tools.read.standard('lead', id),
 
-    jobs: (_, __, { tools }) => tools.read.cache.list('job')
+    jobs: (_, __, { tools }) => tools.read.standardList('job')
       .then(ids => Promise.all(ids
         .map(id => tools.read.standard('job', id)))
         .then(jobs => jobs
@@ -76,7 +76,7 @@ module.exports = {
 
     job: (_, { id }, { tools }) => tools.read.standard('job', id),
 
-    proposals: (_, __, { tools }) => tools.read.cache.list('proposal')
+    proposals: (_, __, { tools }) => tools.read.standardList('proposal')
       .then(ids => Promise.all(ids
         .map(id => tools.read.standard('proposal', id)))
         .then(proposals => proposals
@@ -84,26 +84,26 @@ module.exports = {
 
     proposal: (_, { id }, { tools }) => tools.read.standard('proposal', id),
 
-    admins: (_, __, { tools }) => tools.read.cache.list('admin')
+    admins: (_, __, { tools }) => tools.read.standardList('admin')
       .then(ids => Promise.all(ids
         .map(id => tools.read.standard('admin', id)))),
 
     admin: (_, { id }, { tools }) => tools.read.standard('admin', id),
 
-    salesAgents: (_, __, { tools }) => tools.read.cache.list('salesAgent')
+    salesAgents: (_, __, { tools }) => tools.read.standardList('salesAgent')
       .then(ids => Promise.all(ids
         .map(id => tools.read.standard('salesAgent', id)))),
 
     salesAgent: (_, { id }, { tools }) => tools.read.standard('salesAgent', id),
 
     // implicit plural is such a pain in the ass --ers
-    allStaff: (_, __, { tools }) => tools.read.cache.list('staff')
+    allStaff: (_, __, { tools }) => tools.read.standardList('staff')
       .then(ids => Promise.all(ids
         .map(id => tools.read.standard('staff', id)))),
 
     staff: (_, { id }, { tools }) => tools.read.standard('staff', id),
 
-    installers: (_, __, { tools }) => tools.read.cache.list('installer')
+    installers: (_, __, { tools }) => tools.read.standardList('installer')
       .then(ids => Promise.all(ids
         .map(id => tools.read.standard('installer', id)))),
 

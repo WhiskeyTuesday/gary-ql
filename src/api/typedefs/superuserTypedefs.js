@@ -37,5 +37,8 @@ module.exports = gql`
     ): String
 
     testNotification(userId: ID! type: String): String
+
+    acceptAllProposals: String
+    rejectAllProposals: String
   }
 `;

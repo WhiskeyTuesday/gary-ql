@@ -83,9 +83,9 @@ module.exports = {
 
     // TODO hardcoded to user type
     firebaseUsers: async (_, __, { tools }) => {
-      const userIds = await tools.read.cache.list('user');
+      const userIds = await tools.read.standardList('user');
       const users = (await Promise.all(
-        userIds.map(uid => tools.read.cache.entry('user', uid)),
+        userIds.map(uid => tools.read.standard('user', uid)),
       ));
 
       return users
@@ -484,6 +484,83 @@ module.exports = {
         write: tools.write,
         data,
       });
+    },
+
+    acceptAllProposals: async (_, __, { tools }) => {
+      const jobIds = await tools.read.standardList('job');
+
+      const getProposals = propIds => Promise.all(
+        propIds.map(id => tools.read.standard('proposal', id)),
+      );
+
+      const jobs = await Promise.all(
+        jobIds.map(id => tools.read.standard('job', id)),
+      );
+
+      const proposals = await Promise.all(
+        jobs.flatMap(job => getProposals(job.proposals)),
+      );
+
+      const relevantProposals = proposals.filter(p => p.status === 'pending');
+
+      console.log(relevantProposals);
+      return 'OK';
+
+      const events = relevantProposals.flatMap((p) => {
+        const stageIds = p.stages.map(s => s.id);
+
+        return [
+          {
+            key: `proposal:${p.id}`,
+            type: 'wasAccepted',
+            data: { id: p.id },
+          },
+          {
+            key: `job:${p.jobId}`,
+            type: 'hadProposalAccepted',
+            data: { stageIds },
+          },
+        ];
+      });
+
+      return tools.write({ events });
+    },
+
+    rejectAllProposals: async (_, __, { tools }) => {
+      const jobIds = await tools.read.standardList('job');
+
+      const getProposals = propIds => Promise.all(
+        propIds.map(id => tools.read.standard('proposal', id)),
+      );
+
+      const jobs = await Promise.all(
+        jobIds.map(id => tools.read.standard('job', id)),
+      );
+
+      const proposals = await Promise.all(
+        jobs.flatMap(job => getProposals(job.proposals)),
+      );
+
+      const relevantProposals = proposals.filter(p => p.status === 'pending');
+
+      const events = relevantProposals.flatMap((p) => {
+        const stageIds = p.stages.map(s => s.id);
+
+        return [
+          {
+            key: `proposal:${p.id}`,
+            type: 'wasRejected',
+            data: { id: p.id },
+          },
+          {
+            key: `job:${p.jobId}`,
+            type: 'hadProposalRejected',
+            data: { stageIds },
+          },
+        ];
+      });
+
+      return tools.write({ events });
     },
   },
 };
