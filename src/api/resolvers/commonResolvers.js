@@ -11,6 +11,11 @@ const calcWindow = ({ price, unit, widthInches, heightInches }) => {
 };
 
 const generateProposal = async ({ tools, schemae, jobId }) => {
+  const isPlainObject = x => x && typeof x === 'object' && !Array.isArray(x);
+  assert(isPlainObject(tools), 'tools must be an object');
+  assert(isPlainObject(schemae), 'schemae must be an object');
+  assert(tools.isUUID(jobId));
+
   const emptyProposal = {
     films: [],
     stages: [],
@@ -21,7 +26,6 @@ const generateProposal = async ({ tools, schemae, jobId }) => {
   };
 
   const { read: { standard } } = tools;
-  assert(tools.isUUID(jobId));
   const job = await standard('job', jobId);
   assert(job, 'job not found');
   const { stages } = job;
@@ -786,17 +790,19 @@ module.exports = {
       });
     },
 
-    sendProposal: async (_, { jobId, sim }, { tools }) => {
+    sendProposal: async (_, { jobId, sim }, { tools, schemae }) => {
       const id = tools.uuidv4();
+
+      // disallow sim flag in production (lib only allows those 3 envs)
       assert(
         (['development', 'staging'].includes(process.env.NODE_ENV) || sim),
         'sim only allowed in dev or staging',
       );
 
       // verify that proposal is valid (ie. job is in a valid complete state)
-      const proposal = await generateProposal({ tools, jobId });
+      const proposal = await generateProposal({ tools, jobId, schemae });
 
-      // if simulated, just reutrn a dummy response
+      // if simulated, just return a dummy response
       const emailDetails = sim
         ? { sim: true }
         // otherwise:
@@ -811,6 +817,9 @@ module.exports = {
 
       const memo = sim ? 'simulated' : undefined;
 
+      const job = await tools.read.standard('job', jobId);
+      assert(job, 'job not found');
+
       const events = [
         {
           key: `job:${jobId}`,
@@ -820,11 +829,21 @@ module.exports = {
         {
           key: `proposal:${id}`,
           type: 'wasCreated',
-          data: { id, ...proposal },
+          data: {
+            id,
+            jobId,
+            salesAgentId: job.salesAgentId,
+            ...proposal,
+          },
         },
       ];
 
-      return tools.write({ events });
+      const response = await tools.write({ events });
+      if (response !== 'OK') {
+        throw new Error('failed to write');
+      }
+
+      return true;
     },
 
     cancelProposal: async (_, { jobId, proposalId }, { tools }) => {
