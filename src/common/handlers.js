@@ -533,7 +533,7 @@ module.exports = {
     wasAccepted: (event, state) => ({
       status: 'accepted',
       modifiedTime: event.timestamp,
-      stasges: state.stages.map(stage => ({
+      stages: state.stages.map(stage => ({
         ...stage,
         status: event.data.stageIds.includes(stage.id)
           ? 'accepted'

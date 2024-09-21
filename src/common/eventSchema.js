@@ -343,11 +343,11 @@ module.exports = {
       stageIds: Joi.array().items(uuid).required(),
     }),
 
-    hadProposalRejected: eventData({ id: uuid }),
+    hadProposalRejected: eventData({}),
 
-    hadProposalCancelled: eventData({ id: uuid }),
+    hadProposalCancelled: eventData({}),
 
-    hadProposalExpired: eventData({ id: uuid }),
+    hadProposalExpired: eventData({}),
 
     hadInstallerAssigned: eventData({ installerId: uuid }),
 

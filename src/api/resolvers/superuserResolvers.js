@@ -497,14 +497,11 @@ module.exports = {
         jobIds.map(id => tools.read.standard('job', id)),
       );
 
-      const proposals = await Promise.all(
-        jobs.flatMap(job => getProposals(job.proposals)),
-      );
+      const proposals = (await Promise.all(
+        jobs.map(job => getProposals(job.proposals)),
+      )).flat();
 
-      const relevantProposals = proposals.filter(p => p.status === 'pending');
-
-      console.log(relevantProposals);
-      return 'OK';
+      const relevantProposals = proposals.filter(p => p.status === 'initial');
 
       const events = relevantProposals.flatMap((p) => {
         const stageIds = p.stages.map(s => s.id);
@@ -513,7 +510,7 @@ module.exports = {
           {
             key: `proposal:${p.id}`,
             type: 'wasAccepted',
-            data: { id: p.id },
+            data: { stageIds },
           },
           {
             key: `job:${p.jobId}`,
@@ -537,28 +534,24 @@ module.exports = {
         jobIds.map(id => tools.read.standard('job', id)),
       );
 
-      const proposals = await Promise.all(
-        jobs.flatMap(job => getProposals(job.proposals)),
-      );
+      const proposals = (await Promise.all(
+        jobs.map(job => getProposals(job.proposals)),
+      )).flat();
 
-      const relevantProposals = proposals.filter(p => p.status === 'pending');
+      const relevantProposals = proposals.filter(p => p.status === 'initial');
 
-      const events = relevantProposals.flatMap((p) => {
-        const stageIds = p.stages.map(s => s.id);
-
-        return [
-          {
-            key: `proposal:${p.id}`,
-            type: 'wasRejected',
-            data: { id: p.id },
-          },
-          {
-            key: `job:${p.jobId}`,
-            type: 'hadProposalRejected',
-            data: { stageIds },
-          },
-        ];
-      });
+      const events = relevantProposals.flatMap(p => [
+        {
+          key: `proposal:${p.id}`,
+          type: 'wasRejected',
+          data: {},
+        },
+        {
+          key: `job:${p.jobId}`,
+          type: 'hadProposalRejected',
+          data: {},
+        },
+      ]);
 
       return tools.write({ events });
     },

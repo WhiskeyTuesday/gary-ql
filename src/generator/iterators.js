@@ -774,7 +774,7 @@ module.exports = [
           key: `job:${p.jobId}`,
           type: 'hadProposalCancelled',
           metadata: { actor: { type: 'salesAgent', id: p.salesAgentId } },
-          data: { id: p.id },
+          data: {},
         },
       ]));
     },
@@ -840,7 +840,7 @@ module.exports = [
           key: `job:${j.id}`,
           type: 'hadProposalExpired',
           metadata: { actor: systemAgent },
-          data: { id: j.proposals[j.proposals.length - 1] },
+          data: {},
         },
         {
           key: `proposal:${j.proposals[j.proposals.length - 1]}`,
@@ -873,7 +873,7 @@ module.exports = [
               key: `job:${j.id}`,
               type: 'hadProposalRejected',
               metadata: { actor: systemAgent },
-              data: { id: j.proposals[j.proposals.length - 1] },
+              data: {},
             },
             {
               key: `proposal:${j.proposals[j.proposals.length - 1]}`,
@@ -894,7 +894,7 @@ module.exports = [
               key: `job:${j.id}`,
               type: 'hadProposalRejected',
               metadata: { actor: systemAgent },
-              data: { id: j.proposals[j.proposals.length - 1] },
+              data: {},
             },
             {
               key: `proposal:${j.proposals[j.proposals.length - 1]}`,

@@ -919,11 +919,11 @@ module.exports = {
         .filter(({ id }) => !completedStages.some(({ id: cid }) => cid === id))
         .every(({ status }) => ['complete', 'rejected'].includes(status));
 
-      const installerEvent = jobComplete ? [{
-        key: `installer:${job.installerId}`,
+      const installerEvent = jobComplete ? job.installers.map(iid => ({
+        key: `installer:${iid}`,
         type: 'completedJob',
         data: { jobId: job.id },
-      }] : [];
+      })) : [];
 
       const salesAgentEvent = jobComplete ? [{
         key: `salesAgent:${job.salesAgentId}`,
