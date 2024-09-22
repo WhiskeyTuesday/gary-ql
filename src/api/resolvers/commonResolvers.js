@@ -935,4 +935,28 @@ module.exports = {
       return tools.write({ events });
     },
   },
+
+  forceProposalApproved: async (_, { jobId, proposalId }, { tools }) => {
+  },
+
+  forceProposalRejected: async (_, { jobId, proposalId }, { tools }) => {
+  },
+
+  cancelProposal: async (_, { jobId, proposalId }, { tools }) => {
+  },
+
+  recordInvoiceSent: async (_, { jobId, invoiceId }, { tools }) => {
+  },
+
+  recordInvoicePaid: async (_, { jobId, invoiceId }, { tools }) => {
+  },
+
+  recordInvoiceCancelled: async (_, { jobId, invoiceId }, { tools }) => {
+  },
+
+  recordInvoiceRefunded: async (_, { jobId, invoiceId }, { tools }) => {
+  },
+
+  recordInvoiceVoided: async (_, { jobId, invoiceId }, { tools }) => {
+  },
 };
