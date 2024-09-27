@@ -362,6 +362,41 @@ module.exports = {
     hadWindowsCompleted: eventData({
       windowIds: Joi.array().items(uuid).required(),
     }),
+
+    hadInvoiceSent: eventData({
+      id: uuid,
+      externalId: Joi.string().required(),
+      sentTimestamp: Joi.date().timestamp('unix').required(),
+      memo: memo.optional(),
+    }),
+
+    hadInvoicePaid: eventData({
+      invoiceId: uuid,
+      externalId: Joi.string().optional(),
+      paidTimestamp: Joi.date().timestamp('unix').required(),
+      memo: memo.optional(),
+    }),
+
+    hadInvoiceCancelled: eventData({
+      invoiceId: uuid,
+      externalId: Joi.string().optional(),
+      cancelledTimestamp: Joi.date().timestamp('unix').required(),
+      memo: memo.optional(),
+    }),
+
+    hadInvoiceRefunded: eventData({
+      invoiceId: uuid,
+      externalId: Joi.string().optional(),
+      refundedTimestamp: Joi.date().timestamp('unix').required(),
+      memo: memo.optional(),
+    }),
+
+    hadInvoiceVoided: eventData({
+      invoiceId: uuid,
+      externalId: Joi.string().optional(),
+      voidedTimestamp: Joi.date().timestamp('unix').required(),
+      memo: memo.optional(),
+    }),
   },
 
   proposal: {

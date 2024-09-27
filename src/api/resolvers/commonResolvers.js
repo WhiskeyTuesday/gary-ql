@@ -846,27 +846,6 @@ module.exports = {
       return true;
     },
 
-    cancelProposal: async (_, { jobId, proposalId }, { tools }) => {
-      const { isUUID } = tools;
-      assert(isUUID(proposalId), 'target proposalId is invalid.');
-      assert(isUUID(jobId), 'target jobId is invalid.');
-
-      // verify proposal is still pending
-
-      // TODO call sendgrid
-      // TODO if fail return error
-      // otherwise:
-      // const emailDetails = false; // TODO some kind of identifier?
-
-      const event = {
-        key: `job:${jobId}`,
-        type: 'hadProposalRevoked',
-        data: { id: proposalId },
-      };
-
-      return tools.write({ event });
-    },
-
     supercedeProposal: async (_, { jobId, stageIds }, { tools }) => {
       const id = tools.uuidv4();
       assert(tools.isUUID(jobId), 'target jobId is invalid');
@@ -934,29 +913,186 @@ module.exports = {
       const events = [windowEvent, ...installerEvent, ...salesAgentEvent];
       return tools.write({ events });
     },
-  },
 
-  forceProposalApproved: async (_, { jobId, proposalId }, { tools }) => {
-  },
+    forceProposalAccepted: async (_, { jobId, proposalId }, { tools }) => {
+      const job = await tools.read.standard('job', jobId);
+      assert(job, 'job not found');
 
-  forceProposalRejected: async (_, { jobId, proposalId }, { tools }) => {
-  },
+      const proposal = await tools.read.standard('proposal', proposalId);
+      assert(proposal, 'proposal not found');
 
-  cancelProposal: async (_, { jobId, proposalId }, { tools }) => {
-  },
+      const stageIds = proposal.stages.map(s => s.id);
 
-  recordInvoiceSent: async (_, { jobId, invoiceId }, { tools }) => {
-  },
+      // TODO allow for force approval of individual stages
 
-  recordInvoicePaid: async (_, { jobId, invoiceId }, { tools }) => {
-  },
+      return tools.write({
+        events: [
+          {
+            key: `job:${jobId}`,
+            type: 'hadProposalAccepted',
+            data: { stageIds },
+          },
+          {
+            key: `proposal:${proposalId}`,
+            type: 'wasAccepted',
+            data: { stageIds },
+          },
+        ],
+      });
+    },
 
-  recordInvoiceCancelled: async (_, { jobId, invoiceId }, { tools }) => {
-  },
+    forceProposalRejected: async (_, { jobId, proposalId }, { tools }) => {
+      const job = await tools.read.standard('job', jobId);
+      assert(job, 'job not found');
 
-  recordInvoiceRefunded: async (_, { jobId, invoiceId }, { tools }) => {
-  },
+      const proposal = await tools.read.standard('proposal', proposalId);
+      assert(proposal, 'proposal not found');
 
-  recordInvoiceVoided: async (_, { jobId, invoiceId }, { tools }) => {
+      return tools.write({
+        events: [
+          {
+            key: `job:${jobId}`,
+            type: 'hadProposalRejected',
+            data: {},
+          },
+          {
+            key: `proposal:${proposalId}`,
+            type: 'wasRejected',
+            data: {},
+          },
+        ],
+      });
+    },
+
+    cancelProposal: async (_, { jobId, proposalId }, { tools }) => {
+      const job = await tools.read.standard('job', jobId);
+      assert(job, 'job not found');
+
+      const proposal = await tools.read.standard('proposal', proposalId);
+      assert(proposal, 'proposal not found');
+
+      return tools.write({
+        events: [
+          {
+            key: `job:${jobId}`,
+            type: 'hadProposalCancelled',
+            data: {},
+          },
+          {
+            key: `proposal:${proposalId}`,
+            type: 'wasCancelled',
+            data: {},
+          },
+        ],
+      });
+    },
+
+    recordInvoiceSent: async (
+      _,
+      { jobId, sentTimestamp, externalId, memo },
+      { tools },
+    ) => {
+      const id = tools.uuidv4();
+      const job = await tools.read.standard('job', jobId);
+      assert(job, 'job not found');
+
+      return tools.write({
+        event: {
+          key: `job:${jobId}`,
+          type: 'hadInvoiceSent',
+          data: { externalId, id, sentTimestamp, memo },
+        },
+      });
+    },
+
+    recordInvoicePaid: async (
+      _,
+      { jobId, invoiceId, paidTimestamp, externalId, memo },
+      { tools },
+    ) => {
+      const job = await tools.read.standard('job', jobId);
+      assert(job, 'job not found');
+
+      const invoice = job.invoices.find(i => i.id === invoiceId);
+      assert(invoice, 'invoice not found');
+      assert(invoice.status === 'sent', 'invoice not payable');
+
+      return tools.write({
+        event: {
+          key: `job:${jobId}`,
+          type: 'hadInvoicePaid',
+          data: { invoiceId, externalId, paidTimestamp, memo },
+        },
+      });
+    },
+
+    recordInvoiceCancelled: async (
+      _,
+      { jobId, invoiceId, cancelledTimestamp, externalId, memo },
+      { tools },
+    ) => {
+      const job = await tools.read.standard('job', jobId);
+      assert(job, 'job not found');
+
+      const invoice = job.invoices.find(i => i.id === invoiceId);
+      assert(invoice, 'invoice not found');
+      assert(invoice.status === 'sent', 'invoice not payable');
+
+      return tools.write({
+        events: [
+          {
+            key: `job:${jobId}`,
+            type: 'hadInvoiceCancelled',
+            data: { invoiceId, externalId, cancelledTimestamp, memo },
+          },
+        ],
+      });
+    },
+
+    recordInvoiceRefunded: async (
+      _,
+      { jobId, invoiceId, refundedTimestamp, externalId, memo },
+      { tools },
+    ) => {
+      const job = await tools.read.standard('job', jobId);
+      assert(job, 'job not found');
+
+      const invoice = job.invoices.find(i => i.id === invoiceId);
+      assert(invoice, 'invoice not found');
+      assert(invoice.status === 'sent', 'invoice not payable');
+
+      return tools.write({
+        events: [
+          {
+            key: `job:${jobId}`,
+            type: 'hadInvoiceRefunded',
+            data: { invoiceId, externalId, refundedTimestamp, memo },
+          },
+        ],
+      });
+    },
+
+    recordInvoiceVoided: async (
+      _,
+      { jobId, invoiceId, voidedTimestamp, externalId, memo },
+      { tools },
+    ) => {
+      const job = await tools.read.standard('job', jobId);
+      assert(job, 'job not found');
+
+      const invoice = job.invoices.find(i => i.id === invoiceId);
+      assert(invoice, 'invoice not found');
+      assert(invoice.status === 'sent', 'invoice not payable');
+
+      return tools.write({
+        events: [
+          {
+            key: `job:${jobId}`,
+            type: 'hadInvoiceVoided',
+            data: { invoiceId, externalId, voidedTimestamp, memo },
+          },
+        ],
+      });
+    },
   },
 };

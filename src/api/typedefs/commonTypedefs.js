@@ -88,8 +88,10 @@ module.exports = gql`
     trackLead(details: LeadInput!): Lead
     editLead(id: ID! salesAgentId: ID visitTimestamp: Int notes: String): Lead
     markLeadRejected(id: ID!): Lead
+
     createCustomer(details: CustomerInput!): String
     editCustomer(id: ID!, details: CustomerInput!): String
+
     addAddress(customerId: ID!, address: AddressInput!): String
     editAddress(
       customerId: ID!
@@ -100,12 +102,55 @@ module.exports = gql`
     ): Customer
     deprecateAddress(customerId: ID! addressId: ID!): String
     reinstateAddress(customerId: ID! addressId: ID!): String
+
     createJobDirect(details: JobCreatedInput!): Job
     convertLead(leadId: ID! details: LeadConvertedInput!): Job
     modifyJob(id: ID! details: JobDetailsInput!): Job
+
     sendProposal(jobId: ID! sim: Boolean): Boolean
-    cancelProposal(jobId: ID! proposalId: ID!): Boolean
     supercedeProposal(jobId: ID! stageIds: [ID!]!): Boolean
     markWindowsComplete(jobId: ID! windowIds: [ID!]!): String
+    forceProposalAccepted(jobId: ID! proposalId: ID!): Boolean
+    forceProposalRejected(jobId: ID! proposalId: ID!): Boolean
+    cancelProposal(jobId: ID! proposalId: ID!): Boolean
+
+    recordInvoiceSent(
+      jobId: ID!
+      sentTimestamp: Int!
+      externalId: ID!
+      memo: String
+    ): Boolean
+
+    recordInvoicePaid(
+      jobId: ID!
+      invoiceId: ID!
+      paidTimestamp: Int!
+      externalId: ID
+      memo: String
+    ): Boolean
+
+    recordInvoiceCancelled(
+      jobId: ID!
+      invoiceId: ID!
+      cancelledTimestamp: Int!
+      externalId: ID
+      memo: String
+    ): Boolean
+
+    recordInvoiceRefunded(
+      jobId: ID!
+      invoiceId: ID!
+      refundedTimestamp: Int!
+      externalId: ID
+      memo: String
+    ): Boolean
+
+    recordInvoiceVoided(
+      jobId: ID!
+      invoiceId: ID!
+      voidedTimestamp: Int!
+      externalId: ID
+      memo: String
+    ): Boolean
   }
 `;

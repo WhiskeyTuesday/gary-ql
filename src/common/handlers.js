@@ -365,6 +365,7 @@ module.exports = {
       stages: [],
       materials: [],
       proposals: [],
+      invoices: [],
       installers: [],
 
       startTimestamp: event.data.startTimestamp || false,
@@ -485,6 +486,49 @@ module.exports = {
         status,
       });
     },
+
+    hadInvoiceSent: (event, state) => ({
+      modifiedTime: event.timestamp,
+      invoices: state.invoices.concat({
+        id: event.data.invoiceId,
+        status: 'sent',
+        externalId: event.data.externalId,
+        sentTime: event.data.sentTime,
+        memo: event.data.memo,
+      }),
+    }),
+
+    hadInvoicePaid: (event, state) => ({
+      modifiedTime: event.timestamp,
+      invoices: state.invoices.map(invoice => ({
+        ...invoice,
+        status: 'paid',
+      })),
+    }),
+
+    hadInvoiceCancelled: (event, state) => ({
+      modifiedTime: event.timestamp,
+      invoices: state.invoices.map(invoice => ({
+        ...invoice,
+        status: 'cancelled',
+      })),
+    }),
+
+    hadInvoiceRefunded: (event, state) => ({
+      modifiedTime: event.timestamp,
+      invoices: state.invoices.map(invoice => ({
+        ...invoice,
+        status: 'refunded',
+      })),
+    }),
+
+    hadInvoiceVoided: (event, state) => ({
+      modifiedTime: event.timestamp,
+      invoices: state.invoices.map(invoice => ({
+        ...invoice,
+        status: 'voided',
+      })),
+    }),
   },
 
   proposal: {
