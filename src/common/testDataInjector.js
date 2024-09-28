@@ -155,6 +155,12 @@ module.exports = async ({ now, config, eventDB, stateDB }) => { // , tools })
       emailAddress: '1@test.com',
       phoneNumber: '+16045551111',
     },
+    {
+      firstName: 'Blanco',
+      lastName: 'Blankovitch',
+      emailAddress: 'empty@test.com',
+      phoneNumber: '+16045551112',
+    },
   ];
 
   const adminEvents = adminDescriptors.map((ad, idx) => ({

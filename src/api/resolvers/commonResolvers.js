@@ -971,6 +971,8 @@ module.exports = {
       const proposal = await tools.read.standard('proposal', proposalId);
       assert(proposal, 'proposal not found');
 
+      // TODO send a cancellation email
+
       return tools.write({
         events: [
           {
