@@ -37,18 +37,18 @@ module.exports = {
       lead.customerId,
     ),
 
-    salesAgent: async (lead, _, { tools }) => lead.salesAgentId
+    salesAgent: async (lead, _, { tools }) => (lead.salesAgentId
       ? tools.read.standard(
         'salesAgent',
         lead.salesAgentId,
       )
-      : undefined,
+      : undefined),
   },
 
   Job: {
-    proposalStatus: async (job, _, { tools }) => job.proposals.length
+    proposalStatus: async (job, _, { tools }) => (job.proposals.length
       ? (await tools.read.standard('proposal', job.proposals.at(-1))).status
-      : 'unproposed',
+      : 'unproposed'),
 
     customer: async (job, _, { tools }) => tools.read.standard(
       'customer',
@@ -102,6 +102,12 @@ module.exports = {
       'salesAgent',
       root.salesAgentId,
     ),
+
+    sent: () => true,
+    issuedTime: ({ createdTime }) => createdTime,
+    accepted: ({ acceptedTime }) => !!acceptedTime,
+    rejected: ({ rejectedTime }) => !!rejectedTime,
+    cancelled: ({ cancelledTime }) => !!cancelledTime,
   },
 
   Query: {

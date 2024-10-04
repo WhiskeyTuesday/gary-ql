@@ -97,6 +97,24 @@ module.exports = gql`
     windows: [Window]!
   }
 
+  type Invoice {
+    id: ID!
+    externalId: ID!
+    status: String!
+    sentTime: Int!
+
+    sent: Boolean!
+    paid: Boolean!
+    cancelled: Boolean!
+    refunded: Boolean!
+    voided: Boolean!
+
+    paidTime: Int
+    cancelledTime: Int
+    refundedTime: Int
+    voidedTime: Int
+  }
+
   type Job {
     id: ID!
     status: String!
@@ -108,6 +126,7 @@ module.exports = gql`
     materials: [Material]!
     stages: [JobStage]!
     proposals: [Proposal]!
+    invoices: [Invoice]!
 
     startTimestamp: Int
     completedTime: Int
@@ -180,6 +199,7 @@ module.exports = gql`
 
   type Proposal {
     id: ID!
+    status: String!
     job: Job!
     salesAgent: SalesAgent!
     films: [FilmProposal]!
@@ -188,6 +208,16 @@ module.exports = gql`
     taxAmount: Int!
     subtotal: Int!
     total: Int!
+
+    sent: Boolean!
+    accepted: Boolean!
+    rejected: Boolean!
+    cancelled: Boolean!
+
+    issuedTime: Int!
+    acceptedTime: Int
+    rejectedTime: Int
+    cancelledTime: Int
   }
 
   type Query {

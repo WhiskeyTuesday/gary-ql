@@ -235,7 +235,25 @@ module.exports = {
         .then(jobs => jobs
           .sort((a, b) => b.modifiedTime - a.modifiedTime))),
 
-    job: (_, { id }, { tools }) => tools.read.standard('job', id),
+    job: async (_, { id }, { tools }) => {
+      const job = await tools.read.standard('job', id);
+      assert(job, 'job not found');
+
+      const { invoices, ...rest } = job;
+
+      return {
+        invoices: invoices.map(i => ({
+          sent: true,
+          paid: !!i.paidTime,
+          cancelled: !!i.cancelledTime,
+          refunded: !!i.refundedTime,
+          voided: !!i.voidedTime,
+          ...i,
+        })),
+
+        ...rest,
+      };
+    },
 
     proposals: (_, __, { tools }) => tools.read.standardList('proposal')
       .then(ids => Promise.all(ids
@@ -1038,7 +1056,7 @@ module.exports = {
 
       const invoice = job.invoices.find(i => i.id === invoiceId);
       assert(invoice, 'invoice not found');
-      assert(invoice.status === 'sent', 'invoice not payable');
+      assert(invoice.status === 'sent', 'invoice not cancellable');
 
       return tools.write({
         events: [
@@ -1061,7 +1079,7 @@ module.exports = {
 
       const invoice = job.invoices.find(i => i.id === invoiceId);
       assert(invoice, 'invoice not found');
-      assert(invoice.status === 'sent', 'invoice not payable');
+      assert(invoice.status === 'sent', 'invoice not refundable');
 
       return tools.write({
         events: [
@@ -1084,7 +1102,7 @@ module.exports = {
 
       const invoice = job.invoices.find(i => i.id === invoiceId);
       assert(invoice, 'invoice not found');
-      assert(invoice.status === 'sent', 'invoice not payable');
+      assert(invoice.status === 'sent', 'invoice not voidable');
 
       return tools.write({
         events: [

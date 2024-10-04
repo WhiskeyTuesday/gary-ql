@@ -503,6 +503,7 @@ module.exports = {
       invoices: state.invoices.map(invoice => ({
         ...invoice,
         status: 'paid',
+        paidTime: event.data.paidTime,
       })),
     }),
 
@@ -511,6 +512,7 @@ module.exports = {
       invoices: state.invoices.map(invoice => ({
         ...invoice,
         status: 'cancelled',
+        cancelledTime: event.data.cancelledTime,
       })),
     }),
 
@@ -519,6 +521,7 @@ module.exports = {
       invoices: state.invoices.map(invoice => ({
         ...invoice,
         status: 'refunded',
+        refundedTime: event.data.refundedTime,
       })),
     }),
 
@@ -527,6 +530,7 @@ module.exports = {
       invoices: state.invoices.map(invoice => ({
         ...invoice,
         status: 'voided',
+        voidedTime: event.data.voidedTime,
       })),
     }),
   },
@@ -556,27 +560,32 @@ module.exports = {
     wasCancelled: event => ({
       status: 'cancelled',
       modifiedTime: event.timestamp,
+      cancelledTime: event.timestamp,
     }),
 
     wasSuperseded: event => ({
       status: 'superseded',
       modifiedTime: event.timestamp,
       supersededBy: event.data.supersededBy,
+      supersededTime: event.timestamp,
     }),
 
     wasExpired: event => ({
       status: 'expired',
       modifiedTime: event.timestamp,
+      expiredTime: event.timestamp,
     }),
 
     wasRejected: event => ({
       status: 'rejected',
       modifiedTime: event.timestamp,
+      rejectedTime: event.timestamp,
     }),
 
     wasAccepted: (event, state) => ({
       status: 'accepted',
       modifiedTime: event.timestamp,
+      acceptedTime: event.timestamp,
       stages: state.stages.map(stage => ({
         ...stage,
         status: event.data.stageIds.includes(stage.id)

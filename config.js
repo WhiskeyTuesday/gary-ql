@@ -159,12 +159,12 @@ const config = {
     enabled: process.env.TEST_DATA === 'true',
     suId: 'db96362c-d612-40b1-83fd-a258ad7e70ed',
     staffIds: ['e0f012cc-88e0-4568-8b79-2e0eab32ece5'],
+    installerIds: ['3c652fb9-5175-4ac1-b168-75563b7ccd89'],
+    salesAgentIds: ['09721c87-2e6d-491d-b450-39e8d2506df6'],
     adminIds: [
       'b6a4a1d5-bdac-459d-8325-4beca2a47c44',
       'e2afc0b3-817d-46d1-aa21-bcd638cc1a57',
     ],
-    installerIds: ['3c652fb9-5175-4ac1-b168-75563b7ccd89'],
-    salesAgentIds: ['09721c87-2e6d-491d-b450-39e8d2506df6'],
 
     phoneNumberSubs: JSON.parse(process.env.PHONE_NUMBER_SUBS),
 
