@@ -112,7 +112,7 @@ module.exports = gql`
     markWindowsComplete(jobId: ID! windowIds: [ID!]!): String
     forceProposalAccepted(jobId: ID! proposalId: ID!): Boolean
     forceProposalRejected(jobId: ID! proposalId: ID!): Boolean
-    cancelProposal(jobId: ID! proposalId: ID!): Boolean
+    cancelProposal(jobId: ID! proposalId: ID! memo: String): Boolean
 
     recordInvoiceSent(
       jobId: ID!

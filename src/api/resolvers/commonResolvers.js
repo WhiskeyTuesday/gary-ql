@@ -994,7 +994,11 @@ module.exports = {
       }
     },
 
-    cancelProposal: async (_, { jobId, proposalId }, { tools }) => {
+    cancelProposal: async (
+      _,
+      { jobId, proposalId, memo },
+      { tools },
+    ) => {
       const job = await tools.read.standard('job', jobId);
       assert(job, 'job not found');
 
@@ -1003,7 +1007,7 @@ module.exports = {
 
       // TODO send a cancellation email
 
-      return tools.write({
+      const response = await tools.write({
         events: [
           {
             key: `job:${jobId}`,
@@ -1013,10 +1017,16 @@ module.exports = {
           {
             key: `proposal:${proposalId}`,
             type: 'wasCancelled',
-            data: {},
+            data: { memo },
           },
         ],
       });
+
+      if (response !== 'OK') {
+        throw new Error('failed to write');
+      } else {
+        return true;
+      }
     },
 
     recordInvoiceSent: async (

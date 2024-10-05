@@ -449,6 +449,7 @@ module.exports = {
     }),
 
     wasCancelled: eventData({
+      referenceId: Joi.string().min(1).max(255).optional(),
       memo: memo.optional(),
     }),
 

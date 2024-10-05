@@ -220,6 +220,9 @@ module.exports = gql`
     acceptedTime: Int
     rejectedTime: Int
     cancelledTime: Int
+
+    cancelledMemo: String
+    rejectedMemo: String
   }
 
   type Query {

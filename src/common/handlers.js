@@ -560,6 +560,8 @@ module.exports = {
 
     wasCancelled: event => ({
       status: 'cancelled',
+      cancelledMemo: event.data.memo,
+      cancelledReferenceId: event.data.referenceId,
       modifiedTime: event.timestamp,
       cancelledTime: event.timestamp,
     }),
