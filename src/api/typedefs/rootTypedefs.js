@@ -183,6 +183,8 @@ module.exports = gql`
 
   type StageProposal {
     id: ID!
+    status: String!
+    accepted: Boolean!
     windows: [WindowProposal]!
     films: [FilmProposal]!
     subtotal: Int!

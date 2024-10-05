@@ -943,7 +943,7 @@ module.exports = {
 
       // TODO allow for force approval of individual stages
 
-      return tools.write({
+      const response = await tools.write({
         events: [
           {
             key: `job:${jobId}`,
@@ -957,6 +957,12 @@ module.exports = {
           },
         ],
       });
+
+      if (response !== 'OK') {
+        throw new Error('failed to write');
+      } else {
+        return true;
+      }
     },
 
     forceProposalRejected: async (_, { jobId, proposalId }, { tools }) => {
@@ -966,7 +972,7 @@ module.exports = {
       const proposal = await tools.read.standard('proposal', proposalId);
       assert(proposal, 'proposal not found');
 
-      return tools.write({
+      const response = await tools.write({
         events: [
           {
             key: `job:${jobId}`,
@@ -980,6 +986,12 @@ module.exports = {
           },
         ],
       });
+
+      if (response !== 'OK') {
+        throw new Error('failed to write');
+      } else {
+        return true;
+      }
     },
 
     cancelProposal: async (_, { jobId, proposalId }, { tools }) => {

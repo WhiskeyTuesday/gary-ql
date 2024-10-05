@@ -545,6 +545,7 @@ module.exports = {
 
       stages: event.data.stages.map(stage => ({
         ...stage,
+        accepted: false,
         status: 'initial',
       })),
 
@@ -588,6 +589,7 @@ module.exports = {
       acceptedTime: event.timestamp,
       stages: state.stages.map(stage => ({
         ...stage,
+        accepted: true,
         status: event.data.stageIds.includes(stage.id)
           ? 'accepted'
           : 'rejected',
