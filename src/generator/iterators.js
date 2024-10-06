@@ -734,7 +734,6 @@ module.exports = [
             data: { proposalId },
           },
           {
-            // TODO proposal created goes here
             key: `proposal:${proposalId}`,
             type: 'wasCreated',
             metadata: { actor: { type: 'salesAgent', id: salesAgentId } },
