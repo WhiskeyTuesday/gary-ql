@@ -1102,7 +1102,7 @@ module.exports = {
 
       const invoice = job.invoices.find(i => i.id === invoiceId);
       assert(invoice, 'invoice not found');
-      assert(invoice.status === 'sent', 'invoice not refundable');
+      assert(invoice.status === 'paid', 'invoice not refundable');
 
       const response = await tools.write({
         events: [
@@ -1131,7 +1131,7 @@ module.exports = {
 
       const invoice = job.invoices.find(i => i.id === invoiceId);
       assert(invoice, 'invoice not found');
-      assert(invoice.status === 'sent', 'invoice not voidable');
+      assert(invoice.status === 'paid', 'invoice not voidable');
 
       const response = await tools.write({
         events: [

@@ -500,46 +500,54 @@ module.exports = {
 
     hadInvoicePaid: (event, state) => ({
       modifiedTime: event.timestamp,
-      invoices: state.invoices.map(invoice => ({
-        ...invoice,
-        status: 'paid',
-        paidTimestamp: event.data.paidTimestamp,
-        paidMemo: event.data.memo,
-        paidExternalId: event.data.externalId,
-      })),
+      invoices: state.invoices
+        .filter(invoice => invoice.id !== event.data.invoiceId)
+        .concat({
+          ...state.invoices.find(i => i.id === event.data.invoiceId),
+          status: 'paid',
+          paidTimestamp: event.data.paidTimestamp,
+          paidMemo: event.data.memo,
+          paidExternalId: event.data.externalId,
+        }),
     }),
 
     hadInvoiceCancelled: (event, state) => ({
       modifiedTime: event.timestamp,
-      invoices: state.invoices.map(invoice => ({
-        ...invoice,
-        status: 'cancelled',
-        cancelledTimestamp: event.data.cancelledTimestamp,
-        cancelledMemo: event.data.memo,
-        cancelledExternalId: event.data.externalId,
-      })),
+      invoices: state.invoices
+        .filter(invoice => invoice.id !== event.data.invoiceId)
+        .concat({
+          ...state.invoices.find(i => i.id === event.data.invoiceId),
+          status: 'cancelled',
+          cancelledTimestamp: event.data.cancelledTimestamp,
+          cancelledMemo: event.data.memo,
+          cancelledExternalId: event.data.externalId,
+        }),
     }),
 
     hadInvoiceRefunded: (event, state) => ({
       modifiedTime: event.timestamp,
-      invoices: state.invoices.map(invoice => ({
-        ...invoice,
-        status: 'refunded',
-        refundedTimestamp: event.data.refundedTimestamp,
-        refundedMemo: event.data.memo,
-        refundedExternalId: event.data.externalId,
-      })),
+      invoices: state.invoices
+        .filter(invoice => invoice.id !== event.data.invoiceId)
+        .concat({
+          ...state.invoices.find(i => i.id === event.data.invoiceId),
+          status: 'refunded',
+          refundedTimestamp: event.data.refundedTimestamp,
+          refundedMemo: event.data.memo,
+          refundedExternalId: event.data.externalId,
+        }),
     }),
 
     hadInvoiceVoided: (event, state) => ({
       modifiedTime: event.timestamp,
-      invoices: state.invoices.map(invoice => ({
-        ...invoice,
-        status: 'voided',
-        voidedTimestamp: event.data.voidedTimestamp,
-        voidedMemo: event.data.memo,
-        voidedExternalId: event.data.externalId,
-      })),
+      invoices: state.invoices
+        .filter(invoice => invoice.id !== event.data.invoiceId)
+        .concat({
+          ...state.invoices.find(i => i.id === event.data.invoiceId),
+          status: 'voided',
+          voidedTimestamp: event.data.voidedTimestamp,
+          voidedMemo: event.data.memo,
+          voidedExternalId: event.data.externalId,
+        }),
     }),
   },
 
