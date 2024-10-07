@@ -101,7 +101,7 @@ module.exports = gql`
     id: ID!
     externalId: ID!
     status: String!
-    sentTime: Int!
+    sentTimestamp: Int!
 
     sent: Boolean!
     paid: Boolean!
@@ -109,10 +109,21 @@ module.exports = gql`
     refunded: Boolean!
     voided: Boolean!
 
-    paidTime: Int
-    cancelledTime: Int
-    refundedTime: Int
-    voidedTime: Int
+    paidTimestamp: Int
+    cancelledTimestamp: Int
+    refundedTimestamp: Int
+    voidedTimestamp: Int
+
+    sentMemo: String
+    paidMemo: String
+    cancelledMemo: String
+    refundedMemo: String
+    voidedMemo: String
+
+    paidExternalId: ID
+    cancelledExternalId: ID
+    refundedExternalId: ID
+    voidedExternalId: ID
   }
 
   type Job {
@@ -216,10 +227,10 @@ module.exports = gql`
     rejected: Boolean!
     cancelled: Boolean!
 
-    issuedTime: Int!
-    acceptedTime: Int
-    rejectedTime: Int
-    cancelledTime: Int
+    issuedTimestamp: Int!
+    acceptedTimestamp: Int
+    rejectedTimestamp: Int
+    cancelledTimestamp: Int
 
     cancelledMemo: String
     rejectedMemo: String

@@ -490,10 +490,10 @@ module.exports = {
     hadInvoiceSent: (event, state) => ({
       modifiedTime: event.timestamp,
       invoices: state.invoices.concat({
-        id: event.data.invoiceId,
+        id: event.data.id,
         status: 'sent',
         externalId: event.data.externalId,
-        sentTime: event.data.sentTime,
+        sentTimestamp: event.data.sentTimestamp,
         memo: event.data.memo,
       }),
     }),
@@ -503,7 +503,9 @@ module.exports = {
       invoices: state.invoices.map(invoice => ({
         ...invoice,
         status: 'paid',
-        paidTime: event.data.paidTime,
+        paidTimestamp: event.data.paidTimestamp,
+        paidMemo: event.data.memo,
+        paidExternalId: event.data.externalId,
       })),
     }),
 
@@ -512,7 +514,9 @@ module.exports = {
       invoices: state.invoices.map(invoice => ({
         ...invoice,
         status: 'cancelled',
-        cancelledTime: event.data.cancelledTime,
+        cancelledTimestamp: event.data.cancelledTimestamp,
+        cancelledMemo: event.data.memo,
+        cancelledExternalId: event.data.externalId,
       })),
     }),
 
@@ -521,7 +525,9 @@ module.exports = {
       invoices: state.invoices.map(invoice => ({
         ...invoice,
         status: 'refunded',
-        refundedTime: event.data.refundedTime,
+        refundedTimestamp: event.data.refundedTimestamp,
+        refundedMemo: event.data.memo,
+        refundedExternalId: event.data.externalId,
       })),
     }),
 
@@ -530,7 +536,9 @@ module.exports = {
       invoices: state.invoices.map(invoice => ({
         ...invoice,
         status: 'voided',
-        voidedTime: event.data.voidedTime,
+        voidedTimestamp: event.data.voidedTimestamp,
+        voidedMemo: event.data.memo,
+        voidedExternalId: event.data.externalId,
       })),
     }),
   },
@@ -563,32 +571,32 @@ module.exports = {
       cancelledMemo: event.data.memo,
       cancelledReferenceId: event.data.referenceId,
       modifiedTime: event.timestamp,
-      cancelledTime: event.timestamp,
+      cancelledTimestamp: event.timestamp,
     }),
 
     wasSuperseded: event => ({
       status: 'superseded',
       modifiedTime: event.timestamp,
       supersededBy: event.data.supersededBy,
-      supersededTime: event.timestamp,
+      supersededTimestamp: event.timestamp,
     }),
 
     wasExpired: event => ({
       status: 'expired',
       modifiedTime: event.timestamp,
-      expiredTime: event.timestamp,
+      expiredTimestamp: event.timestamp,
     }),
 
     wasRejected: event => ({
       status: 'rejected',
       modifiedTime: event.timestamp,
-      rejectedTime: event.timestamp,
+      rejectedTimestamp: event.timestamp,
     }),
 
     wasAccepted: (event, state) => ({
       status: 'accepted',
       modifiedTime: event.timestamp,
-      acceptedTime: event.timestamp,
+      acceptedTimestamp: event.timestamp,
       stages: state.stages.map(stage => ({
         ...stage,
         accepted: true,

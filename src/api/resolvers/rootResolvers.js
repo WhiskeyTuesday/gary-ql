@@ -76,6 +76,15 @@ module.exports = {
     installers: async (job, _, { tools }) => Promise.all(
       job.installers.map(i => tools.read.standard('installer', i)),
     ),
+
+    invoices: async (job, _, __) => job.invoices.map(i => ({
+      sent: true,
+      paid: !!i.paidTimestamp,
+      cancelled: !!i.cancelledTimestamp,
+      refunded: !!i.refundedTimestamp,
+      voided: !!i.voidedTimestamp,
+      ...i,
+    })),
   },
 
   FilmProposal: {
@@ -104,10 +113,10 @@ module.exports = {
     ),
 
     sent: () => true,
-    issuedTime: ({ createdTime }) => createdTime,
-    accepted: ({ acceptedTime }) => !!acceptedTime,
-    rejected: ({ rejectedTime }) => !!rejectedTime,
-    cancelled: ({ cancelledTime }) => !!cancelledTime,
+    issuedTimestamp: ({ createdTime }) => createdTime,
+    accepted: ({ acceptedTimestamp }) => !!acceptedTimestamp,
+    rejected: ({ rejectedTimestamp }) => !!rejectedTimestamp,
+    cancelled: ({ cancelledTimestamp }) => !!cancelledTimestamp,
   },
 
   Query: {

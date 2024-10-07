@@ -22,6 +22,8 @@ const token = Joi.object().keys({
 const currencyCode = Joi.string().valid('USD', 'CAD').required();
 const currencyAmount = Joi.number().integer().min(0).required();
 
+const externalId = Joi.string().min(1).max(255).required();
+
 const provinceCodes = [
   'ab', 'bc', 'mb', 'nb',
   'nl', 'ns', 'nt', 'nu',
@@ -365,35 +367,35 @@ module.exports = {
 
     hadInvoiceSent: eventData({
       id: uuid,
-      externalId: Joi.string().required(),
+      externalId,
       sentTimestamp: Joi.date().timestamp('unix').required(),
       memo: memo.optional(),
     }),
 
     hadInvoicePaid: eventData({
       invoiceId: uuid,
-      externalId: Joi.string().optional(),
+      externalId: externalId.optional(),
       paidTimestamp: Joi.date().timestamp('unix').required(),
       memo: memo.optional(),
     }),
 
     hadInvoiceCancelled: eventData({
       invoiceId: uuid,
-      externalId: Joi.string().optional(),
+      externalId: externalId.optional(),
       cancelledTimestamp: Joi.date().timestamp('unix').required(),
       memo: memo.optional(),
     }),
 
     hadInvoiceRefunded: eventData({
       invoiceId: uuid,
-      externalId: Joi.string().optional(),
+      externalId: externalId.optional(),
       refundedTimestamp: Joi.date().timestamp('unix').required(),
       memo: memo.optional(),
     }),
 
     hadInvoiceVoided: eventData({
       invoiceId: uuid,
-      externalId: Joi.string().optional(),
+      externalId: externalId.optional(),
       voidedTimestamp: Joi.date().timestamp('unix').required(),
       memo: memo.optional(),
     }),

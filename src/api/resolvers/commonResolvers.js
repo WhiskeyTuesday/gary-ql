@@ -235,25 +235,7 @@ module.exports = {
         .then(jobs => jobs
           .sort((a, b) => b.modifiedTime - a.modifiedTime))),
 
-    job: async (_, { id }, { tools }) => {
-      const job = await tools.read.standard('job', id);
-      assert(job, 'job not found');
-
-      const { invoices, ...rest } = job;
-
-      return {
-        invoices: invoices.map(i => ({
-          sent: true,
-          paid: !!i.paidTime,
-          cancelled: !!i.cancelledTime,
-          refunded: !!i.refundedTime,
-          voided: !!i.voidedTime,
-          ...i,
-        })),
-
-        ...rest,
-      };
-    },
+    job: (_, { id }, { tools }) => tools.read.standard('job', id),
 
     proposals: (_, __, { tools }) => tools.read.standardList('proposal')
       .then(ids => Promise.all(ids
@@ -1031,20 +1013,27 @@ module.exports = {
 
     recordInvoiceSent: async (
       _,
-      { jobId, sentTimestamp, externalId, memo },
+      { jobId, invoiceId, externalId, sentTimestamp, memo },
       { tools },
     ) => {
-      const id = tools.uuidv4();
+      assert(tools.isUUID(jobId), 'target jobId is invalid');
+      assert(tools.isUUID(invoiceId), 'target invoiceId is invalid');
       const job = await tools.read.standard('job', jobId);
       assert(job, 'job not found');
 
-      return tools.write({
+      const response = await tools.write({
         event: {
           key: `job:${jobId}`,
           type: 'hadInvoiceSent',
-          data: { externalId, id, sentTimestamp, memo },
+          data: { externalId, id: invoiceId, sentTimestamp, memo },
         },
       });
+
+      if (response !== 'OK') {
+        throw new Error('failed to write');
+      } else {
+        return true;
+      }
     },
 
     recordInvoicePaid: async (
@@ -1059,13 +1048,19 @@ module.exports = {
       assert(invoice, 'invoice not found');
       assert(invoice.status === 'sent', 'invoice not payable');
 
-      return tools.write({
+      const response = await tools.write({
         event: {
           key: `job:${jobId}`,
           type: 'hadInvoicePaid',
           data: { invoiceId, externalId, paidTimestamp, memo },
         },
       });
+
+      if (response !== 'OK') {
+        throw new Error('failed to write');
+      } else {
+        return true;
+      }
     },
 
     recordInvoiceCancelled: async (
@@ -1080,7 +1075,7 @@ module.exports = {
       assert(invoice, 'invoice not found');
       assert(invoice.status === 'sent', 'invoice not cancellable');
 
-      return tools.write({
+      const response = await tools.write({
         events: [
           {
             key: `job:${jobId}`,
@@ -1089,6 +1084,12 @@ module.exports = {
           },
         ],
       });
+
+      if (response !== 'OK') {
+        throw new Error('failed to write');
+      } else {
+        return true;
+      }
     },
 
     recordInvoiceRefunded: async (
@@ -1103,7 +1104,7 @@ module.exports = {
       assert(invoice, 'invoice not found');
       assert(invoice.status === 'sent', 'invoice not refundable');
 
-      return tools.write({
+      const response = await tools.write({
         events: [
           {
             key: `job:${jobId}`,
@@ -1112,6 +1113,12 @@ module.exports = {
           },
         ],
       });
+
+      if (response !== 'OK') {
+        throw new Error('failed to write');
+      } else {
+        return true;
+      }
     },
 
     recordInvoiceVoided: async (
@@ -1126,7 +1133,7 @@ module.exports = {
       assert(invoice, 'invoice not found');
       assert(invoice.status === 'sent', 'invoice not voidable');
 
-      return tools.write({
+      const response = await tools.write({
         events: [
           {
             key: `job:${jobId}`,
@@ -1135,6 +1142,12 @@ module.exports = {
           },
         ],
       });
+
+      if (response !== 'OK') {
+        throw new Error('failed to write');
+      } else {
+        return true;
+      }
     },
   },
 };

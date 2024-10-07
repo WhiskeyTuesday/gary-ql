@@ -116,8 +116,9 @@ module.exports = gql`
 
     recordInvoiceSent(
       jobId: ID!
-      sentTimestamp: Int!
+      invoiceId: ID!
       externalId: ID!
+      sentTimestamp: Int!
       memo: String
     ): Boolean
 
