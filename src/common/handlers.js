@@ -607,7 +607,7 @@ module.exports = {
       acceptedTimestamp: event.timestamp,
       stages: state.stages.map(stage => ({
         ...stage,
-        accepted: true,
+        accepted: event.data.stageIds.includes(stage.id),
         status: event.data.stageIds.includes(stage.id)
           ? 'accepted'
           : 'rejected',
