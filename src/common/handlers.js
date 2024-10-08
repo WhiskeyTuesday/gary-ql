@@ -7,7 +7,7 @@ const isOld = (item, event) => {
   return (item.timestamp + interval) <= event.timestamp;
 };
 
-const customerDetails = event => ({
+const customerDetails = (event, state) => ({
   createdTime: event.timestamp,
   modifiedTime: event.timestamp,
   firstName: event.data.firstName,
@@ -19,9 +19,9 @@ const customerDetails = event => ({
   taxDetails: event.data.taxDetails,
   referralType: event.data.referralType,
   referralDetails: event.data.referralDetails,
-  addresses: [],
-  leads: [],
-  jobs: [],
+  addresses: state.addresses || [],
+  leads: state.leads || [],
+  jobs: state.jobs || [],
 });
 
 module.exports = {
@@ -242,11 +242,11 @@ module.exports = {
     wasCreated: event => ({
       id: event.data.id,
       status: 'active',
-      ...customerDetails(event),
+      ...customerDetails(event, {}),
     }),
 
-    wasModified: event => ({
-      ...customerDetails(event),
+    wasModified: (event, state) => ({
+      ...customerDetails(event, state),
     }),
 
     wasDeactivated: () => ({ status: 'inactive' }),
