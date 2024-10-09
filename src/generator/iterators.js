@@ -955,6 +955,12 @@ module.exports = [
           metadata: { actor: { type: 'admin', id: aid } },
           data: { jobId: j.id },
         },
+        {
+          key: `job:${j.id}`,
+          type: 'hadInstallationScheduled',
+          metadata: { actor: { type: 'admin', id: aid } },
+          data: { startTimestamp: ctx.clock.unix() + (7 * 24 * 60 * 60) },
+        },
       ]));
     },
   },
@@ -987,6 +993,15 @@ module.exports = [
             metadata: { actor: { type: 'admin', id: aid } },
             data: { jobId: j.id },
           },
+          ...(j.installers.length === 1
+            ? [
+              {
+                key: `job:${j.id}`,
+                type: 'hadInstallationUnscheduled',
+                metadata: { actor: { type: 'admin', id: aid } },
+                data: {},
+              },
+            ] : []),
         ];
       });
     },

@@ -359,7 +359,7 @@ module.exports = {
       startTimestamp: Joi.date().timestamp('unix').required(),
     }),
 
-    hasInstallationUnscheduled: eventData({}),
+    hadInstallationUnscheduled: eventData({}),
 
     hadWindowsCompleted: eventData({
       windowIds: Joi.array().items(uuid).required(),
