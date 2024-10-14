@@ -377,8 +377,8 @@ module.exports = {
       const noteEvent = notes && notes.trim() !== existingNotes
         ? [{
           key: `lead:${id}`,
-          type: 'hadMemoEdited',
-          data: { memo: notes },
+          type: 'hadNotesEdited',
+          data: { notes },
         }]
         : [];
 
