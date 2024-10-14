@@ -714,7 +714,10 @@ module.exports = {
         });
       }
 
-      const { materials, stages } = details;
+      const { materials, stages: suppliedStages } = details;
+
+      // filter out empty stages
+      const stages = suppliedStages.filter(s => s.windows.length);
 
       const materialsChanged = materials
         && (
@@ -736,8 +739,10 @@ module.exports = {
       };
 
       const stageChanged = (s, sPrime) => {
-        const windowsChanged = (s.windows || [])
-          .some((w, i) => windowChanged(w, sPrime.windows[i]));
+        // if there's a different number of windows, it's changed
+        // if the window at any index is different, it's changed
+        const windowsChanged = (s.windows.length !== sPrime.windows.length)
+        || (s.windows.some((w, i) => windowChanged(w, sPrime.windows[i])));
 
         return windowsChanged;
       };
