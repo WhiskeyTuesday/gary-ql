@@ -684,17 +684,31 @@ module.exports = {
         }
 
         events.push(...[
-          ...added.map(i => ({
-            key: `job:${id}`,
-            type: 'hadInstallerAssigned',
-            data: { installerId: i },
-          })),
+          ...added.flatMap(i => [
+            {
+              key: `job:${id}`,
+              type: 'hadInstallerAssigned',
+              data: { installerId: i },
+            },
+            {
+              key: `installer:${i}`,
+              type: 'wasAssignedJob',
+              data: { jobId: id },
+            },
+          ]),
 
-          ...removed.map(i => ({
-            key: `job:${id}`,
-            type: 'hadInstallerUnassigned',
-            data: { installerId: i },
-          })),
+          ...removed.flatMap(i => [
+            {
+              key: `installer:${i}`,
+              type: 'wasUnassignedJob',
+              data: { jobId: id },
+            },
+            {
+              key: `job:${id}`,
+              type: 'hadInstallerUnassigned',
+              data: { installerId: i },
+            },
+          ]),
         ]);
       }
 
