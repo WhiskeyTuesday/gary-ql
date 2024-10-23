@@ -440,7 +440,7 @@ module.exports = {
         })).required(),
 
         subtotal: currencyAmount,
-      })).required(),
+      })).min(1).required(),
 
       subtotal: currencyAmount,
       isTaxExempt: Joi.boolean().required(),

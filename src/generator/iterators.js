@@ -726,6 +726,8 @@ module.exports = [
         const proposalId = ctx.faker.string.uuid();
         const { id: jobId, salesAgentId, ...proposalDetails } = o;
 
+        if (proposalDetails.stages.length === 0) return [];
+
         return [
           {
             key: `job:${jobId}`,
