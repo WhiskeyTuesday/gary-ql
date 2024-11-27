@@ -181,7 +181,7 @@ module.exports = {
       const self = await tools.read.self(actor);
 
       const x = await (async () => {
-        if (['staff', 'admin'].includes(actor.type)) {
+        if (['staff', 'admin', 'salesAgent'].includes(actor.type)) {
           const leads = await tools.read.standardList('lead');
           const jobs = await tools.read.standardList('job');
 
