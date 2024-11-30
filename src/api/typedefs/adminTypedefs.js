@@ -61,6 +61,16 @@ module.exports = gql`
     currencyCode: CurrencyCode!
   }
 
+  type NewAccountDetails {
+    admin: Admin
+    staff: Staff
+    installer: Installer
+    salesAgent: SalesAgent
+
+    password: String!
+    alreadyExists: Boolean!
+  }
+
   # TODO respond with the actual aggregate for optemistic UI
   extend type Mutation {
     createMaterial(details: MaterialInput!): Material
@@ -68,22 +78,22 @@ module.exports = gql`
     deprecateMaterial(id: ID!): Material
     reinstateMaterial(id: ID!): Material
 
-    createAdmin(details: AdminInput!): Admin
+    createAdmin(details: AdminInput!): NewAccountDetails
     editAdmin(id: ID! details: AdminInput!): Admin
     deactivateAdmin(id: ID!): Admin
     reactivateAdmin(id: ID!): Admin
 
-    createStaff(details: StaffInput!): Staff
+    createStaff(details: StaffInput!): NewAccountDetails
     editStaff(id: ID! details: StaffInput!): Staff
     deactivateStaff(id: ID!): Staff
     reactivateStaff(id: ID!): Staff
 
-    createSalesAgent(details: SalesAgentInput!): SalesAgent
+    createSalesAgent(details: SalesAgentInput!): NewAccountDetails
     editSalesAgent(id: ID! details: SalesAgentInput!): SalesAgent
     deactivateSalesAgent(id: ID!): SalesAgent
     reactivateSalesAgent(id: ID!): SalesAgent
 
-    createInstaller(details: InstallerInput!): Installer
+    createInstaller(details: InstallerInput!): NewAccountDetails
     editInstaller(id: ID! details: InstallerInput!): Installer
     deactivateInstaller(id: ID!): Installer
     reactivateInstaller(id: ID!): Installer
