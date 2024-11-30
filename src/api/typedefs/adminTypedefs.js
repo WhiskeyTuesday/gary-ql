@@ -67,11 +67,11 @@ module.exports = gql`
     installer: Installer
     salesAgent: SalesAgent
 
-    password: String!
     alreadyExists: Boolean!
+
+    password: String
   }
 
-  # TODO respond with the actual aggregate for optemistic UI
   extend type Mutation {
     createMaterial(details: MaterialInput!): Material
     editMaterial(id: ID! details: MaterialInput!): Material

@@ -1,4 +1,5 @@
 const assert = require('assert').strict;
+const crypto = require('crypto');
 
 const checkIfEmailExists = async (firebase, email) => {
   try {
@@ -129,7 +130,7 @@ module.exports = {
 
       assert(!exists, 'email address already in use');
 
-      const { alreadyExists, password } = createFirebaseAccount(
+      const { alreadyExists, password } = await createFirebaseAccount(
         databases.firebase,
         details.emailAddress,
       );
@@ -228,7 +229,7 @@ module.exports = {
 
       assert(!exists, 'email address already in use');
 
-      const { alreadyExists, password } = createFirebaseAccount(
+      const { alreadyExists, password } = await createFirebaseAccount(
         databases.firebase,
         details.emailAddress,
       );
@@ -325,7 +326,7 @@ module.exports = {
 
       assert(!exists, 'email address already in use');
 
-      const { alreadyExists, password } = createFirebaseAccount(
+      const { alreadyExists, password } = await createFirebaseAccount(
         databases.firebase,
         details.emailAddress,
       );
@@ -427,7 +428,7 @@ module.exports = {
 
       assert(!exists, 'email address already in use');
 
-      const { alreadyExists, password } = createFirebaseAccount(
+      const { alreadyExists, password } = await createFirebaseAccount(
         databases.firebase,
         details.emailAddress,
       );
