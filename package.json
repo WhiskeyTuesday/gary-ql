@@ -8,7 +8,8 @@
   "scripts": {
     "rs": "rescript build -w",
     "server": "nodemon --exec \"heroku local --port 5005\" --signal SIGTERM --ignore out/ --ignore dev/ --ignore testing/ --ignore in/",
-    "generator": "env GENERATOR=true nodemon --exec \"heroku local --port 5005\" --signal SIGTERM --ignore out/ --ignore dev/ --ignore testing/ --ignore in/"
+    "generator": "env GENERATOR=true nodemon --exec \"heroku local --port 5005\" --signal SIGTERM --ignore out/ --ignore dev/ --ignore testing/ --ignore in/",
+    "lint": "eslint ./src"
   },
   "engines": {
     "npm": "^10.8.2",
@@ -48,7 +49,10 @@
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-node": "^11.1.0",
     "nodemon": "^3.1.7",
-    "rescript": "^10.1.4"
+    "rescript": "^10.1.4",
+    "typescript": "^5.7.2",
+    "typescript-language-server": "^4.3.3",
+    "vscode-langservers-extracted": "^4.10.0"
   },
   "pnpm": {
     "overrides": {
