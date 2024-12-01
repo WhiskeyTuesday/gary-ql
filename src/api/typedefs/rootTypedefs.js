@@ -295,5 +295,6 @@ module.exports = gql`
 
   type Mutation {
     time: String!
+    requestPasswordResetEmail(email: String!): Boolean!
   }
 `;

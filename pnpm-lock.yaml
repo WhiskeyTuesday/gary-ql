@@ -98,6 +98,9 @@ importers:
       lodash.uniq:
         specifier: ^4.5.0
         version: 4.5.0
+      loops:
+        specifier: ^3.4.0
+        version: 3.4.0
       luxon:
         specifier: ^3.5.0
         version: 3.5.0
@@ -1616,6 +1619,10 @@ packages:
 
   long@5.2.3:
     resolution: {integrity: sha512-lcHwpNoggQTObv5apGNCTdJrO69eHOZMi4BNC+rTLER8iHAqGrUVeLh/irVIM7zTw2bOXA8T6uNPeujwOLg/2Q==}
+
+  loops@3.4.0:
+    resolution: {integrity: sha512-5iseiVxG43tdNJPHdD6DdCZBnanIA+WWbu0/+q6e+smnFZaT57Gsw1quFtgFXqyRqW0GZzLRGlVaSiEik8QLJw==}
+    engines: {node: '>=18'}
 
   lru-cache@6.0.0:
     resolution: {integrity: sha512-Jo6dJ04CmSjuznwJSS3pUeWmd/H0ffTlkXXgwZi+eq1UCmqQwCh+eLsYOYCwY991i2Fah4h1BEMCx4qThGbsiA==}
@@ -4284,6 +4291,8 @@ snapshots:
 
   long@5.2.3:
     optional: true
+
+  loops@3.4.0: {}
 
   lru-cache@6.0.0:
     dependencies:

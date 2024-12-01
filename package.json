@@ -35,6 +35,7 @@
     "lodash.compact": "^3.0.1",
     "lodash.shuffle": "^4.2.0",
     "lodash.uniq": "^4.5.0",
+    "loops": "^3.4.0",
     "luxon": "^3.5.0",
     "set-interval-async": "^3.0.3",
     "stripe": "^14.9.0",

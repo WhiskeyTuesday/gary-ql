@@ -1,4 +1,4 @@
-// const assert = require('assert').strict;
+const assert = require('assert').strict;
 // const crypto = require('crypto');
 
 // union Self = Staff | SalesAgent | Installer | Admin | Superuser
@@ -125,5 +125,46 @@ module.exports = {
 
   Mutation: {
     time: (_, __, { clock }) => clock.now().toString(),
+
+    requestPasswordResetEmail: async (
+      _,
+      { email },
+      { tools, databases: { firebase: { auth } } },
+    ) => {
+      const exists = await auth().getUserByEmail(email);
+      assert(exists, 'email not found');
+
+      try {
+        const isTestDomain = email.endsWith('@test.com')
+          || email.endsWith('@example.com');
+
+        const link = isTestDomain
+          ? 'this is a fake link' // TODO
+          : await auth().generatePasswordResetLink(email);
+
+        // use loops API to send email
+        // NOTE: If email ends with @test.com or @example.com
+        // the API will return a response without actually
+        // sending an email.
+        const response = await tools.loops.sendTransactionalEmail({
+          transactionalId: 'cm459f8qc00qwl133akppab0p',
+          email,
+          addToAudience: false,
+          dataVariables: {
+            link,
+          },
+        });
+
+        if (response.success !== true) {
+          throw new Error('failed to send email');
+        }
+      } catch (e) {
+        /* eslint-disable no-console */
+        console.error(e);
+        throw new Error('failed to send email');
+      }
+
+      return true;
+    },
   },
 };

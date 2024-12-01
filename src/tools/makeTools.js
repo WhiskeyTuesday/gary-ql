@@ -13,6 +13,7 @@ const { v4: uuidv4 } = require('uuid');
 const { v4: isUUID } = require('is-uuid');
 const axios = require('axios');
 const { DateTime } = require('luxon');
+const { LoopsClient } = require('loops');
 
 module.exports = ({
   actor,
@@ -37,6 +38,7 @@ module.exports = ({
     DateTime,
     axios,
     crypto,
+    loops: new LoopsClient(implementationConfig.loops.apiKey),
   };
 
   const tools = {

@@ -4,6 +4,7 @@ const crypto = require('crypto');
 const checkIfEmailExists = async (firebase, email) => {
   try {
     const record = await firebase.auth().getUserByEmail(email);
+    assert(record, 'record not found');
     return true;
   } catch (e) {
     if (e.code === 'auth/user-not-found') {
@@ -17,12 +18,20 @@ const createFirebaseAccount = async (firebase, email) => {
   const password = crypto.randomBytes(8).toString('hex');
 
   try {
-    const record = firebase.auth().createUser({
+    const record = await firebase.auth().createUser({
       email,
       password,
     });
 
+    assert(record, 'record not found');
+
     // console.log(record.toJSON());
+
+    return {
+      password,
+      alreadyExists: false,
+      uid: record.uid,
+    };
   } catch (error) {
     switch (error.code) {
       case 'auth/email-already-exists':
@@ -34,8 +43,64 @@ const createFirebaseAccount = async (firebase, email) => {
       default: throw error;
     }
   }
+};
 
-  return { alreadyExists: false, password };
+const newAgent = async ({
+  implementationConfig,
+  databases,
+  details,
+  tools,
+  type,
+  memo,
+}) => {
+  assert({
+    implementationConfig,
+    databases,
+    details,
+    tools,
+    type,
+    memo,
+  });
+
+  const exists = await checkIfEmailExists(
+    databases.firebase,
+    details.emailAddress,
+  );
+
+  assert(!exists, 'email address already in use');
+
+  const { alreadyExists, password, uid } = await createFirebaseAccount(
+    databases.firebase,
+    details.emailAddress,
+  );
+
+  const id = tools.uuidv4();
+
+  const event = {
+    key: `{type}:${id}`,
+    type: 'wasCreated',
+    data: { memo, id, ...details },
+  };
+
+  const response = await tools.write({ event });
+  assert(response === 'OK', 'write failed');
+
+  const { fbtAudience: aud, fbtIssuer: iss } = implementationConfig;
+  const idResponse = await tools.writeId({
+    token: { sub: uid, aud, iss },
+    type,
+    id,
+  });
+
+  assert(idResponse === 'OK', 'write failed');
+
+  const record = await tools.read.aggregateFromDatabase({ type, id });
+
+  return {
+    [type]: record,
+    alreadyExists,
+    password,
+  };
 };
 
 module.exports = {
@@ -122,41 +187,18 @@ module.exports = {
       });
     },
 
-    createAdmin: async (_, { memo, details }, { tools, databases }) => {
-      const exists = await checkIfEmailExists(
-        databases.firebase,
-        details.emailAddress,
-      );
-
-      assert(!exists, 'email address already in use');
-
-      const { alreadyExists, password } = await createFirebaseAccount(
-        databases.firebase,
-        details.emailAddress,
-      );
-
-      const adminId = tools.uuidv4();
-
-      const event = {
-        key: `admin:${adminId}`,
-        type: 'wasCreated',
-        data: { memo, id: adminId, ...details },
-      };
-
-      const response = await tools.write({ event });
-      assert(response === 'OK', 'write failed');
-
-      const admin = await tools.read.aggregateFromDatabase({
-        type: 'admin',
-        id: adminId,
-      });
-
-      return {
-        admin,
-        password,
-        alreadyExists,
-      };
-    },
+    createAdmin: async (
+      _,
+      { memo, details },
+      { tools, databases, implementationConfig },
+    ) => newAgent({
+      type: 'admin',
+      implementationConfig,
+      databases,
+      details,
+      tools,
+      memo,
+    }),
 
     editAdmin: async (_, { id, details }, { tools }) => {
       assert(tools.isUUID(id), 'target id is invalid');
@@ -221,43 +263,18 @@ module.exports = {
       });
     },
 
-    createStaff: async (_, { memo, details }, { tools, databases }) => {
-      const exists = await checkIfEmailExists(
-        databases.firebase,
-        details.emailAddress,
-      );
-
-      assert(!exists, 'email address already in use');
-
-      const { alreadyExists, password } = await createFirebaseAccount(
-        databases.firebase,
-        details.emailAddress,
-      );
-
-      const staffId = tools.uuidv4();
-      const event = {
-        key: `staff:${staffId}`,
-        type: 'wasCreated',
-        data: {
-          memo,
-          id: staffId,
-          ...details,
-        },
-      };
-
-      const response = await tools.write({ event });
-      assert(response === 'OK', 'write failed');
-      const staff = await tools.read.aggregateFromDatabase({
-        type: 'staff',
-        id: staffId,
-      });
-
-      return {
-        staff,
-        password,
-        alreadyExists,
-      };
-    },
+    createStaff: async (
+      _,
+      { memo, details },
+      { tools, databases, implementationConfig },
+    ) => newAgent({
+      type: 'staff',
+      implementationConfig,
+      databases,
+      details,
+      tools,
+      memo,
+    }),
 
     editStaff: async (_, { id, details }, { tools }) => {
       assert(tools.isUUID(id), 'target id is invalid');
@@ -318,48 +335,18 @@ module.exports = {
       });
     },
 
-    createSalesAgent: async (_, { memo, details }, { tools, databases }) => {
-      const exists = await checkIfEmailExists(
-        databases.firebase,
-        details.emailAddress,
-      );
-
-      assert(!exists, 'email address already in use');
-
-      const { alreadyExists, password } = await createFirebaseAccount(
-        databases.firebase,
-        details.emailAddress,
-      );
-
-      const agentId = tools.uuidv4();
-
-      const event = {
-        key: `salesAgent:${agentId}`,
-        type: 'wasCreated',
-        data: {
-          id: agentId,
-          firstName: details.firstName,
-          lastName: details.lastName,
-          emailAddress: details.emailAddress,
-          phoneNumber: details.phoneNumber,
-
-          memo,
-        },
-      };
-
-      const res = await tools.write({ event });
-      assert(res === 'OK', 'write failed');
-      const salesAgent = await tools.read.aggregateFromDatabase({
-        type: 'salesAgent',
-        id: agentId,
-      });
-
-      return {
-        salesAgent,
-        password,
-        alreadyExists,
-      };
-    },
+    createSalesAgent: async (
+      _,
+      { memo, details },
+      { tools, databases, implementationConfig },
+    ) => newAgent({
+      type: 'salesAgent',
+      implementationConfig,
+      databases,
+      details,
+      tools,
+      memo,
+    }),
 
     editSalesAgent: async (_, { id, details }, { tools }) => {
       assert(tools.isUUID(id), 'target id is invalid');
@@ -420,48 +407,18 @@ module.exports = {
       });
     },
 
-    createInstaller: async (_, { memo, details }, { tools, databases }) => {
-      const exists = await checkIfEmailExists(
-        databases.firebase,
-        details.emailAddress,
-      );
-
-      assert(!exists, 'email address already in use');
-
-      const { alreadyExists, password } = await createFirebaseAccount(
-        databases.firebase,
-        details.emailAddress,
-      );
-
-      const installerId = tools.uuidv4();
-
-      const event = {
-        key: `installer:${installerId}`,
-        type: 'wasCreated',
-        data: {
-          id: installerId,
-          firstName: details.firstName,
-          lastName: details.lastName,
-          emailAddress: details.emailAddress,
-          phoneNumber: details.phoneNumber,
-
-          memo,
-        },
-      };
-
-      const res = await tools.write({ event });
-      assert(res === 'OK', 'write failed');
-      const installer = await tools.read.aggregateFromDatabase({
-        type: 'installer',
-        id: installerId,
-      });
-
-      return {
-        installer,
-        password,
-        alreadyExists,
-      };
-    },
+    createInstaller: async (
+      _,
+      { memo, details },
+      { tools, databases, implementationConfig },
+    ) => newAgent({
+      type: 'installer',
+      implementationConfig,
+      databases,
+      details,
+      tools,
+      memo,
+    }),
 
     editInstaller: async (_, { id, details }, { tools }) => {
       assert(tools.isUUID(id), 'target id is invalid');

@@ -197,6 +197,10 @@ const config = {
     acountSid: process.env.TWILIO_ACCOUNT_SID,
     authToken: process.env.TWILIO_AUTH_TOKEN,
   },
+
+  loops: {
+    apiKey: process.env.LOOPS_API_KEY,
+  },
 };
 
 // ensure that the name of no cache config is the same as a cache type
