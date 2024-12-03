@@ -107,7 +107,7 @@ module.exports = gql`
     convertLead(leadId: ID! details: LeadConvertedInput!): Job
     modifyJob(id: ID! details: JobDetailsInput!): Job
 
-    sendProposal(jobId: ID! sim: Boolean): Boolean
+    sendProposal(jobId: ID!): Boolean
     supercedeProposal(jobId: ID! stageIds: [ID!]!): Boolean
     markWindowsComplete(jobId: ID! windowIds: [ID!]!): String
     forceProposalAccepted(jobId: ID! proposalId: ID!): Boolean

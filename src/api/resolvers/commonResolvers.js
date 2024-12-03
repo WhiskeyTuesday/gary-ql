@@ -811,22 +811,15 @@ module.exports = {
 
     sendProposal: async (
       _,
-      { jobId, sim },
-      { tools, schemae, implementationConfig },
+      { jobId },
+      { tools, schemae },
     ) => {
       const id = tools.uuidv4();
 
-      // disallow sim flag in production (lib only allows those 3 envs)
-      assert(
-        (['development', 'staging'].includes(process.env.NODE_ENV) || sim),
-        'sim only allowed in dev or staging',
-      );
-
       // verify that proposal is valid (ie. job is in a valid complete state)
       const proposal = await generateProposal({ tools, jobId, schemae });
-      console.log(implementationConfig);
 
-      const url = implementationConfig.siteUrl;
+      const url = tools.siteUrl;
       const link = `${url}/proposal/${id}`; // TODO
 
       const emailAddress = await tools.read.standard('job', jobId)
@@ -836,23 +829,18 @@ module.exports = {
 
       assert(emailAddress, 'email address not found');
 
-      console.log({ url, emailAddress, link });
-
-      // if simulated, just return a dummy response
-      const emailDetails = sim
-        ? { success: true }
-        : tools.loops.sendTransactionalEmail({
-          transactionalId: '', // TODO
-          email: emailAddress,
-          addToAudience: false,
-          dataVariables: { link },
-        });
+      // if email ends with test.com or example.com, loops will
+      // respond with { success: true } but not actually send anything
+      const emailDetails = tools.loops.sendTransactionalEmail({
+        transactionalId: 'cm47qhpeu01fc6fssctd72g4m',
+        email: emailAddress,
+        addToAudience: false,
+        dataVariables: { link },
+      });
 
       if (emailDetails.success !== true) {
         throw new Error('failed to send email');
       }
-
-      const memo = sim ? 'simulated' : undefined;
 
       const job = await tools.read.standard('job', jobId);
       assert(job, 'job not found');
@@ -861,7 +849,7 @@ module.exports = {
         {
           key: `job:${jobId}`,
           type: 'wasProposed',
-          data: { memo, proposalId: id },
+          data: { proposalId: id },
         },
         {
           key: `proposal:${id}`,
