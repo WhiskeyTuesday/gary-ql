@@ -97,7 +97,7 @@ module.exports = [
           firstName: 'Gary',
           lastName: ctx.faker.person.lastName(),
           phoneNumber: phoneNumber(ctx.faker),
-          emailAddress: 'gary@example.com',
+          emailAddress: 'gary@test.com',
         },
       };
     },
@@ -121,7 +121,7 @@ module.exports = [
 
       const createdEvents = [...Array(howMany)].map(() => {
         const sid = ctx.faker.string.uuid();
-        const email = ctx.faker.internet.email({ provider: 'example.com' });
+        const email = ctx.faker.internet.email({ provider: 'test.com' });
 
         return {
           key: `staff:${sid}`,
@@ -181,7 +181,7 @@ module.exports = [
             lastName: ctx.faker.person.lastName(),
             phoneNumber: phoneNumber(ctx.faker),
             emailAddress: ctx.faker.internet.email({
-              provider: 'example.net',
+              provider: 'test.com',
             }),
           },
         };
@@ -216,7 +216,7 @@ module.exports = [
             lastName: ctx.faker.person.lastName(),
             phoneNumber: phoneNumber(ctx.faker),
             emailAddress: ctx.faker.internet.email({
-              provider: 'example.net',
+              provider: 'test.com',
             }),
           },
         };
@@ -261,7 +261,7 @@ module.exports = [
             referralDetails: 'generated test data',
             phoneNumber: phoneNumber(ctx.faker),
             emailAddress: ctx.faker.internet.email({
-              provider: 'example.org',
+              provider: 'example.com',
             }),
 
             // 6.25% of customers are tax exempt
