@@ -196,6 +196,7 @@ module.exports = gql`
     id: ID!
     status: String!
     accepted: Boolean!
+    rejected: Boolean!
     windows: [WindowProposal]!
     films: [FilmProposal]!
     subtotal: Int!
@@ -238,6 +239,7 @@ module.exports = gql`
 
   type Query {
     time: String!
+    proposal(id: ID!): Proposal
   }
 
   input AddressInput {
@@ -296,5 +298,7 @@ module.exports = gql`
   type Mutation {
     time: String!
     requestPasswordResetEmail(email: String!): Boolean!
+    acceptProposal(id: ID!): Boolean!
+    rejectProposal(id: ID!): Boolean!
   }
 `;

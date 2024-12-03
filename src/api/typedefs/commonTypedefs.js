@@ -13,7 +13,6 @@ module.exports = gql`
     jobs: [Job]
     job(id: ID!): Job
     proposals: [Proposal]
-    proposal(id: ID!): Proposal
     admin(id: ID!): Admin
     admins: [Admin]
     salesAgents: [SalesAgent]

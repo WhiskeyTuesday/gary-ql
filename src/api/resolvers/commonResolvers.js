@@ -243,8 +243,6 @@ module.exports = {
         .then(proposals => proposals
           .sort((a, b) => b.modifiedTime - a.modifiedTime))),
 
-    proposal: (_, { id }, { tools }) => tools.read.standard('proposal', id),
-
     admins: (_, __, { tools }) => tools.read.standardList('admin')
       .then(ids => Promise.all(ids
         .map(id => tools.read.standard('admin', id)))),

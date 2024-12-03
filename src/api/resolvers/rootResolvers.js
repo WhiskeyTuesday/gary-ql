@@ -121,6 +121,7 @@ module.exports = {
 
   Query: {
     time: (_, __, { clock }) => clock.now().toString(),
+    proposal: (_, { id }, { tools }) => tools.read.standard('proposal', id),
   },
 
   Mutation: {
@@ -163,6 +164,25 @@ module.exports = {
       }
 
       return true;
+    },
+
+    acceptProposal: async (_, { proposalId, stageIds }, { tools }) => {
+      // so... first problem, anon client context doesn't provide
+      // a writer (I think), partly because agent will be... will
+      // have to be... blank?
+
+      // assuming we have a reader (we must, right?)
+      // we'll:
+      // get the proposal object
+      // check if it's already been accepted or rejected
+      // make sure the stage IDs line up
+      // construct the events on the proposal and the job
+      // and then write them back to the database (assuming we have a writer)
+      // and then return true if the response is "OK"
+    },
+
+    rejectProposal: async (_, { proposalId, stageIds }, { tools }) => {
+      // same as acceptProposal, but with a different event
     },
   },
 };
