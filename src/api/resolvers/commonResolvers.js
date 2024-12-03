@@ -809,7 +809,11 @@ module.exports = {
       });
     },
 
-    sendProposal: async (_, { jobId, sim }, { tools, schemae }) => {
+    sendProposal: async (
+      _,
+      { jobId, sim },
+      { tools, schemae, implementationConfig },
+    ) => {
       const id = tools.uuidv4();
 
       // disallow sim flag in production (lib only allows those 3 envs)
@@ -820,17 +824,31 @@ module.exports = {
 
       // verify that proposal is valid (ie. job is in a valid complete state)
       const proposal = await generateProposal({ tools, jobId, schemae });
+      console.log(implementationConfig);
+
+      const url = implementationConfig.siteUrl;
+      const link = `${url}/proposal/${id}`; // TODO
+
+      const emailAddress = await tools.read.standard('job', jobId)
+        .then(job => tools.read.standard('customer', job.customerId))
+        .then(customer => customer.emailAddress)
+        .catch(() => null);
+
+      assert(emailAddress, 'email address not found');
+
+      console.log({ url, emailAddress, link });
 
       // if simulated, just return a dummy response
       const emailDetails = sim
-        ? { sim: true }
-        // otherwise:
-        // TODO call sendgrid
-        // TODO if fail return error
-        // if not fail return actual response
-        : false;
+        ? { success: true }
+        : tools.loops.sendTransactionalEmail({
+          transactionalId: '', // TODO
+          email: emailAddress,
+          addToAudience: false,
+          dataVariables: { link },
+        });
 
-      if (emailDetails === false) {
+      if (emailDetails.success !== true) {
         throw new Error('failed to send email');
       }
 

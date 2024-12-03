@@ -23,35 +23,51 @@ module.exports = ({
   const notify = libraryTools.makeNotify(implementationConfig);
 
   const anonymous = {
+    loops: new LoopsClient(implementationConfig.loops.apiKey),
+    // NOTE: TODO: some things, like siteURL, are really more data than tools
+    // we should probably make a parallel actor type based thing in ctx for
+    // data properties
+    siteUrl: implementationConfig.siteUrl,
     read: libraryTools.read,
     uuidv4,
     isUUID,
+
+    writeFirebaseId: ({ uid, type, id }) => libraryTools.writeId({
+      token: {
+        sub: uid,
+        aud: implementationConfig.fbtAudience,
+        iss: implementationConfig.fbtIssuer,
+      },
+      type,
+      id,
+    }),
   };
 
   const common = {
-    ...anonymous,
     write: args => libraryTools.write({ ...args, actor }),
     getChat: libraryTools.getChat,
-    notify,
     coldStart: libraryTools.coldStart, // TODO consider move to staff or su?
     injectTestData: libraryTools.injectTestData, // TODO same as
     DateTime,
+    notify,
     axios,
     crypto,
-    loops: new LoopsClient(implementationConfig.loops.apiKey),
   };
 
   const tools = {
     user: {},
 
-    staff: {
-      writeId: libraryTools.writeId,
-      dumpDB: libraryTools.dumpDB,
-    },
+    staff: {},
 
-    host: {},
+    admin: {},
+
+    installer: {},
+
+    salesAgent: {},
 
     superuser: {
+      writeId: libraryTools.writeId,
+      dumpDB: libraryTools.dumpDB,
       populateDB: libraryTools.populateDB,
       b2Load: libraryTools.b2Load,
       mintToken: libraryTools.tokenTools.mintToken,
@@ -59,15 +75,15 @@ module.exports = ({
     },
   };
 
+  const { superuser, ...rest } = tools;
   tools.superuser = {
-    ...tools.user,
-    ...tools.staff,
-    ...tools.host,
-    ...tools.superuser,
+    ...rest,
+    ...superuser,
   };
 
   return {
-    ...common,
+    ...anonymous,
+    ...(actor ? common : {}),
     ...(actor ? tools[actor.type] : {}),
   };
 };

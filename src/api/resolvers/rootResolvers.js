@@ -150,9 +150,7 @@ module.exports = {
           transactionalId: 'cm459f8qc00qwl133akppab0p',
           email,
           addToAudience: false,
-          dataVariables: {
-            link,
-          },
+          dataVariables: { link },
         });
 
         if (response.success !== true) {

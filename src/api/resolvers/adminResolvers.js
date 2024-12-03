@@ -46,38 +46,42 @@ const createFirebaseAccount = async (firebase, email) => {
 };
 
 const newAgent = async ({
-  implementationConfig,
   databases,
   details,
   tools,
   type,
   memo,
 }) => {
-  assert({
-    implementationConfig,
-    databases,
-    details,
-    tools,
-    type,
-    memo,
-  });
+  assert(
+    databases
+    && details
+    && tools
+    && type,
+  );
+
+  assert(databases.firebase, 'firebase not initialised');
+
+  const { emailAddress } = details;
+  assert(emailAddress, 'email address required');
+  assert(typeof emailAddress === 'string', 'email address invalid');
+  assert(emailAddress.includes('@'), 'email address invalid');
 
   const exists = await checkIfEmailExists(
     databases.firebase,
-    details.emailAddress,
+    emailAddress,
   );
 
   assert(!exists, 'email address already in use');
 
-  const { alreadyExists, password, uid } = await createFirebaseAccount(
-    databases.firebase,
-    details.emailAddress,
-  );
+  const { alreadyExists, password, uid } = emailAddress.endsWith('@test.com')
+  || emailAddress.endsWith('@example.com')
+    ? { alreadyExists: false, password: 'fakePassword', uid: tools.uuidv4() }
+    : await createFirebaseAccount(databases.firebase, emailAddress);
 
   const id = tools.uuidv4();
 
   const event = {
-    key: `{type}:${id}`,
+    key: `${type}:${id}`,
     type: 'wasCreated',
     data: { memo, id, ...details },
   };
@@ -85,9 +89,8 @@ const newAgent = async ({
   const response = await tools.write({ event });
   assert(response === 'OK', 'write failed');
 
-  const { fbtAudience: aud, fbtIssuer: iss } = implementationConfig;
-  const idResponse = await tools.writeId({
-    token: { sub: uid, aud, iss },
+  const idResponse = await tools.writeFirebaseId({
+    uid,
     type,
     id,
   });
@@ -190,10 +193,9 @@ module.exports = {
     createAdmin: async (
       _,
       { memo, details },
-      { tools, databases, implementationConfig },
+      { tools, databases },
     ) => newAgent({
       type: 'admin',
-      implementationConfig,
       databases,
       details,
       tools,
@@ -266,10 +268,9 @@ module.exports = {
     createStaff: async (
       _,
       { memo, details },
-      { tools, databases, implementationConfig },
+      { tools, databases },
     ) => newAgent({
       type: 'staff',
-      implementationConfig,
       databases,
       details,
       tools,
@@ -338,10 +339,9 @@ module.exports = {
     createSalesAgent: async (
       _,
       { memo, details },
-      { tools, databases, implementationConfig },
+      { tools, databases },
     ) => newAgent({
       type: 'salesAgent',
-      implementationConfig,
       databases,
       details,
       tools,
@@ -410,10 +410,9 @@ module.exports = {
     createInstaller: async (
       _,
       { memo, details },
-      { tools, databases, implementationConfig },
+      { tools, databases },
     ) => newAgent({
       type: 'installer',
-      implementationConfig,
       databases,
       details,
       tools,
