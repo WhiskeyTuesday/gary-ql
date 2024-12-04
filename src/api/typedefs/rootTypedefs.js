@@ -187,7 +187,12 @@ module.exports = gql`
     id: ID!
     sqft: Int!
     lnft: Int!
+    width: Int!
+    height: Int!
+    location: String!
     filmName: String!
+    type: WindowType!
+    glassType: GlassType!
     film: Material!
     price: Int!
   }
@@ -298,7 +303,7 @@ module.exports = gql`
   type Mutation {
     time: String!
     requestPasswordResetEmail(email: String!): Boolean!
-    acceptProposal(id: ID!): Boolean!
-    rejectProposal(id: ID!): Boolean!
+    acceptProposal(proposalId: ID! stageIds: [ID!]!): Boolean!
+    rejectProposal(proposalId: ID!): Boolean!
   }
 `;

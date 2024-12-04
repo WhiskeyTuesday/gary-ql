@@ -101,6 +101,11 @@ module.exports = {
     ),
   },
 
+  StageProposal: {
+    accepted: ({ acceptedTimestamp }) => !!acceptedTimestamp,
+    rejected: ({ rejectedTimestamp }) => !!rejectedTimestamp,
+  },
+
   Proposal: {
     job: async (root, _, { tools }) => tools.read.standard(
       'job',
@@ -171,18 +176,66 @@ module.exports = {
       // a writer (I think), partly because agent will be... will
       // have to be... blank?
 
-      // assuming we have a reader (we must, right?)
-      // we'll:
-      // get the proposal object
+      const proposal = await tools.read.standard('proposal', proposalId);
+      assert(proposal, 'proposal not found');
+
       // check if it's already been accepted or rejected
+      assert(!proposal.acceptedTimestamp, 'proposal already accepted');
+      assert(!proposal.rejectedTimestamp, 'proposal already rejected');
+
+      // make sure at least one stage ID is provided
+      assert(stageIds.length, 'no stages provided');
+
       // make sure the stage IDs line up
+      assert(stageIds.every(id => proposal.stages.some(s => s.id === id)));
+
       // construct the events on the proposal and the job
       // and then write them back to the database (assuming we have a writer)
-      // and then return true if the response is "OK"
+      const response = await tools.write({
+        events: [
+          {
+            key: `job:${proposal.jobId}`,
+            type: 'hadProposalAccepted',
+            data: { stageIds },
+          },
+          {
+            key: `proposal:${proposalId}`,
+            type: 'wasAccepted',
+            data: { stageIds },
+          },
+        ],
+      });
+
+      assert(response === 'OK', 'failed to write events');
+
+      return true;
     },
 
-    rejectProposal: async (_, { proposalId, stageIds }, { tools }) => {
-      // same as acceptProposal, but with a different event
+    rejectProposal: async (_, { proposalId }, { tools }) => {
+      const proposal = await tools.read.standard('proposal', proposalId);
+      assert(proposal, 'proposal not found');
+
+      assert(!proposal.acceptedTimestamp, 'proposal already accepted');
+      assert(!proposal.rejectedTimestamp, 'proposal already rejected');
+
+      const response = await tools.write({
+        events: [
+          {
+            key: `job:${proposal.jobId}`,
+            type: 'hadProposalRejected',
+            data: {},
+          },
+          {
+            key: `proposal:${proposalId}`,
+            type: 'wasRejected',
+            data: {},
+          },
+        ],
+      });
+
+      assert(response === 'OK', 'failed to write events');
+
+      return true;
     },
   },
 };
