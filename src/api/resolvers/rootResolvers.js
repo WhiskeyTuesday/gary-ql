@@ -189,6 +189,9 @@ module.exports = {
       // make sure the stage IDs line up
       assert(stageIds.every(id => proposal.stages.some(s => s.id === id)));
 
+      const job = await tools.read.standard('job', proposal.jobId);
+      assert(job, 'job not found');
+      const { customerId } = job;
       // construct the events on the proposal and the job
       // and then write them back to the database (assuming we have a writer)
       const response = await tools.write({
@@ -197,11 +200,13 @@ module.exports = {
             key: `job:${proposal.jobId}`,
             type: 'hadProposalAccepted',
             data: { stageIds },
+            metadata: { actor: { type: 'customer', id: customerId } },
           },
           {
             key: `proposal:${proposalId}`,
             type: 'wasAccepted',
             data: { stageIds },
+            metadata: { actor: { type: 'customer', id: customerId } },
           },
         ],
       });
@@ -218,17 +223,23 @@ module.exports = {
       assert(!proposal.acceptedTimestamp, 'proposal already accepted');
       assert(!proposal.rejectedTimestamp, 'proposal already rejected');
 
+      const job = await tools.read.standard('job', proposal.jobId);
+      assert(job, 'job not found');
+      const { customerId } = job;
+
       const response = await tools.write({
         events: [
           {
             key: `job:${proposal.jobId}`,
             type: 'hadProposalRejected',
             data: {},
+            metadata: { actor: { type: 'customer', id: customerId } },
           },
           {
             key: `proposal:${proposalId}`,
             type: 'wasRejected',
             data: {},
+            metadata: { actor: { type: 'customer', id: customerId } },
           },
         ],
       });

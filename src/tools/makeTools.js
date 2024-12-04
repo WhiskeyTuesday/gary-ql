@@ -41,6 +41,9 @@ module.exports = ({
       type,
       id,
     }),
+
+    // will be overridden by common if actor is present
+    write: args => libraryTools.write({ ...args, allowManualMetadata: true }),
   };
 
   const common = {
