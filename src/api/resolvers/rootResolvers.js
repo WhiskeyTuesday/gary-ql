@@ -194,25 +194,23 @@ module.exports = {
       const { customerId } = job;
       // construct the events on the proposal and the job
       // and then write them back to the database (assuming we have a writer)
-      const response = await tools.write({
-        events: [
-          {
-            key: `job:${proposal.jobId}`,
-            type: 'hadProposalAccepted',
-            data: { stageIds },
-            metadata: { actor: { type: 'customer', id: customerId } },
-          },
-          {
-            key: `proposal:${proposalId}`,
-            type: 'wasAccepted',
-            data: { stageIds },
-            metadata: { actor: { type: 'customer', id: customerId } },
-          },
-        ],
-      });
+      const events = [
+        {
+          key: `job:${proposal.jobId}`,
+          type: 'hadProposalAccepted',
+          data: { stageIds },
+        },
+        {
+          key: `proposal:${proposalId}`,
+          type: 'wasAccepted',
+          data: { stageIds },
+        },
+      ];
 
+      // console.log('events', JSON.stringify(events, null, 2));
+
+      const response = await tools.write(customerId)({ events });
       assert(response === 'OK', 'failed to write events');
-
       return true;
     },
 
@@ -227,25 +225,23 @@ module.exports = {
       assert(job, 'job not found');
       const { customerId } = job;
 
-      const response = await tools.write({
-        events: [
-          {
-            key: `job:${proposal.jobId}`,
-            type: 'hadProposalRejected',
-            data: {},
-            metadata: { actor: { type: 'customer', id: customerId } },
-          },
-          {
-            key: `proposal:${proposalId}`,
-            type: 'wasRejected',
-            data: {},
-            metadata: { actor: { type: 'customer', id: customerId } },
-          },
-        ],
-      });
+      const events = [
+        {
+          key: `job:${proposal.jobId}`,
+          type: 'hadProposalRejected',
+          data: {},
+        },
+        {
+          key: `proposal:${proposalId}`,
+          type: 'wasRejected',
+          data: {},
+        },
+      ];
+
+      // console.log('events', JSON.stringify(events, null, 2));
+      const response = await tools.write(customerId)({ events });
 
       assert(response === 'OK', 'failed to write events');
-
       return true;
     },
   },

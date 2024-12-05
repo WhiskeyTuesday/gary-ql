@@ -70,6 +70,7 @@ const config = {
   agentTypes: [
     'staff',
     'admin', // admin within business context
+    'customer',
     'installer',
     'superuser', // dev, root, sysadmin, etc.
     'salesAgent',
