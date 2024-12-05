@@ -9,16 +9,16 @@ const crypto = require('crypto');
 // const assert = require('assert').strict;
 
 // npm tools
-const { v4: uuidv4 } = require('uuid');
-const { v4: isUUID } = require('is-uuid');
-const axios = require('axios');
-const { DateTime } = require('luxon');
 const { LoopsClient } = require('loops');
+const { v4: isUUID } = require('is-uuid');
+const { v4: uuidv4 } = require('uuid');
+const { DateTime } = require('luxon');
+const axios = require('axios');
 
 module.exports = ({
-  actor,
-  libraryTools,
   implementationConfig,
+  libraryTools,
+  actor,
 }) => {
   const notify = libraryTools.makeNotify(implementationConfig);
 
@@ -33,28 +33,37 @@ module.exports = ({
     isUUID,
 
     writeFirebaseId: ({ uid, type, id }) => libraryTools.writeId({
+      id,
+      type,
       token: {
         sub: uid,
-        aud: implementationConfig.fbtAudience,
         iss: implementationConfig.fbtIssuer,
+        aud: implementationConfig.fbtAudience,
       },
-      type,
-      id,
     }),
 
-    // will be overridden by common if actor is present
-    write: args => libraryTools.write({ ...args, allowManualMetadata: true }),
+    // This will be overridden by common if actor is present
+    // NOTE: I have made this a higher-order function rather
+    // than extracting customerId from args so that the
+    // signature explicitly does not match the normal case,
+    // that way if this gets unknowingly called it won't do
+    // anything (in place of the common case below)
+    write: customerId => args => libraryTools.write({
+      ...args,
+
+      actor: { type: 'customer', id: customerId },
+    }),
   };
 
   const common = {
-    write: args => libraryTools.write({ ...args, actor }),
     getChat: libraryTools.getChat,
     coldStart: libraryTools.coldStart, // TODO consider move to staff or su?
-    injectTestData: libraryTools.injectTestData, // TODO same as
+    injectTestData: libraryTools.injectTestData, // TODO same as coldStart
+    write: args => libraryTools.write({ ...args, actor }),
     DateTime,
     notify,
-    axios,
     crypto,
+    axios,
   };
 
   const tools = {
@@ -69,12 +78,12 @@ module.exports = ({
     salesAgent: {},
 
     superuser: {
-      writeId: libraryTools.writeId,
-      dumpDB: libraryTools.dumpDB,
-      populateDB: libraryTools.populateDB,
-      b2Load: libraryTools.b2Load,
-      mintToken: libraryTools.tokenTools.mintToken,
       implementationConfig,
+      b2Load: libraryTools.b2Load,
+      dumpDB: libraryTools.dumpDB,
+      writeId: libraryTools.writeId,
+      populateDB: libraryTools.populateDB,
+      mintToken: libraryTools.tokenTools.mintToken,
     },
   };
 
