@@ -829,7 +829,7 @@ module.exports = {
 
       // if email ends with test.com or example.com, loops will
       // respond with { success: true } but not actually send anything
-      const emailDetails = tools.loops.sendTransactionalEmail({
+      const emailDetails = await tools.loops.sendTransactionalEmail({
         transactionalId: 'cm47qhpeu01fc6fssctd72g4m',
         email: emailAddress,
         addToAudience: false,
@@ -837,6 +837,8 @@ module.exports = {
       });
 
       if (emailDetails.success !== true) {
+        // eslint-disable-next-line no-console
+        console.error(emailDetails);
         throw new Error('failed to send email');
       }
 
