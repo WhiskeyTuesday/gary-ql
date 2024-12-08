@@ -18,13 +18,11 @@
   "dependencies": {
     "@faker-js/faker": "^8.3.1",
     "@gather-social/lib": "^0.0.25",
-    "@sendgrid/mail": "^7.7.0",
     "axios": "^1.7.8",
     "body-parser": "^1.20.3",
     "express": "^4.21.1",
     "firebase-admin": "^11.11.1",
     "graphql": "^16.8.1",
-    "graphql-request": "^6.1.0",
     "graphql-tag": "^2.12.6",
     "image-size": "^1.0.2",
     "ioredis": "^5.3.2",
@@ -38,8 +36,6 @@
     "loops": "^3.4.0",
     "luxon": "^3.5.0",
     "set-interval-async": "^3.0.3",
-    "stripe": "^14.9.0",
-    "twilio": "^4.20.0",
     "uuid": "^9.0.1"
   },
   "devDependencies": {
@@ -50,7 +46,6 @@
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-node": "^11.1.0",
     "nodemon": "^3.1.7",
-    "rescript": "^10.1.4",
     "typescript": "^5.7.2",
     "typescript-language-server": "^4.3.3",
     "vscode-langservers-extracted": "^4.10.0"
