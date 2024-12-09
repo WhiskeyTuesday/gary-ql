@@ -101,11 +101,6 @@ module.exports = {
     ),
   },
 
-  StageProposal: {
-    accepted: ({ acceptedTimestamp }) => !!acceptedTimestamp,
-    rejected: ({ rejectedTimestamp }) => !!rejectedTimestamp,
-  },
-
   Proposal: {
     job: async (root, _, { tools }) => tools.read.standard(
       'job',

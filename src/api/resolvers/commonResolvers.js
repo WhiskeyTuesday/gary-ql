@@ -829,12 +829,18 @@ module.exports = {
 
       // if email ends with test.com or example.com, loops will
       // respond with { success: true } but not actually send anything
-      const emailDetails = await tools.loops.sendTransactionalEmail({
-        transactionalId: 'cm47qhpeu01fc6fssctd72g4m',
-        email: emailAddress,
-        addToAudience: false,
-        dataVariables: { link },
-      });
+      const emailDetails = await (async () => {
+        try {
+          return tools.loops.sendTransactionalEmail({
+            transactionalId: 'cm47qhpeu01fc6fssctd72g4m',
+            email: emailAddress,
+            addToAudience: false,
+            dataVariables: { link },
+          });
+        } catch (e) {
+          return { success: false, error: e };
+        }
+      })();
 
       if (emailDetails.success !== true) {
         // eslint-disable-next-line no-console
