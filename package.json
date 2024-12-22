@@ -7,6 +7,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "rs": "rescript build -w",
+    "clear-dbs": "for n in 0 1 2 3; redis-cli -p 1000$n flushall; end",
     "server": "nodemon --exec \"heroku local --port 5005\" --signal SIGTERM --ignore out/ --ignore dev/ --ignore testing/ --ignore in/",
     "generator": "env GENERATOR=true nodemon --exec \"heroku local --port 5005\" --signal SIGTERM --ignore out/ --ignore dev/ --ignore testing/ --ignore in/",
     "lint": "eslint ./src"
