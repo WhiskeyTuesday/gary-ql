@@ -294,6 +294,7 @@ module.exports = {
 
     hadJobCreated: (event, state) => ({
       modifiedTime: event.timestamp,
+      leads: state.leads.filter(lead => lead !== event.data.leadId),
       jobs: state.jobs.concat(event.data.jobId),
     }),
   },

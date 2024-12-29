@@ -314,6 +314,11 @@ module.exports = {
             ...rest,
           },
         },
+        {
+          key: `customer:${details.customerId}`,
+          type: 'hadLeadCreated',
+          data: { leadId },
+        },
         ...salesAgentId ? [
           {
             key: `lead:${leadId}`,

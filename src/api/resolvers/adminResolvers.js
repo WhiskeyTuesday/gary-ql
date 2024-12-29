@@ -66,11 +66,7 @@ const newAgent = async ({
   assert(typeof emailAddress === 'string', 'email address invalid');
   assert(emailAddress.includes('@'), 'email address invalid');
 
-  const exists = await checkIfEmailExists(
-    databases.firebase,
-    emailAddress,
-  );
-
+  const exists = await checkIfEmailExists(databases.firebase, emailAddress);
   assert(!exists, 'email address already in use');
 
   const { alreadyExists, password, uid } = emailAddress.endsWith('@test.com')
@@ -89,12 +85,7 @@ const newAgent = async ({
   const response = await tools.write({ event });
   assert(response === 'OK', 'write failed');
 
-  const idResponse = await tools.writeFirebaseId({
-    uid,
-    type,
-    id,
-  });
-
+  const idResponse = await tools.writeFirebaseId({ uid, type, id });
   assert(idResponse === 'OK', 'write failed');
 
   const record = await tools.read.aggregateFromDatabase({ type, id });
