@@ -843,6 +843,7 @@ module.exports = {
             dataVariables: { link },
           });
         } catch (e) {
+          console.error(e);
           return { success: false, error: e };
         }
       })();
