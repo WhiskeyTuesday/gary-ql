@@ -445,7 +445,15 @@ module.exports = {
         },
       };
 
-      return tools.write({ event });
+      const response = await tools.write({ event });
+      if (response !== 'OK') {
+        throw new Error('failed to write');
+      }
+
+      return tools.read.aggregateFromDatabase({
+        type: 'customer',
+        id: customerId,
+      });
     },
 
     editCustomer: async (_, { id, details }, { tools }) => {
@@ -462,7 +470,15 @@ module.exports = {
         },
       };
 
-      return tools.write({ event });
+      const response = await tools.write({ event });
+      if (response !== 'OK') {
+        throw new Error('failed to write');
+      }
+
+      return tools.read.aggregateFromDatabase({
+        type: 'customer',
+        id,
+      });
     },
 
     addAddress: async (_, { customerId, address }, { tools }) => {
@@ -479,7 +495,15 @@ module.exports = {
         data: { address: { id, ...address, country: 'us' } },
       };
 
-      return tools.write({ event });
+      const response = await tools.write({ event });
+      if (response !== 'OK') {
+        throw new Error('failed to write');
+      }
+
+      return tools.read.aggregateFromDatabase({
+        type: 'customer',
+        id: customerId,
+      });
     },
 
     editAddress: async (
@@ -843,6 +867,7 @@ module.exports = {
             dataVariables: { link },
           });
         } catch (e) {
+          // eslint-disable-next-line no-console
           console.error(e);
           return { success: false, error: e };
         }

@@ -88,10 +88,10 @@ module.exports = gql`
     editLead(id: ID! salesAgentId: ID visitTimestamp: Int notes: String): Lead
     markLeadRejected(id: ID!): Lead
 
-    createCustomer(details: CustomerInput!): String
-    editCustomer(id: ID!, details: CustomerInput!): String
+    createCustomer(details: CustomerInput!): Customer
+    editCustomer(id: ID!, details: CustomerInput!): Customer
 
-    addAddress(customerId: ID!, address: AddressInput!): String
+    addAddress(customerId: ID!, address: AddressInput!): Customer
     editAddress(
       customerId: ID!
       addressId: ID!
@@ -99,6 +99,7 @@ module.exports = gql`
       activate: Boolean
       deactivate: Boolean
     ): Customer
+
     deprecateAddress(customerId: ID! addressId: ID!): String
     reinstateAddress(customerId: ID! addressId: ID!): String
 
