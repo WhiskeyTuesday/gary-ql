@@ -146,7 +146,8 @@ module.exports = {
         // use loops API to send email
         // NOTE: If email ends with @test.com or @example.com
         // the API will return a response without actually
-        // sending an email.
+        // sending an email (on their end, they already do
+        // this check, so we don't need to do it here).
         const response = await tools.loops.sendTransactionalEmail({
           transactionalId: 'cm459f8qc00qwl133akppab0p',
           email,

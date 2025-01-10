@@ -70,10 +70,35 @@ const newAgent = async ({
   const exists = await checkIfEmailExists(databases.firebase, emailAddress);
   assert(!exists, 'email address already in use');
 
-  const { alreadyExists, password, uid } = emailAddress.endsWith('@test.com')
-  || emailAddress.endsWith('@example.com')
+  const isTestEmail = emailAddress.endsWith('@test.com')
+    || emailAddress.endsWith('@example.com');
+
+  const { alreadyExists, password, uid } = isTestEmail
     ? { alreadyExists: false, password: 'fakePassword', uid: tools.uuidv4() }
     : await createFirebaseAccount(databases.firebase, emailAddress);
+
+  const resetLink = isTestEmail
+    ? 'fake link lol'
+    : await databases.firebase.auth().generatePasswordResetLink(emailAddress);
+
+  assert(resetLink.success, 'generating reset link failed');
+
+  // NOTE: loops API already does nothing and returns { success: true }
+  // if we provide a test domain email address so we don't have to
+  // check for that/branch on it
+  const loopsResponse = await tools.loops.sendTransactionalEmail({
+    transactionalId: 'cm459f8qc00qwl133akppab0p',
+    email: emailAddress,
+    addToAudience: false,
+    dataVariables: { link: resetLink },
+  });
+
+  if (loopsResponse.success !== true) {
+    // eslint-disable-next-line no-console
+    console.error('failed to send password reset email');
+    // eslint-disable-next-line no-console
+    console.error(loopsResponse);
+  }
 
   const id = tools.uuidv4();
 
@@ -89,10 +114,10 @@ const newAgent = async ({
   const idResponse = await tools.writeFirebaseId({ uid, type, id });
   assert(idResponse === 'OK', 'write failed');
 
-  const record = await tools.read.aggregateFromDatabase({ type, id });
+  const aggregate = await tools.read.aggregateFromDatabase({ type, id });
 
   return {
-    [type]: record,
+    [type]: aggregate,
     alreadyExists,
     password,
   };
