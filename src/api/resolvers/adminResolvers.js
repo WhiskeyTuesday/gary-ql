@@ -65,6 +65,7 @@ const newAgent = async ({
   assert(emailAddress, 'email address required');
   assert(typeof emailAddress === 'string', 'email address invalid');
   assert(emailAddress.includes('@'), 'email address invalid');
+  assert(emailAddress.includes('.'), 'email address invalid');
 
   const exists = await checkIfEmailExists(databases.firebase, emailAddress);
   assert(!exists, 'email address already in use');
@@ -95,6 +96,79 @@ const newAgent = async ({
     alreadyExists,
     password,
   };
+};
+
+const changeFirebaseEmail = async (firebase, uid, email) => {
+  assert(firebase, 'firebase not initialised');
+
+  assert(uid, 'uid required');
+  assert(typeof uid === 'string', 'uid invalid');
+  assert(email, 'email required');
+  assert(typeof email === 'string', 'email invalid');
+  assert(email.includes('@'), 'email invalid');
+  assert(email.includes('.'), 'email invalid');
+
+  try {
+    const record = await firebase.auth().updateUser(uid, { email });
+    assert(record, 'record not found');
+    return { alreadyExists: false };
+  } catch (e) {
+    if (e.code === 'auth/email-already-exists') {
+      return { alreadyExists: true };
+    }
+
+    throw e;
+  }
+};
+
+const editAgent = async ({
+  databases,
+  details,
+  id,
+  tools,
+  type,
+}) => {
+  assert(
+    databases
+    && details
+    && id
+    && tools
+    && type,
+  );
+
+  assert(databases.firebase, 'firebase not initialised');
+
+  assert(tools.isUUID(id), 'target id is invalid');
+  const agent = await tools.read.aggregateFromDatabase({ type, id });
+  assert(agent, 'agent not found');
+
+  const { emailAddress } = details;
+  const emailChanged = emailAddress && emailAddress !== agent.emailAddress;
+
+  const emailChangedResponse = emailChanged
+    ? await changeFirebaseEmail(databases.firebase, agent.uid, emailAddress)
+    : { alreadyExists: false };
+
+  if (emailChanged && emailChangedResponse.alreadyExists) {
+    throw new Error('email already in use');
+  } else if (emailChanged && !emailChangedResponse) {
+    throw new Error('email change failed. Details are in the server logs.');
+  }
+
+  const event = {
+    key: `${type}:${id}`,
+    type: 'wasEdited',
+    data: details,
+  };
+
+  const response = await tools.write({ event });
+  assert(response === 'OK', 'write failed');
+
+  // if write failed reverse firebase I guess?
+  // but then if the reversal fails...
+  // for now I'm just going to cowboy it
+
+  return tools.read.aggregateFromDatabase({ type, id });
 };
 
 module.exports = {
@@ -193,24 +267,13 @@ module.exports = {
       memo,
     }),
 
-    editAdmin: async (_, { id, details }, { tools }) => {
-      assert(tools.isUUID(id), 'target id is invalid');
-      const admin = await tools.read.exists(`admin:${id}`);
-      if (!admin) { throw new Error('admin not found'); }
-
-      const event = {
-        key: `admin:${id}`,
-        type: 'wasEdited',
-        data: details,
-      };
-
-      const response = await tools.write({ event });
-      assert(response === 'OK', 'write failed');
-      return tools.read.aggregateFromDatabase({
-        type: 'admin',
-        id,
-      });
-    },
+    editAdmin: async (_, { id, details }, { tools, databases }) => editAgent({
+      type: 'admin',
+      databases,
+      details,
+      tools,
+      id,
+    }),
 
     deactivateAdmin: async (_, { id, memo }, { tools, actor }) => {
       if (!tools.isUUID(id)) { throw new Error('target id is invalid.'); }
@@ -268,24 +331,13 @@ module.exports = {
       memo,
     }),
 
-    editStaff: async (_, { id, details }, { tools }) => {
-      assert(tools.isUUID(id), 'target id is invalid');
-      const staff = await tools.read.standard('staff', id);
-      if (!staff) { throw new Error('staff not found'); }
-
-      const event = {
-        key: `staff:${id}`,
-        type: 'wasEdited',
-        data: details,
-      };
-
-      const response = await tools.write({ event });
-      assert(response === 'OK', 'write failed');
-      return tools.read.aggregateFromDatabase({
-        type: 'staff',
-        id,
-      });
-    },
+    editStaff: async (_, { id, details }, { tools, databases }) => editAgent({
+      type: 'staff',
+      databases,
+      details,
+      tools,
+      id,
+    }),
 
     deactivateStaff: async (_, { id, memo }, { tools }) => {
       assert(tools.isUUID(id), 'target id is invalid');
@@ -339,24 +391,17 @@ module.exports = {
       memo,
     }),
 
-    editSalesAgent: async (_, { id, details }, { tools }) => {
-      assert(tools.isUUID(id), 'target id is invalid');
-      const agent = await tools.read.standard('salesAgent', id);
-      if (!agent) { throw new Error('agent not found'); }
-
-      const event = {
-        key: `salesAgent:${id}`,
-        type: 'wasEdited',
-        data: details,
-      };
-
-      const response = await tools.write({ event });
-      assert(response === 'OK', 'write failed');
-      return tools.read.aggregateFromDatabase({
-        type: 'salesAgent',
-        id,
-      });
-    },
+    editSalesAgent: async (
+      _,
+      { id, details },
+      { tools, databases },
+    ) => editAgent({
+      type: 'salesAgent',
+      databases,
+      details,
+      tools,
+      id,
+    }),
 
     deactivateSalesAgent: async (_, { id, memo }, { tools }) => {
       assert(tools.isUUID(id), 'target id is invalid');
@@ -410,24 +455,17 @@ module.exports = {
       memo,
     }),
 
-    editInstaller: async (_, { id, details }, { tools }) => {
-      assert(tools.isUUID(id), 'target id is invalid');
-      const installer = await tools.read.standard('installer', id);
-      if (!installer) { throw new Error('installer not found'); }
-
-      const event = {
-        key: `installer:${id}`,
-        type: 'wasEdited',
-        data: details,
-      };
-
-      const response = await tools.write({ event });
-      assert(response === 'OK', 'write failed');
-      return tools.read.aggregateFromDatabase({
-        type: 'installer',
-        id,
-      });
-    },
+    editInstaller: async (
+      _,
+      { id, details },
+      { tools, databases },
+    ) => editAgent({
+      type: 'installer',
+      databases,
+      details,
+      tools,
+      id,
+    }),
 
     deactivateInstaller: async (_, { id, memo }, { tools }) => {
       assert(tools.isUUID(id), 'target id is invalid');
