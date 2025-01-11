@@ -81,8 +81,6 @@ const newAgent = async ({
     ? 'fake link lol'
     : await databases.firebase.auth().generatePasswordResetLink(emailAddress);
 
-  assert(resetLink.success, 'generating reset link failed');
-
   // NOTE: loops API already does nothing and returns { success: true }
   // if we provide a test domain email address so we don't have to
   // check for that/branch on it
@@ -102,13 +100,22 @@ const newAgent = async ({
 
   const id = tools.uuidv4();
 
-  const event = {
-    key: `${type}:${id}`,
-    type: 'wasCreated',
-    data: { memo, id, ...details },
-  };
+  const events = [
+    {
+      key: `${type}:${id}`,
+      type: 'wasCreated',
+      data: { memo, id, ...details },
+    },
+    {
+      key: `${type}:${id}`,
+      type: 'hadTokenAssociated',
+      data: {
+        token: { sub: uid, iss: tools.fbtIssuer, aud: tools.fbtAudience },
+      },
+    },
+  ];
 
-  const response = await tools.write({ event });
+  const response = await tools.write({ events });
   assert(response === 'OK', 'write failed');
 
   const idResponse = await tools.writeFirebaseId({ uid, type, id });
@@ -148,6 +155,7 @@ const changeFirebaseEmail = async (firebase, uid, email) => {
 
 const editAgent = async ({
   databases,
+  fbtIssuer,
   details,
   id,
   tools,
@@ -155,6 +163,7 @@ const editAgent = async ({
 }) => {
   assert(
     databases
+    && fbtIssuer
     && details
     && id
     && tools
@@ -170,8 +179,19 @@ const editAgent = async ({
   const { emailAddress } = details;
   const emailChanged = emailAddress && emailAddress !== agent.emailAddress;
 
-  const emailChangedResponse = emailChanged
-    ? await changeFirebaseEmail(databases.firebase, agent.uid, emailAddress)
+  // if the existing OR new email address is a test domain don't touch firebase
+  const isTestEmail = emailAddress.endsWith('@test.com')
+    || emailAddress.endsWith('@example.com')
+    || agent.emailAddress.endsWith('@test.com')
+    || agent.emailAddress.endsWith('@example.com');
+
+  // what if there are multiple? should be fine
+  console.log({ tokens: agent.tokens, fbtIssuer });
+  const firebaseUid = agent.tokens.find(t => t.iss === fbtIssuer).sub;
+  assert(firebaseUid, 'firebase uid not found');
+
+  const emailChangedResponse = emailChanged && !isTestEmail
+    ? await changeFirebaseEmail(databases.firebase, firebaseUid, emailAddress)
     : { alreadyExists: false };
 
   if (emailChanged && emailChangedResponse.alreadyExists) {
@@ -187,11 +207,37 @@ const editAgent = async ({
   };
 
   const response = await tools.write({ event });
-  assert(response === 'OK', 'write failed');
+  if (response !== 'OK') {
+    // if write failed reverse firebase I guess?
+    // but then if the reversal fails...
+    // for now I'm just going to cowboy it
+    // there's a console log to maybe hopefully help
 
-  // if write failed reverse firebase I guess?
-  // but then if the reversal fails...
-  // for now I'm just going to cowboy it
+    // eslint-disable-next-line no-console
+    console.error(
+      'agent edit event write failed',
+      { event, response },
+    );
+
+    throw new Error('agent edit event write failed');
+  }
+
+  if (emailChanged && !emailChangedResponse.alreadyExists) {
+    // update iddb
+    const iddbResponse = await tools.writeFirebaseId(
+      { uid: firebaseUid, type, id },
+    );
+
+    if (iddbResponse !== 'OK') {
+      // if iddb fails should reverse... everything?
+      // again just going to cowboy it for now
+      // eslint-disable-next-line no-console
+      console.error(
+        'agent edit id write failed',
+        { iddbResponse },
+      );
+    }
+  }
 
   return tools.read.aggregateFromDatabase({ type, id });
 };
@@ -292,7 +338,12 @@ module.exports = {
       memo,
     }),
 
-    editAdmin: async (_, { id, details }, { tools, databases }) => editAgent({
+    editAdmin: async (
+      _,
+      { id, details },
+      { tools, databases },
+    ) => editAgent({
+      fbtIssuer: tools.fbtIssuer,
       type: 'admin',
       databases,
       details,
@@ -356,7 +407,12 @@ module.exports = {
       memo,
     }),
 
-    editStaff: async (_, { id, details }, { tools, databases }) => editAgent({
+    editStaff: async (
+      _,
+      { id, details },
+      { tools, databases },
+    ) => editAgent({
+      fbtIssuer: tools.fbtIssuer,
       type: 'staff',
       databases,
       details,
@@ -421,6 +477,7 @@ module.exports = {
       { id, details },
       { tools, databases },
     ) => editAgent({
+      fbtIssuer: tools.fbtIssuer,
       type: 'salesAgent',
       databases,
       details,
@@ -485,6 +542,7 @@ module.exports = {
       { id, details },
       { tools, databases },
     ) => editAgent({
+      fbtIssuer: tools.fbtIssuer,
       type: 'installer',
       databases,
       details,

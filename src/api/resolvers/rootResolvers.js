@@ -140,7 +140,7 @@ module.exports = {
           || email.endsWith('@example.com');
 
         const link = isTestDomain
-          ? 'this is a fake link' // TODO
+          ? 'this is a fake link'
           : await auth().generatePasswordResetLink(email);
 
         // use loops API to send email

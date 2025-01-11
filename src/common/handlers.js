@@ -32,11 +32,14 @@ module.exports = {
   superuser: {
     wasCreated: event => ({
       aggregateType: 'Superuser',
+      tokens: [],
       simulation: event.data.simulation || false,
       id: event.data.id,
     }),
 
-    hadTokenAssociated: () => ({}),
+    hadTokenAssociated: (event, state) => ({
+      tokens: state.tokens.concat(event.data.token),
+    }),
 
     createdStaff: () => ({}),
   },
@@ -45,7 +48,7 @@ module.exports = {
     wasCreated: event => ({
       aggregateType: 'Staff',
       id: event.data.id,
-      token: false,
+      tokens: [],
       userId: false,
       status: 'active',
 
@@ -69,8 +72,8 @@ module.exports = {
       },
     }),
 
-    hadTokenAssociated: event => ({
-      token: event.data.token,
+    hadTokenAssociated: (event, state) => ({
+      tokens: state.tokens.concat(event.data.token),
     }),
 
     wasDeactivated: () => ({ status: 'inactive' }),
@@ -85,7 +88,7 @@ module.exports = {
     wasCreated: event => ({
       aggregateType: 'Staff',
       id: event.data.id,
-      token: false,
+      tokens: [],
       userId: false,
       status: 'active',
 
@@ -98,8 +101,8 @@ module.exports = {
       },
     }),
 
-    hadTokenAssociated: event => ({
-      token: event.data.token,
+    hadTokenAssociated: (event, state) => ({
+      tokens: state.tokens.concat(event.data.token),
     }),
 
     wasEdited: (event, state) => ({
@@ -120,6 +123,7 @@ module.exports = {
     wasCreated: event => ({
       id: event.data.id,
       status: 'active',
+      tokens: [],
       profile: {
         id: event.data.id,
         firstName: event.data.firstName,
@@ -143,7 +147,10 @@ module.exports = {
       },
     }),
 
-    hadTokenAssociated: () => ({}),
+    hadTokenAssociated: (event, state) => ({
+      tokens: state.tokens.concat(event.data.token),
+    }),
+
     wasDeactivated: () => ({ status: 'inactive' }),
     wasReactivated: () => ({ status: 'active' }),
 
@@ -199,6 +206,7 @@ module.exports = {
     wasCreated: event => ({
       id: event.data.id,
       status: 'active',
+      tokens: [],
       profile: {
         id: event.data.id,
         firstName: event.data.firstName,
@@ -219,7 +227,10 @@ module.exports = {
       },
     }),
 
-    hadTokenAssociated: () => ({}),
+    hadTokenAssociated: (event, state) => ({
+      tokens: state.tokens.concat(event.data.token),
+    }),
+
     wasDeactivated: () => ({ status: 'inactive' }),
     wasReactivated: () => ({ status: 'active' }),
 

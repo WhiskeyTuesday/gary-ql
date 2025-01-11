@@ -126,6 +126,11 @@ module.exports = async ({ now, config, eventDB, stateDB }) => { // , tools })
       aud: config.sstAudience,
       iss: config.sstIssuer,
     },
+    firebaseToken: {
+      sub: subs[idx],
+      aud: config.fbtAudience,
+      iss: config.fbtIssuer,
+    },
   })).flatMap(sd => ([ // events
     {
       key: `staff:${sd.id}`,
@@ -145,6 +150,12 @@ module.exports = async ({ now, config, eventDB, stateDB }) => { // , tools })
       type: 'hadTokenAssociated',
       metadata: { actor: { type: 'superuser', id: suId } },
       data: { token: sd.token },
+    },
+    {
+      key: `staff:${sd.id}`,
+      type: 'hadTokenAssociated',
+      metadata: { actor: { type: 'superuser', id: suId } },
+      data: { token: sd.firebaseToken },
     },
   ]));
 
@@ -171,6 +182,11 @@ module.exports = async ({ now, config, eventDB, stateDB }) => { // , tools })
       aud: config.sstAudience,
       iss: config.sstIssuer,
     },
+    firebaseToken: {
+      sub: subs[idx + staffDescriptors.length],
+      aud: config.fbtAudience,
+      iss: config.fbtIssuer,
+    },
   })).flatMap(ad => ([ // events
     {
       key: `admin:${ad.id}`,
@@ -189,6 +205,12 @@ module.exports = async ({ now, config, eventDB, stateDB }) => { // , tools })
       type: 'hadTokenAssociated',
       metadata: { actor: { type: 'superuser', id: suId } },
       data: { token: ad.token },
+    },
+    {
+      key: `admin:${ad.id}`,
+      type: 'hadTokenAssociated',
+      metadata: { actor: { type: 'superuser', id: suId } },
+      data: { token: ad.firebaseToken },
     },
   ]));
 
@@ -209,6 +231,11 @@ module.exports = async ({ now, config, eventDB, stateDB }) => { // , tools })
       aud: config.sstAudience,
       iss: config.sstIssuer,
     },
+    firebaseToken: {
+      sub: subs[idx + staffDescriptors.length + adminDescriptors.length],
+      aud: config.fbtAudience,
+      iss: config.fbtIssuer,
+    },
   })).flatMap(instid => ([ // event
     {
       key: `installer:${instid.id}`,
@@ -227,6 +254,12 @@ module.exports = async ({ now, config, eventDB, stateDB }) => { // , tools })
       type: 'hadTokenAssociated',
       metadata: { actor: { type: 'superuser', id: suId } },
       data: { token: instid.token },
+    },
+    {
+      key: `installer:${instid.id}`,
+      type: 'hadTokenAssociated',
+      metadata: { actor: { type: 'superuser', id: suId } },
+      data: { token: instid.firebaseToken },
     },
   ]));
 
@@ -247,6 +280,15 @@ module.exports = async ({ now, config, eventDB, stateDB }) => { // , tools })
       aud: config.sstAudience,
       iss: config.sstIssuer,
     },
+    firebaseToken: {
+      sub: subs[
+        idx + staffDescriptors.length
+        + adminDescriptors.length
+        + installerDescriptors.length
+      ],
+      aud: config.fbtAudience,
+      iss: config.fbtIssuer,
+    },
   })).flatMap(sad => ([ // event
     {
       key: `salesAgent:${sad.id}`,
@@ -266,6 +308,12 @@ module.exports = async ({ now, config, eventDB, stateDB }) => { // , tools })
       metadata: { actor: { type: 'superuser', id: suId } },
       data: { token: sad.token },
     },
+    {
+      key: `salesAgent:${sad.id}`,
+      type: 'hadTokenAssociated',
+      metadata: { actor: { type: 'superuser', id: suId } },
+      data: { token: sad.firebaseToken },
+    },
   ]));
 
   staticEvents.push(
@@ -274,9 +322,6 @@ module.exports = async ({ now, config, eventDB, stateDB }) => { // , tools })
     ...installerEvents,
     ...salesAgentEvents,
   );
-
-  const firebaseAud = config.fbtAudience;
-  const firebaseIss = config.fbtIssuer;
 
   const staticTimestamps = (events, t) => events
     .map((e, idx) => ({
@@ -304,66 +349,13 @@ module.exports = async ({ now, config, eventDB, stateDB }) => { // , tools })
   const testDataKeys = events.map(({ key }) => key);
   await stateDB.sadd('testDataKeys', ...testDataKeys);
 
-  { // ID sync
-    const tokenEvents = events.filter(e => e.type === 'hadTokenAssociated');
+  const tokenEvents = events.filter(e => e.type === 'hadTokenAssociated');
 
-    await Promise.all(tokenEvents.map(async (e) => {
-      const [actorType, id] = e.key.split(':');
-      const { iss, aud, sub } = e.data.token;
-      await stateDB.set(`id:${iss}:${aud}:${sub}:${actorType}`, id);
-    }));
-
-    // Manually connect firebase token subs to aggregates
-
-    const staffPromises = staffDescriptors
-      .map((_, idx) => {
-        assert(!!subs[idx]);
-        return stateDB.set(
-          `id:${firebaseIss}:${firebaseAud}:${subs[idx]}:staff`,
-          staffIds[idx],
-        );
-      });
-
-    const adminPromises = adminDescriptors
-      .map((_, idx) => {
-        const offset = staffDescriptors.length;
-        assert(!!subs[idx + offset]);
-        return stateDB.set(
-          `id:${firebaseIss}:${firebaseAud}:${subs[idx + offset]}:admin`,
-          adminIds[idx],
-        );
-      });
-
-    const installerPromises = installerDescriptors
-      .map((_, idx) => {
-        const offset = staffDescriptors.length + adminDescriptors.length;
-        assert(!!subs[idx + offset]);
-        return stateDB.set(
-          `id:${firebaseIss}:${firebaseAud}:${subs[idx + offset]}:installer`,
-          installerIds[idx],
-        );
-      });
-
-    const salesAgentPromises = salesAgentDescriptors
-      .map((_, idx) => {
-        const offset = staffDescriptors.length
-          + adminDescriptors.length
-          + installerDescriptors.length;
-
-        assert(!!subs[idx + offset]);
-        return stateDB.set(
-          `id:${firebaseIss}:${firebaseAud}:${subs[idx + offset]}:salesAgent`,
-          salesAgentIds[idx],
-        );
-      });
-
-    await Promise.all([
-      staffPromises,
-      adminPromises,
-      installerPromises,
-      salesAgentPromises,
-    ]);
-  }
+  await Promise.all(tokenEvents.map(async (e) => {
+    const [actorType, id] = e.key.split(':');
+    const { iss, aud, sub } = e.data.token;
+    await stateDB.set(`id:${iss}:${aud}:${sub}:${actorType}`, id);
+  }));
 
   return events;
 };

@@ -71,7 +71,10 @@ module.exports = ({
 
     staff: {},
 
-    admin: {},
+    admin: {
+      fbtIssuer: implementationConfig.fbtIssuer,
+      fbtAudience: implementationConfig.fbtAudience,
+    },
 
     installer: {},
 

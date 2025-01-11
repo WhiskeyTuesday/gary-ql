@@ -27,7 +27,10 @@ module.exports = {
   Query: {
     agentWithCharacteristics: async (_, { mode, count = 1 }, { tools }) => {
       const modes = {
-        staff: ['staff', agg => !!agg.token && agg.aggregateType === 'Staff'],
+        staff: [
+          'staff',
+          agg => !!agg.tokens[0] && agg.aggregateType === 'Staff',
+        ],
       };
 
       if (!modes[mode]) { throw new Error('mode unknown'); }
@@ -68,14 +71,11 @@ module.exports = {
     tokenById: async (_, { id, imp, type }, { tools, clock }) => {
       assert([].includes(type), 'invalid type');
 
-      const agent = await tools.read.aggregateFromDatabase({
-        id,
-        type,
-      });
-
+      const agent = await tools.read.aggregateFromDatabase({ id, type });
       if (!agent) { throw new Error('agent not found for id'); }
 
-      const tokenDetails = agent.token;
+      // TODO should probably return all token or require an aud or iss filter?
+      const tokenDetails = agent.tokens[0];
       if (!tokenDetails) { throw new Error('token details not found for id'); }
       const now = clock.unix();
       return tools.mintToken({ ...tokenDetails, imp, now });
@@ -88,9 +88,10 @@ module.exports = {
         userIds.map(uid => tools.read.standard('user', uid)),
       ));
 
-      return users
-        .filter(u => u.token.iss.startsWith('https://securetoken.google.com'))
-        .map(u => u.id);
+      const hasFirebaseToken = u => u.tokens
+        .some(t => t.iss.startsWith('https://securetoken.google.com'));
+
+      return users.filter(hasFirebaseToken).map(u => u.id);
     },
 
     generatorState: (_, __, { generator }) => {
