@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@faker-js/faker": "^8.4.1",
-    "@gather-social/lib": "^0.0.26",
+    "@gather-social/lib": "^0.0.27",
     "axios": "^1.7.9",
     "body-parser": "^1.20.3",
     "express": "^4.21.2",
