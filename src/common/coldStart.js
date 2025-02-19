@@ -145,69 +145,125 @@ module.exports = async (databases, implementationConfig) => {
           },
         ];
       })(),
-      (() => {
+      ...(() => {
         const id = uuid();
-        return {
-          key: `salesAgent:${id}`,
-          type: 'wasCreated',
-          metadata: { actor: systemAgent },
-          data: {
-            id,
-            memo: 'created on cold start',
-            firstName: 'Ted',
-            lastName: 'Riggs',
-            emailAddress: 'tariggs67@gmail.com',
-            phoneNumber: '+15555555555',
+        return [
+          {
+            key: `salesAgent:${id}`,
+            type: 'wasCreated',
+            metadata: { actor: systemAgent },
+            data: {
+              id,
+              memo: 'created on cold start',
+              firstName: 'Ted',
+              lastName: 'Riggs',
+              emailAddress: 'tariggs67@gmail.com',
+              phoneNumber: '+15555555555',
+            },
           },
-        };
+          {
+            key: `admin:${id}`,
+            type: 'hadTokenAssociated',
+            metadata: { actor: systemAgent },
+            data: {
+              token: {
+                sub: 'eDVQKOVM7qRXoelhldMNsgg4I4b2',
+                aud: implementationConfig.fbtAudience,
+                iss: implementationConfig.fbtIssuer,
+              },
+            },
+          },
+        ];
       })(),
-      (() => {
+      ...(() => {
         const id = uuid();
-        return {
-          key: `salesAgent:${id}`,
-          type: 'wasCreated',
-          metadata: { actor: systemAgent },
-          data: {
-            id,
-            memo: 'created on cold start',
-            firstName: 'Jack',
-            lastName: 'Lowe',
-            emailAddress: 'jack-gwt@att.net',
-            phoneNumber: '+15555555555',
+        return [
+          {
+            key: `salesAgent:${id}`,
+            type: 'wasCreated',
+            metadata: { actor: systemAgent },
+            data: {
+              id,
+              memo: 'created on cold start',
+              firstName: 'Jack',
+              lastName: 'Lowe',
+              emailAddress: 'jack-gwt@att.net',
+              phoneNumber: '+15555555555',
+            },
           },
-        };
+          {
+            key: `admin:${id}`,
+            type: 'hadTokenAssociated',
+            metadata: { actor: systemAgent },
+            data: {
+              token: {
+                sub: 'driQykM9GRTDVJi3dAJgbF4nFtj2',
+                aud: implementationConfig.fbtAudience,
+                iss: implementationConfig.fbtIssuer,
+              },
+            },
+          },
+        ];
       })(),
-      (() => {
+      ...(() => {
         const id = uuid();
-        return {
-          key: `installer:${id}`,
-          type: 'wasCreated',
-          metadata: { actor: systemAgent },
-          data: {
-            id,
-            memo: 'created on cold start',
-            firstName: 'James',
-            lastName: 'Brown',
-            emailAddress: 'jbrown.gwt@att.net',
-            phoneNumber: '+15555555555',
+        return [
+          {
+            key: `installer:${id}`,
+            type: 'wasCreated',
+            metadata: { actor: systemAgent },
+            data: {
+              id,
+              memo: 'created on cold start',
+              firstName: 'James',
+              lastName: 'Brown',
+              emailAddress: 'jbrown.gwt@att.net',
+              phoneNumber: '+15555555555',
+            },
           },
-        };
+          {
+            key: `admin:${id}`,
+            type: 'hadTokenAssociated',
+            metadata: { actor: systemAgent },
+            data: {
+              token: {
+                sub: 'pnfatDxF5fbuT6Ym324RECrpmrj2',
+                aud: implementationConfig.fbtAudience,
+                iss: implementationConfig.fbtIssuer,
+              },
+            },
+          },
+        ];
       })(),
-      (() => {
+      ...(() => {
         const id = uuid();
-        return {
-          key: `staff:${id}`,
-          type: 'wasCreated',
-          metadata: { actor: systemAgent },
-          data: {
-            id,
-            memo: 'created on cold start',
-            firstName: 'Shiela',
-            lastName: 'Bongio',
-            emailAddress: 'shiela-gwt@att.net',
-            phoneNumber: '+15555555555',
+        return [
+          {
+            key: `staff:${id}`,
+            type: 'wasCreated',
+            metadata: { actor: systemAgent },
+            data: {
+              id,
+              memo: 'created on cold start',
+              firstName: 'Shiela',
+              lastName: 'Bongio',
+              emailAddress: 'shiela-gwt@att.net',
+              phoneNumber: '+15555555555',
+            },
           },
-        };
+          {
+            key: `admin:${id}`,
+            type: 'hadTokenAssociated',
+            metadata: { actor: systemAgent },
+            data: {
+              token: {
+                sub: 'Ocf6qWpgGxeco6zabNb6CdYi84n2',
+                aud: implementationConfig.fbtAudience,
+                iss: implementationConfig.fbtIssuer,
+              },
+            },
+          },
+        ];
       })(),
     ];
 
