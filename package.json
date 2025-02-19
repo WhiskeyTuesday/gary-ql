@@ -1,6 +1,6 @@
 {
   "name": "indowint-gql",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "",
   "main": "none",
   "author": "Elija Sorensen @WhiskeyTuesday",
@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@faker-js/faker": "^8.4.1",
-    "@gather-social/lib": "^0.0.27",
+    "@gather-social/lib": "^0.0.28",
     "axios": "^1.7.9",
     "body-parser": "^1.20.3",
     "express": "^4.21.2",
