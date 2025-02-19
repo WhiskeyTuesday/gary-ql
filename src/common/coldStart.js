@@ -55,21 +55,95 @@ module.exports = async (databases, implementationConfig) => {
           data: { id, name, price, unit: 'SQ_FT', currencyCode: 'USD' },
         };
       }),
-      (() => {
+      ...(() => {
         const id = uuid();
-        return {
-          key: `admin:${id}`,
-          type: 'wasCreated',
-          metadata: { actor: systemAgent },
-          data: {
-            id,
-            memo: 'created on cold start',
-            firstName: 'Gary',
-            lastName: 'Cooper',
-            emailAddress: 'gtinting@gmail.com',
-            phoneNumber: '+15555555555',
+        return [
+          {
+            key: `admin:${id}`,
+            type: 'wasCreated',
+            metadata: { actor: systemAgent },
+            data: {
+              id,
+              memo: 'created on cold start',
+              firstName: 'Gary',
+              lastName: 'Cooper',
+              emailAddress: 'gtinting@gmail.com',
+              phoneNumber: '+15555555555',
+            },
           },
-        };
+          {
+            key: `admin:${id}`,
+            type: 'hadTokenAssociated',
+            metadata: { actor: systemAgent },
+            data: {
+              token: {
+                sub: 'bnf4o5JqI1dzZcwq3tPkJ5cGZto1',
+                aud: implementationConfig.fbtAudience,
+                iss: implementationConfig.fbtIssuer,
+              },
+            },
+          },
+        ];
+      })(),
+      ...(() => {
+        const id = uuid();
+        return [
+          {
+            key: `admin:${id}`,
+            type: 'wasCreated',
+            metadata: { actor: systemAgent },
+            data: {
+              id,
+              memo: 'created on cold start',
+              firstName: 'Elija',
+              lastName: 'Sorensen',
+              emailAddress: '1@test.com',
+              phoneNumber: '+15555555555',
+            },
+          },
+          {
+            key: `admin:${id}`,
+            type: 'hadTokenAssociated',
+            metadata: { actor: systemAgent },
+            data: {
+              token: {
+                sub: 'Er587AJ69yVvXlcQeMZqIEaTZ2Y2',
+                aud: implementationConfig.fbtAudience,
+                iss: implementationConfig.fbtIssuer,
+              },
+            },
+          },
+        ];
+      })(),
+      ...(() => {
+        const id = uuid();
+        return [
+          {
+            key: `admin:${id}`,
+            type: 'wasCreated',
+            metadata: { actor: systemAgent },
+            data: {
+              id,
+              memo: 'created on cold start',
+              firstName: 'Butch',
+              lastName: 'Ewing',
+              emailAddress: 'butch+test@bruceandeddy.com',
+              phoneNumber: '+15555555555',
+            },
+          },
+          {
+            key: `admin:${id}`,
+            type: 'hadTokenAssociated',
+            metadata: { actor: systemAgent },
+            data: {
+              token: {
+                sub: 'XJ6RKGrWEHTqFC61oJvMHa4kj9J2',
+                aud: implementationConfig.fbtAudience,
+                iss: implementationConfig.fbtIssuer,
+              },
+            },
+          },
+        ];
       })(),
       (() => {
         const id = uuid();

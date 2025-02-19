@@ -177,17 +177,30 @@ const editAgent = async ({
   assert(agent, 'agent not found');
 
   const { emailAddress } = details;
-  const emailChanged = emailAddress && emailAddress !== agent.emailAddress;
+  const existingEmail = agent.profile.emailAddress;
+
+  const maybeValidEmail = (adr) => {
+    assert(adr, 'email address required');
+    assert(typeof adr === 'string', 'email address invalid');
+    assert(adr.includes('@'), 'email address invalid');
+    assert(adr.includes('.'), 'email address invalid');
+  };
+
+  maybeValidEmail(emailAddress);
+  maybeValidEmail(existingEmail);
+
+  const emailChanged = emailAddress && emailAddress !== existingEmail;
 
   // if the existing OR new email address is a test domain don't touch firebase
   const isTestEmail = emailAddress.endsWith('@test.com')
     || emailAddress.endsWith('@example.com')
-    || agent.emailAddress.endsWith('@test.com')
-    || agent.emailAddress.endsWith('@example.com');
+    || existingEmail.endsWith('@test.com')
+    || existingEmail.endsWith('@example.com');
 
   // what if there are multiple? should be fine
-  console.log({ tokens: agent.tokens, fbtIssuer });
-  const firebaseUid = agent.tokens.find(t => t.iss === fbtIssuer).sub;
+  const token = agent.tokens.find(t => t.iss === fbtIssuer);
+  assert(token, 'token not found');
+  const firebaseUid = token.sub;
   assert(firebaseUid, 'firebase uid not found');
 
   const emailChangedResponse = emailChanged && !isTestEmail
@@ -375,9 +388,10 @@ module.exports = {
       });
     },
 
-    reactivateAdmin: async (_, { id, memo }, { tools }) => {
+    reactivateAdmin: async (_, { id, memo }, { tools, actor }) => {
       if (!tools.isUUID(id)) { throw new Error('target id is invalid.'); }
       const admin = await tools.read.standard('admin', id);
+      if (actor.id === id) { throw new Error('cannot reactivate self'); }
       if (!admin) { throw new Error('admin not found'); }
       if (admin.status === 'active') { return admin; }
       const response = await tools.write({
