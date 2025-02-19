@@ -67,6 +67,7 @@ module.exports = async (databases, implementationConfig) => {
             firstName: 'Gary',
             lastName: 'Cooper',
             emailAddress: 'gtinting@gmail.com',
+            phoneNumber: '+15555555555',
           },
         };
       })(),
@@ -82,6 +83,7 @@ module.exports = async (databases, implementationConfig) => {
             firstName: 'Ted',
             lastName: 'Riggs',
             emailAddress: 'tariggs67@gmail.com',
+            phoneNumber: '+15555555555',
           },
         };
       })(),
@@ -97,6 +99,7 @@ module.exports = async (databases, implementationConfig) => {
             firstName: 'Jack',
             lastName: 'Lowe',
             emailAddress: 'jack-gwt@att.net',
+            phoneNumber: '+15555555555',
           },
         };
       })(),
@@ -112,6 +115,7 @@ module.exports = async (databases, implementationConfig) => {
             firstName: 'James',
             lastName: 'Brown',
             emailAddress: 'jbrown.gwt@att.net',
+            phoneNumber: '+15555555555',
           },
         };
       })(),
@@ -127,6 +131,7 @@ module.exports = async (databases, implementationConfig) => {
             firstName: 'Shiela',
             lastName: 'Bongio',
             emailAddress: 'shiela-gwt@att.net',
+            phoneNumber: '+15555555555',
           },
         };
       })(),
