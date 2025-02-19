@@ -162,7 +162,7 @@ module.exports = async (databases, implementationConfig) => {
             },
           },
           {
-            key: `admin:${id}`,
+            key: `salesAgent:${id}`,
             type: 'hadTokenAssociated',
             metadata: { actor: systemAgent },
             data: {
@@ -192,7 +192,7 @@ module.exports = async (databases, implementationConfig) => {
             },
           },
           {
-            key: `admin:${id}`,
+            key: `salesAgent:${id}`,
             type: 'hadTokenAssociated',
             metadata: { actor: systemAgent },
             data: {
@@ -222,7 +222,7 @@ module.exports = async (databases, implementationConfig) => {
             },
           },
           {
-            key: `admin:${id}`,
+            key: `installer:${id}`,
             type: 'hadTokenAssociated',
             metadata: { actor: systemAgent },
             data: {
@@ -252,7 +252,7 @@ module.exports = async (databases, implementationConfig) => {
             },
           },
           {
-            key: `admin:${id}`,
+            key: `staff:${id}`,
             type: 'hadTokenAssociated',
             metadata: { actor: systemAgent },
             data: {
