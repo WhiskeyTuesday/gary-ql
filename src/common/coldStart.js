@@ -55,6 +55,81 @@ module.exports = async (databases, implementationConfig) => {
           data: { id, name, price, unit: 'SQ_FT', currencyCode: 'USD' },
         };
       }),
+      (() => {
+        const id = uuid();
+        return {
+          key: `admin:${id}`,
+          type: 'wasCreated',
+          metadata: { actor: systemAgent },
+          data: {
+            id,
+            memo: 'created on cold start',
+            firstName: 'Gary',
+            lastName: 'Cooper',
+            emailAddress: 'gtinting@gmail.com',
+          },
+        };
+      })(),
+      (() => {
+        const id = uuid();
+        return {
+          key: `salesAgent:${id}`,
+          type: 'wasCreated',
+          metadata: { actor: systemAgent },
+          data: {
+            id,
+            memo: 'created on cold start',
+            firstName: 'Ted',
+            lastName: 'Riggs',
+            emailAddress: 'tariggs67@gmail.com',
+          },
+        };
+      })(),
+      (() => {
+        const id = uuid();
+        return {
+          key: `salesAgent:${id}`,
+          type: 'wasCreated',
+          metadata: { actor: systemAgent },
+          data: {
+            id,
+            memo: 'created on cold start',
+            firstName: 'Jack',
+            lastName: 'Lowe',
+            emailAddress: 'jack-gwt@att.net',
+          },
+        };
+      })(),
+      (() => {
+        const id = uuid();
+        return {
+          key: `installer:${id}`,
+          type: 'wasCreated',
+          metadata: { actor: systemAgent },
+          data: {
+            id,
+            memo: 'created on cold start',
+            firstName: 'James',
+            lastName: 'Brown',
+            emailAddress: 'jbrown.gwt@att.net',
+          },
+        };
+      })(),
+      (() => {
+        const id = uuid();
+        return {
+          key: `staff:${id}`,
+          type: 'wasCreated',
+          metadata: { actor: systemAgent },
+          data: {
+            id,
+            memo: 'created on cold start',
+            firstName: 'Shiela',
+            lastName: 'Bongio',
+            emailAddress: 'shiela-gwt@att.net',
+          },
+        };
+      })(),
     ];
 
     await databases.events.flushdb();
