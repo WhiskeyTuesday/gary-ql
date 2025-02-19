@@ -148,7 +148,7 @@ module.exports = {
       firstName: Joi.string().max(50).required(),
       lastName: Joi.string().max(50).required(),
       emailAddress: Joi.string().email().required(),
-      phoneNumber: phoneNumberNorthAmerica,
+      phoneNumber: phoneNumberNorthAmerica.optional(),
 
       memo: memo.optional(),
     }),
@@ -161,7 +161,7 @@ module.exports = {
       firstName: Joi.string().max(50).required(),
       lastName: Joi.string().max(50).required(),
       emailAddress: Joi.string().email().required(),
-      phoneNumber: phoneNumberNorthAmerica,
+      phoneNumber: phoneNumberNorthAmerica.optional(),
     }),
 
     wasDeactivated: eventData({ memo: memo.optional() }),
@@ -174,7 +174,7 @@ module.exports = {
       firstName: Joi.string().max(50).required(),
       lastName: Joi.string().max(50).required(),
       emailAddress: Joi.string().email().required(),
-      phoneNumber: phoneNumberNorthAmerica,
+      phoneNumber: phoneNumberNorthAmerica.optional(),
 
       memo: memo.optional(),
     }),
@@ -185,7 +185,7 @@ module.exports = {
       firstName: Joi.string().max(50).required(),
       lastName: Joi.string().max(50).required(),
       emailAddress: Joi.string().email().required(),
-      phoneNumber: phoneNumberNorthAmerica,
+      phoneNumber: phoneNumberNorthAmerica.optional(),
     }),
 
     hadTokenAssociated: eventData({ token }),
@@ -205,7 +205,7 @@ module.exports = {
       firstName: Joi.string().required(),
       lastName: Joi.string().required(),
       emailAddress: Joi.string().email().required(),
-      phoneNumber: phoneNumberNorthAmerica,
+      phoneNumber: phoneNumberNorthAmerica.optional(),
 
       memo: memo.optional(),
     }),
@@ -216,7 +216,7 @@ module.exports = {
       firstName: Joi.string().max(50).required(),
       lastName: Joi.string().max(50).required(),
       emailAddress: Joi.string().email().required(),
-      phoneNumber: phoneNumberNorthAmerica,
+      phoneNumber: phoneNumberNorthAmerica.optional(),
     }),
 
     hadTokenAssociated: eventData({ token }),
@@ -237,7 +237,7 @@ module.exports = {
       firstName: Joi.string().required(),
       lastName: Joi.string().required(),
       emailAddress: Joi.string().email().required(),
-      phoneNumber: phoneNumberNorthAmerica,
+      phoneNumber: phoneNumberNorthAmerica.optional(),
 
       memo: memo.optional(),
     }),
@@ -248,7 +248,7 @@ module.exports = {
       firstName: Joi.string().max(50).required(),
       lastName: Joi.string().max(50).required(),
       emailAddress: Joi.string().email().required(),
-      phoneNumber: phoneNumberNorthAmerica,
+      phoneNumber: phoneNumberNorthAmerica.optional(),
     }),
 
     hadTokenAssociated: eventData({ token }),
