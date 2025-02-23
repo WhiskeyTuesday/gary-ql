@@ -149,7 +149,7 @@ module.exports = {
         // sending an email (on their end, they already do
         // this check, so we don't need to do it here).
         const response = await tools.loops.sendTransactionalEmail({
-          transactionalId: 'cm459f8qc00qwl133akppab0p',
+          transactionalId: 'cm7cjkyer01gsz09s9eqv0jci',
           email,
           addToAudience: false,
           dataVariables: { link },

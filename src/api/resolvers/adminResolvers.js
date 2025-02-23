@@ -85,7 +85,7 @@ const newAgent = async ({
   // if we provide a test domain email address so we don't have to
   // check for that/branch on it
   const loopsResponse = await tools.loops.sendTransactionalEmail({
-    transactionalId: 'cm459f8qc00qwl133akppab0p',
+    transactionalId: 'cm7cjkyer01gsz09s9eqv0jci',
     email: emailAddress,
     addToAudience: false,
     dataVariables: { link: resetLink },

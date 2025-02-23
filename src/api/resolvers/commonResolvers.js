@@ -861,7 +861,7 @@ module.exports = {
       const emailDetails = await (async () => {
         try {
           return tools.loops.sendTransactionalEmail({
-            transactionalId: 'cm47qhpeu01fc6fssctd72g4m',
+            transactionalId: 'cm7cjrobh01n610871ww42v2h',
             email: emailAddress,
             addToAudience: false,
             dataVariables: { link },
