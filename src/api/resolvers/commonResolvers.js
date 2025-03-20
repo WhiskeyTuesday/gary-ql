@@ -701,6 +701,8 @@ module.exports = {
       const startTimestampChanged = startTimestamp
         && startTimestamp !== job.startTimestamp;
 
+      const startTimestampCleared = !startTimestamp && job.startTimestamp;
+
       const notesChanged = notes && notes !== job.notes;
 
       const events = [];
@@ -744,6 +746,14 @@ module.exports = {
           key: `job:${id}`,
           type: 'hadInstallationScheduled',
           data: { startTimestamp: details.startTimestamp },
+        });
+      }
+
+      if (startTimestampCleared) {
+        events.push({
+          key: `job:${id}`,
+          type: 'hadInstallationUnscheduled',
+          data: {},
         });
       }
 
